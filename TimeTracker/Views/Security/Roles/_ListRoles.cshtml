@@ -1,0 +1,174 @@
+﻿
+@{
+    List<TimeTracker.Models.Roles> roles = Model;
+}
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix mb-20">
+        <div class="pull-left">
+            <h4 class="text-lime h4">Roles</h4>
+            @*<p>Add class <code>.table</code></p>*@
+        </div>
+        <div class="pull-right">
+            <a href="#basic-table" class="btn btn-primary btn-sm scroll-click" rel="content-y" data-toggle="modal" data-target="#modalAddRoles"
+               role="button"><i class="fa fa-plus"></i> Create Role</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="roles-list" class="table data-table table-white-space table-bordered row-grouping display no-wrap icheck table-middle">
+            <thead>
+                <tr>
+                    <th>Role Id</th>
+                    <th>Description</th>
+                    <th>Comment</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in roles)
+                {
+                    <tr>
+                        <td>@item.RoleId</td>
+                        <td>@item.RoleDescription</td>
+                        <td>@item.RoleComment</td>
+                        @if ((bool)item.RoleActive)
+                        {
+                            <td>
+                                <input type="checkbox" name="customCheck" id="customCheck" checked readonly>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <input type="checkbox" name="customCheck" id="customCheck" readonly>
+                            </td>
+                        }
+                        <td>
+                            <div class="dropdown">
+                                <a class="btn btn-link font-24 p-0 line-height-1  dropdown-toggle"
+                                   href="#" role="button" data-toggle="dropdown">
+                                    <i class="icon-copy bi bi-gear-fill"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                    <a class="dropdown-item btnEditRoles" RoleId="@item.RoleId" data-toggle="modal" data-target="#modalEditRoles" href="#"><i class="dw dw-edit2"></i> Edit</a>
+                                    <a class="dropdown-item btnDeleteRoles" RoleId="@item.RoleId" RolesName="@item.RoleDescription" href="#"><i class="dw dw-delete-3"></i> Delete</a>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                }
+
+
+            </tbody>
+
+        </table>
+
+
+
+        <div class="modal fade text-left" id="modalAddRoles" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Create Roles</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("RolesAddNew", "Roles", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccess" }, null))
+                    {
+
+
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Description</label>
+                                <input type="text" class="form-control" id="Description" name="Description" placeholder="">
+                            </fieldset>
+                        </div>
+
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Comment</label>
+                                <input type="text" class="form-control" id="Comment" name="Comment" placeholder="">
+                            </fieldset>
+                        </div>
+
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <input type="checkbox" name="Active" id="Active" checked>
+                                <label for="customCheck">Active </label>
+                            </fieldset>
+
+
+                        </div>
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade text-left" id="modalEditRoles" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Edit Roles</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("RolesUpdate", "Roles", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnSuccess = "OnSuccessEdit" }, null))
+                    {
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Role Id</label>
+                                <input type="text" class="form-control" id="RoleId" name="RoleId" placeholder="" readonly>
+                            </fieldset>
+                        </div>
+
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Description</label>
+                                <input type="text" class="form-control" id="eDescription" name="eDescription" placeholder="">
+                            </fieldset>
+                        </div>
+
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Comment</label>
+                                <input type="text" class="form-control" id="eComment" name="eComment" placeholder="">
+                            </fieldset>
+                        </div>
+
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <input type="checkbox" name="eActive" id="eActive" checked>
+                                <label  for="customCheck">Active </label>
+                            </fieldset>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+

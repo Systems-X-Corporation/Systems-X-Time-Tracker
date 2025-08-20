@@ -1,0 +1,248 @@
+﻿
+
+@using TimeTracker.Models
+@{
+    List<Users> users = Model;
+}
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix mb-20"> 
+        <div class="pull-left">
+            <h4 class="text-lime h4">Users</h4>
+            @*<p>Add class <code>.table</code></p>*@
+        </div>
+        <div class="pull-right">
+            <a href="#basic-table" class="btn btn-primary btn-sm scroll-click" rel="content-y" data-toggle="modal" data-target="#modalAddUser" id="btnNewUsers"
+               role="button"><i class="fa fa-plus"></i> Create User</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="users-list" class="table data-table table-white-space table-bordered row-grouping display no-wrap icheck table-middle">
+            <thead>
+                <tr>
+                    <th>User Id</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in users)
+                {
+                    string color = "";
+                    if (item.AccessFailedCount == 3)
+                    {
+                        color = "#FF0000";
+                    }
+
+                    <tr style="background-color:@color">
+                        <td>@item.UserId</td>
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                        <td>@item.Email</td>
+                        <td>@item.UserName</td>
+                        <td>
+                            <div class="dropdown">
+                                <a class="btn btn-link font-24 p-0 line-height-1  dropdown-toggle"
+                                   href="#" role="button" data-toggle="dropdown">
+                                    <i class="icon-copy bi bi-gear-fill"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                    <a class="dropdown-item btnEditUsers" UsersId="@item.UserId" data-toggle="modal" data-target="#modalEditUser" href="#"><i class="dw dw-edit2"></i> Edit</a>
+                                    <a class="dropdown-item btnDeleteUsers" UsersId="@item.UserId" UsersName="@item.Email" href="#"><i class="dw dw-delete-3"></i> Delete</a>
+                                </div>
+                            </div>
+
+
+                        </td>
+
+                    </tr>
+                }
+
+
+            </tbody>
+
+        </table>
+
+
+
+        <div class="modal fade text-left" id="modalAddUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Create User</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("UsersAddNew", "Users", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccess" }, null))
+                    {
+                        <div class="modal-body">
+                            <label for="email">First Name</label>
+                            <input type="text" class="form-control" id="FirstName" name="FirstName" placeholder="">
+                        </div>
+
+                        <div class="modal-body">
+                            <label for="email">Last Name</label>
+                            <input type="text" class="form-control" id="LastName" name="LastName" placeholder="">
+                        </div>
+                        <div class="modal-body">
+                            <label for="email">Email</label>
+                            <input type="text" class="form-control" id="Email" name="Email" placeholder="">
+                        </div>
+                        <div class="modal-body">
+                            <label for="email">Username</label>
+                            <input type="text" class="form-control" id="Username" name="Username" placeholder="">
+                        </div>
+                        <div class="modal-body">
+                            <label for="Active">Roles </label>
+                            @Html.Action("GetCboMultipleRoles", "System")
+                        </div>
+
+
+
+                        <div class="modal-body">
+                            <input type="checkbox" name="Active" id="Active" checked>
+                            <label for="Active">Active </label>
+                        </div>
+
+
+
+
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade text-left" id="modalEditUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Edit User</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("UsersUpdate", "Users", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnSuccess = "OnSuccessEdit" }, null))
+                    {
+                        <div class="modal-body">
+
+                            <label for="email">Id</label>
+                            <input type="text" class="form-control" id="EdUsersId" name="EdUsersId" readonly>
+
+                        </div>
+                        <div class="modal-body">
+
+                            <label for="email">First Name</label>
+                            <input type="text" class="form-control" id="eFirstName" name="eFirstName" placeholder="">
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <label for="email">Last Name</label>
+                            <input type="text" class="form-control" id="eLastName" name="eLastName" placeholder="">
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <label for="email">Email</label>
+                            <input type="text" class="form-control" id="eEmail" name="eEmail" placeholder="">
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <label for="email">Username</label>
+                            <input type="text" class="form-control" id="eUsername" name="eUsername" placeholder="">
+
+                        </div>
+                        <div class="modal-body">
+                            <label for="Active">Roles </label>
+                            @Html.Action("GetCboEMultipleRoles", "System")
+                        </div>
+                        <div class="modal-body">
+
+                            <input type="checkbox" name="EActive" id="EActive" checked>
+                            <label for="EActive">Active </label>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+               
+
+
+<div class="modal fade text-left" id="modalEditUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="myModalLabel35"> Edit User</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Ajax.BeginForm("UserUpdate", "Users", null, new AjaxOptions()
+            { UpdateTargetId = "container", HttpMethod = "Post", OnSuccess = "OnSuccessEdit" }, null))
+            {
+
+              
+
+                <div class="modal-footer">
+                    <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                    <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+            </section>
+
+

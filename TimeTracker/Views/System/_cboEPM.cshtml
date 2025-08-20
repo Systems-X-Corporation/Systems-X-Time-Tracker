@@ -1,0 +1,17 @@
+﻿
+@using TimeTracker.Models;
+
+@{
+    List<Users> users = Model;
+}
+
+<select class="custom-select2 form-control" id="cboEPM" name="cboEPM"
+        multiple="multiple"
+        style="width: 100%">
+
+    @foreach (var item in users)
+    {
+        string name = item.FirstName + " " + item.LastName;
+        <option value="@item.UserId">@name</option>
+    }
+</select>

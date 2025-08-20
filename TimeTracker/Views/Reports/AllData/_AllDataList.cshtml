@@ -1,0 +1,370 @@
+﻿
+
+
+@using TimeTracker.Models
+@using System.Web.UI.WebControls;
+
+@{
+    TimeTracker.Controllers.SystemController systemController = new TimeTracker.Controllers.SystemController();
+    var timeHours = ViewData["data"] as List<TimeHours>;
+    List<TimeHours> data = Model;
+}
+
+
+
+
+
+@Html.DevExpress().GridView(settings =>
+{
+    settings.Name = "gvAllDataList";
+    settings.KeyFieldName = "TimeHoursId";
+    settings.Width = Unit.Percentage(100);
+    settings.Height = Unit.Pixel(750);
+    settings.CallbackRouteValues = new { Controller = "Reports", Action = "DetailList", project = ViewBag.project, user = ViewBag.user, from = ViewBag.from, to = ViewBag.to, records = ViewBag.records };
+
+    settings.SettingsBehavior.AllowFocusedRow = true;
+    settings.SettingsBehavior.AllowSelectByRowClick = true;
+    settings.SettingsBehavior.EnableRowHotTrack = true;
+    settings.SettingsBehavior.EnableCustomizationWindow = true;
+
+    /*Pager Settings*/
+    settings.SettingsPager.Visible = true;
+    settings.SettingsPager.Mode = GridViewPagerMode.ShowPager;
+    settings.SettingsPager.ShowNumericButtons = false;
+    settings.SettingsPager.PageSize = 50;
+    settings.SettingsPager.PageSizeItemSettings.Visible = true;
+    settings.SettingsPager.PageSizeItemSettings.Caption = "Show:";
+    settings.SettingsPager.PageSizeItemSettings.Items = new string[] { "25", "50", "100", "200", "500" };
+    settings.SettingsPager.PageSizeItemSettings.ShowAllItem = true;
+    settings.Settings.HorizontalScrollBarMode = ScrollBarMode.Auto;
+    settings.Settings.VerticalScrollBarMode = ScrollBarMode.Auto;
+    settings.SettingsBehavior.AllowSelectByRowClick = false;
+    /********************************************************/
+
+    settings.Settings.ShowGroupPanel = true;
+    settings.Settings.ShowFilterRow = true;
+    settings.Settings.ShowFooter = false;
+    settings.Settings.ShowGroupFooter = GridViewGroupFooterMode.Hidden;
+    settings.KeyboardSupport = true;
+    settings.SettingsContextMenu.Enabled = true;
+    settings.SettingsContextMenu.RowMenuItemVisibility.EditRow = false;
+    settings.SettingsContextMenu.RowMenuItemVisibility.NewRow = false;
+    settings.SettingsContextMenu.RowMenuItemVisibility.DeleteRow = false;
+    settings.SettingsCustomizationDialog.Enabled = true;
+    settings.Styles.AlternatingRow.Enabled = DefaultBoolean.True;
+
+    settings.Settings.HorizontalScrollBarMode = ScrollBarMode.Visible;
+    settings.Settings.VerticalScrollBarMode = ScrollBarMode.Visible;
+
+    settings.SettingsResizing.ColumnResizeMode = ColumnResizeMode.Control;
+    settings.SettingsResizing.Visualization = ResizingMode.Live;
+    settings.SettingsBehavior.AllowEllipsisInText = true;
+
+    settings.Settings.ShowHeaderFilterButton = true;
+    settings.SettingsPopup.HeaderFilter.Width = 300;
+    settings.SettingsPopup.HeaderFilter.Height = 300;
+    settings.Styles.Footer.BackColor = DXColor.Beige;
+    settings.Styles.GroupFooter.BackColor = DXColor.Beige;
+
+    settings.ClientSideEvents.Init = "function(s, e) { AdjustSize(s, false) }";
+
+    settings.SettingsExport.EnableClientSideExportAPI = true;
+    settings.SettingsExport.ExcelExportMode = DevExpress.Export.ExportType.WYSIWYG;
+
+    settings.SettingsExport.RenderBrick = (sender, e) =>
+    {
+        if (e.RowType == GridViewRowType.Data && e.VisibleIndex % 2 == 0)
+            e.BrickStyle.BackColor = System.Drawing.Color.FromArgb(0xEE, 0xEE, 0xEE);
+    };
+
+    settings.Toolbars.Add(toolbar =>
+    {
+        toolbar.Enabled = true;
+        toolbar.Position = GridToolbarPosition.Top;
+        toolbar.ItemAlign = GridToolbarItemAlign.Right;
+        toolbar.Items.Add(GridViewToolbarCommand.FullExpand);
+        toolbar.Items.Add(GridViewToolbarCommand.FullCollapse);
+        toolbar.Items.Add(GridViewToolbarCommand.ShowCustomizationDialog);
+        toolbar.Items.Add(GridViewToolbarCommand.Refresh, true);
+        toolbar.Items.Add(GridViewToolbarCommand.ClearFilter);
+        toolbar.Items.Add(GridViewToolbarCommand.ClearGrouping);
+        toolbar.Items.Add(GridViewToolbarCommand.ShowSearchPanel);
+
+        toolbar.Items.Add(i =>
+        {
+            i.Text = "Export";
+            i.Image.IconID = DevExpress.Web.ASPxThemes.IconID.ActionsDownload16x16office2013;
+            i.BeginGroup = true;
+            i.Items.Add(exportitem =>
+            {
+                exportitem.Name = "XLS";
+                exportitem.Text = "Excel";
+                exportitem.Image.IconID = DevExpress.Web.ASPxThemes.IconID.ExportExporttoxlsx16x16office2013;
+                exportitem.Command = GridViewToolbarCommand.ExportToXlsx;
+            });
+            i.Items.Add(exportitem =>
+            {
+                exportitem.Name = "PDF";
+                exportitem.Text = "PDF";
+                exportitem.Image.IconID = DevExpress.Web.ASPxThemes.IconID.ExportExporttopdf16x16office2013;
+                exportitem.Command = GridViewToolbarCommand.ExportToPdf;
+            });
+            i.Items.Add(exportitem =>
+            {
+                exportitem.Name = "PDF";
+                exportitem.Text = "Word";
+                exportitem.Image.IconID = DevExpress.Web.ASPxThemes.IconID.ExportExporttodoc16x16office2013;
+                exportitem.Command = GridViewToolbarCommand.ExportToDocx;
+            });
+        });
+    });
+
+
+
+    settings.CommandColumn.Width = Unit.Pixel(100);
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.DateEdit;
+        c.FieldName = "THDate";
+        c.Caption = "Date";
+        c.PropertiesEdit.DisplayFormatString = "MM/dd/yyyy";
+        c.Visible = true;
+        //c.ReadOnly = true;
+        c.Width = Unit.Pixel(100);
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "Users.UserId";
+        c.Caption = "User Id";
+        c.Visible = true;
+        //c.ReadOnly = true;
+        c.Width = 75;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.ComboBox;
+        c.FieldName = "Users.UserId";
+        c.Caption = "User";
+        c.EditorProperties().ComboBox(p =>
+        {
+            p.TextField = "Name";
+            p.ValueField = "UserId";
+            p.ValueType = typeof(int);
+            p.DataSource = systemController.getUsersList();
+        });
+        c.Visible = true;
+        //c.ReadOnly = true;
+        c.Width = 150;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "Activity.Project.ProjectId";
+        c.Caption = "Project Id";
+        c.Visible = true;
+        //c.ReadOnly = true;
+
+        c.Width = 75;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "Activity.Project.ProjectName";
+        c.Caption = "Project";
+        c.Visible = true;
+        //c.ReadOnly = true;
+
+        c.Width = 150;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "Activity.ActivityId";
+        c.Caption = "Work Id";
+        c.Visible = true;
+        //c.ReadOnly = true;
+
+        c.Width = 75;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.ComboBox;
+        c.FieldName = "Activity.ActivityId";
+        c.Caption = "Work";
+        c.Visible = true;
+        //c.ReadOnly = true;
+        c.EditorProperties().ComboBox(p =>
+        {
+            p.TextField = "ActivityName";
+            p.ValueField = "ActivityId";
+            p.ValueType = typeof(int);
+            p.DataSource = systemController.getActivityList();
+        });
+        c.Width = 200;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "ActDescription";
+        c.Caption = "Work Performed";
+        c.Visible = true;
+        c.ReadOnly = false;
+        //c.Width = Unit.Percentage(100);
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "THours";
+        c.Caption = "Hours";
+        c.ColumnType = MVCxGridViewColumnType.SpinEdit;
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.Width = 200;
+    });
+
+
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "Category.CategoryId";
+        c.Caption = "Category Id";
+        c.Visible = true;
+        c.ReadOnly = false;
+
+        c.Width = 100;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.ComboBox;
+        c.FieldName = "Category.CategoryId";
+        c.Caption = "Category";
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.EditorProperties().ComboBox(p =>
+        {
+            p.TextField = "CategoryName";
+            p.ValueField = "CategoryId";
+            p.ValueType = typeof(int);
+            p.DataSource = systemController.getCategoryList();
+        });
+        c.Width = 200;
+    });
+
+
+
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Billable";
+        c.Caption = "Billable";
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.ColumnType = MVCxGridViewColumnType.CheckBox;
+        //c.Width =  Unit.Percentage(100);
+    });
+
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "InternalNote";
+        c.Caption = "Notes";
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.Width = 300;
+    });
+
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.ComboBox;
+        c.FieldName = "DayStatus";
+        c.Caption = "Day Status";
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.EditorProperties().ComboBox(p =>
+        {
+            //p.TextField = "CategoryName";
+            //p.ValueField = "CategoryId";
+            //p.ValueType = typeof(int);
+            p.DataSource = systemController.getStatusList();
+        });
+        //c.Width =  Unit.Percentage(100);
+    });
+
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "TaskAllocation";
+        c.Caption = "Task Allocation";
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.Width = 150;
+    });
+
+
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Visible";
+        c.Caption = "Visible Client";
+        c.ColumnType = MVCxGridViewColumnType.CheckBox;
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.Width = 50;
+    });
+
+
+    settings.Columns.Add(c =>
+    {
+        c.ColumnType = MVCxGridViewColumnType.TextBox;
+        c.FieldName = "ApprovalNote";
+        c.Caption = "Approval Note";
+        c.Visible = true;
+        c.ReadOnly = false;
+        c.Width = 300;
+    });
+
+
+
+    //settings.CellEditorInitialize = (s, e) =>
+    //{
+    //    ASPxEdit editor = (ASPxEdit)e.Editor;
+    //    editor.ValidationSettings.Display = Display.None;
+    //};
+    //settings.ClientSideEvents.BeginCallback = "OnBeginGridCallback";
+    settings.ClientSideEvents.BatchEditStartEditing = "OnBatchEditStartEditing";
+
+}).Bind(Model).GetHtml()
+
+
+
+<script>
+
+    function OnBatchEditStartEditing(s, e) {
+        if (e.visibleIndex < 0) {
+            gvApproveList.GetEditor("THDate").SetReadOnly(false);
+            gvApproveList.GetEditor("Users.UserId").SetReadOnly(false);
+            gvApproveList.GetEditor("Activity.ActivityId").SetReadOnly(false);
+            gvApproveList.GetEditor("ActDescription").SetReadOnly(false);
+        }
+        else {
+            gvApproveList.GetEditor("THDate").SetReadOnly(true);
+            gvApproveList.GetEditor("Users.UserId").SetReadOnly(true);
+            gvApproveList.GetEditor("Activity.ActivityId").SetReadOnly(true);
+            gvApproveList.GetEditor("ActDescription").SetReadOnly(true);
+        }
+    }
+
+</script>
+

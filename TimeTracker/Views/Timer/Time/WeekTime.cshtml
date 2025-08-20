@@ -1,0 +1,211 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+
+
+
+<div class="row">
+
+
+
+    <div class="col-lg-8">
+        <div class="pd-20 card-box mb-30">
+
+            <div class="calendar-wrap">
+                <div id="calendar"></div>
+            </div>
+
+            <!-- calendar modal -->
+            <div id="modal-view-event"
+                 class="modal modal-top fade calendar-modal">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <h4 class="h4">
+                                <span class="event-icon weight-400 mr-3"></span><span class="event-title"></span>
+                            </h4>
+                            <div class="event-body"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    data-dismiss="modal">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modal-view-event-add"
+                 class="modal modal-top fade calendar-modal">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <h4 class="text-blue h4 mb-10">Add Hours</h4>
+                            <form id="data_form">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Work Date</label>
+                                            <input type="date" id="date" class="form-control" name="date" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="Date Opened" required>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <input type="hidden" id="TimeHoursId" name="TimeHoursId" value="" />
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="timesheetinput5">Start Time</label>
+                                            <div class="position-relative has-icon-left">
+                                                <input type="time" id="starttime" class="form-control" name="starttime" @*step="900" min="06:00" max="20:00"*@>
+                                                <div class="form-control-position">
+                                                    <i class="ft-clock"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="timesheetinput6">End Time</label>
+                                            <div class="position-relative has-icon-left">
+                                                <input type="time" id="endtime" class="form-control" name="endtime" @*step="900" min="06:00" max="20:00"*@>
+                                                <div class="form-control-position">
+                                                    <i class="ft-clock"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="timesheetinput6">Time</label>
+                                            <div class="position-relative has-icon-left">
+                                                <input type="number" id="time" class="form-control" name="time" step=".01">
+                                                <div class="form-control-position">
+                                                    <i class="ft-clock"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Client - Project</label>
+                                            @Html.Action("GetCboProjectUser", "System")
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                @*<div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Project</label>
+                                            <div id="CboProjectContent">
+                                                @Html.Action("GetCboProject", "System")
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>*@
+                                @*<div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="issueinput3">Work</label>
+                    <div id="CboActivityContent">
+
+                        @Html.Action("GetCboActivity", "System")
+                    </div>
+                </div>
+            </div>
+
+        </div>*@
+
+
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Work Performed / Activities completed</label>
+                                            <input type="text" id="description" class="form-control" name="description" required>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Category</label>
+                                            <div id="CboCategoryContent">
+
+                                                @Html.Action("GetCboCategory", "System")
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+
+                                            <input type="checkbox" id="Billable" name="Billable" checked>
+                                            <label for="issueinput3">Billable</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Internal Notes</label>
+                                            <input type="text" id="InternalNotes" class="form-control" name="InternalNotes">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button id="btnDelete" class="btn btn-danger">
+                                        Delete
+                                    </button>
+                                    <button id="btnSave" class="btn btn-primary">
+                                        Save
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-primary"
+                                            data-dismiss="modal">
+                                        Close
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                        
+                       
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <div class="col-lg-4">
+        <div id="dailystatus">
+
+        </div>
+    </div>
+</div>
+
+
+
+<script src="~/Scripts/Timer/Calendar.js"></script>

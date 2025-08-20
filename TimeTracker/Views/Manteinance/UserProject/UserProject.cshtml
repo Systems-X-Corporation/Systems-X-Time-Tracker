@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewBag.Title = "Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="card">
+    <div class="card-header">
+
+        Assign User to Project
+
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                <label>Client</label>
+                @Html.Action("GetCboCustomer", "System")
+            </div>
+            <div class="col-6">
+                <label>Project</label>
+                <div id="CboProjectContent">
+                    @Html.Action("GetCboProject", "System")
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-8" style="text-align:center; margin:auto">
+                @using (Ajax.BeginForm("UserProjectAddNew", "UserProject", null, new AjaxOptions()
+                { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccess" }, null))
+                {
+                    <div id="container">
+                        <input type="hidden" name="idProject"  id="idProject" />
+                        <div class="form-group">
+                            <select multiple="multiple" size="10" class="duallistbox-multi-selection" id="UserProject" name="UserProject">
+                            </select>
+
+                        </div>
+
+                        <div class="modal-footer">
+                           
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+
+       
+
+    </div>
+</div>
+
+
+
+
+<script src="~/Scripts/Manteinance/UserProject.js"></script>

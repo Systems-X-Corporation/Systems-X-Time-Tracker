@@ -1,0 +1,187 @@
+﻿
+@using TimeTracker.Models
+@{
+    List<Project> projects = Model;
+}
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix mb-20">
+        <div class="pull-left">
+            <h4 class="text-lime h4">Project</h4>
+            @*<p>Add class <code>.table</code></p>*@
+        </div>
+        <div class="pull-right">
+            <a href="#basic-table" class="btn btn-primary btn-sm scroll-click" rel="content-y" data-toggle="modal" data-target="#modalAddProject"
+               role="button"><i class="fa fa-plus"></i> Create Project</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="projects" class="table table-white-space table-bordered row-grouping display no-wrap icheck table-middle">
+            <thead>
+                <tr>
+                    <th>Client Id</th>
+                    <th>Client Name</th>
+                    <th>Project Id</th>
+                    <th>Project Name</th>
+                    <th>Create Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in projects)
+                {
+                    <tr>
+                        <td>@item.Customer.CustomerId</td>
+                        <td>@item.Customer.CustomerName</td>
+                        <td>@item.ProjectId</td>
+                        <td>@item.ProjectName</td>
+                        <td>@item.CreateDate</td>
+
+                        <td>
+                            <div class="dropdown">
+                                <a class="btn btn-link font-24 p-0 line-height-1  dropdown-toggle"
+                                   href="#" role="button" data-toggle="dropdown">
+                                    <i class="icon-copy bi bi-gear-fill"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                    <a class="dropdown-item btnEditProject" ProjectId="@item.ProjectId" data-toggle="modal" data-target="#modalEditProject" href="#"><i class="dw dw-edit2"></i> Edit</a>
+                                    <a class="dropdown-item btnDeleteProject" ProjectId="@item.ProjectId" ProjectName="@item.ProjectName" href="#"><i class="dw dw-delete-3"></i> Delete</a>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                }
+
+
+            </tbody>
+
+        </table>
+
+
+
+        <div class="modal fade text-left" id="modalAddProject" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Create Project</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("ProjectAddNew", "Projects", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccess" }, null))
+                    {
+
+                        <div class="modal-body">
+                            <label for="email">Client</label>
+                            @Html.Action("GetCboCustomer", "System")
+                        </div>
+
+
+                        <div class="modal-body">
+                            <label for="email">Project Name</label>
+                            <input type="text" class="form-control" id="ProjectName" name="ProjectName" placeholder="">
+                        </div>
+
+                        <div class="modal-body">
+                            <label for="email">Color</label>
+                            <input type="text" class="colorpicker form-control" id="color" name="color" value="blue" placeholder="">
+                        </div>
+
+
+                        <div class="modal-body">
+                            <label for="email">Project Manager</label>
+                            @Html.Action("GetCboPM", "System")
+                        </div>
+
+
+
+
+
+
+
+                        <br>
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade text-left" id="modalEditProject" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Edit Project</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("ProjectUpdate", "Projects", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccessEdit" }, null))
+                    {
+
+
+                        <div class="modal-body">
+
+                            <label for="email">Project Id</label>
+                            <input type="text" class="form-control" id="EdProjectId" name="EdProjectId" placeholder="" readonly="readonly">
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <label for="email">Client</label>
+                            @Html.Action("GetECboCustomer", "System")
+
+                        </div>
+
+
+                        <div class="modal-body">
+
+                            <label for="email">Project Name</label>
+                            <input type="text" class="form-control" id="EdProjectName" name="EdProjectName" placeholder="">
+
+
+
+                        </div>
+
+
+                        <div class="modal-body">
+                            <label for="email">Color</label>
+                            <input type="text" class="colorpicker form-control" id="ecolor" name="ecolor">
+                        </div>
+
+                        <div class="modal-body">
+
+                            <label for="email">Project Manager</label>
+                            @Html.Action("GetCboEPM", "System")
+
+                        </div>
+
+                        <br>
+
+
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+

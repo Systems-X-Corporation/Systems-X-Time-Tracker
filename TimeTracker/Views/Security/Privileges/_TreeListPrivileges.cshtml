@@ -1,0 +1,57 @@
+﻿
+
+
+@{
+
+    var treeList = Html.DevExpress().TreeList(s =>
+    {
+        s.Name = "tlPrivilegios";
+        s.CallbackRouteValues = new { Controller = "Privileges", Action = "GetPrivileges", ViewBag.id };
+        s.SettingsBehavior.ExpandCollapseAction = DevExpress.Web.ASPxTreeList.TreeListExpandCollapseAction.NodeDblClick;
+        s.SettingsBehavior.AllowFocusedNode = true;
+        s.SettingsBehavior.AutoExpandAllNodes = true;
+        s.SettingsSelection.Recursive = true;
+        s.Settings.VerticalScrollBarMode = ScrollBarMode.Auto;
+        s.Settings.GridLines = System.Web.UI.WebControls.GridLines.Horizontal;
+        s.Styles.AlternatingNode.Enabled = DefaultBoolean.True;
+
+        var selected = ViewData["selected"] as List<System.String>;
+
+        s.PreRender = (sx, e) =>
+        {
+
+            MVCxTreeList tl = sx as MVCxTreeList;
+            if (selected != null)
+            {
+                for (int i = 0; i < selected.Count; i++)
+                {
+                    (tl.FindNodeByKeyValue(selected[i]) as DevExpress.Web.ASPxTreeList.TreeListNode).Selected = true;
+                }
+            }
+
+
+        };
+
+        s.Toolbars.Add(t =>
+        {
+            t.ItemAlign = GridToolbarItemAlign.Right;
+            t.Items.Add(DevExpress.Web.ASPxTreeList.TreeListToolbarCommand.FullExpand);
+            t.Items.Add(DevExpress.Web.ASPxTreeList.TreeListToolbarCommand.FullCollapse);
+            t.Items.Add(DevExpress.Web.ASPxTreeList.TreeListToolbarCommand.Refresh, true);
+        });
+
+        s.KeyFieldName = "PrivilegeId";
+        s.ParentFieldName = "PrivilegeParent";
+
+        s.Columns.Add("PrivilegeDescrip", " Privilege description");
+
+        s.SettingsPager.Visible = true;
+        s.SettingsSelection.Enabled = true;
+
+        s.ClientSideEvents.Init = "function(s, e) { OnInitTreelistUsuarios(s, e) }";
+        s.ClientSideEvents.SelectionChanged = "function (s, e) { onSelectionChanged (s, e) }";
+    });
+}
+
+@treeList.Bind(Model).GetHtml()
+

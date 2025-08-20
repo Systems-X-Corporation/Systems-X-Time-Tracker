@@ -1,0 +1,139 @@
+﻿@using TimeTracker.Models
+@{
+    List<Category> category = Model;
+}
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix mb-20">
+        <div class="pull-left">
+            <h4 class="text-lime h4">Category</h4>
+            @*<p>Add class <code>.table</code></p>*@
+        </div>
+        <div class="pull-right">
+            <a href="#basic-table" class="btn btn-primary btn-sm scroll-click" rel="content-y" data-toggle="modal" data-target="#modalAddCategory"
+               role="button"><i class="fa fa-plus"></i> Create Category</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="category" class="table data-table table-white-space table-bordered row-grouping display no-wrap icheck table-middle">
+            <thead>
+                <tr>
+                    <th>Category Id</th>
+                    <th>Category Name</th>
+                    <th>Create Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in category)
+                {
+                    <tr>
+                        <td>@item.CategoryId</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.CreateDate</td>
+
+                        <td>
+                            <div class="dropdown">
+                                <a class="btn btn-link font-24 p-0 line-height-1  dropdown-toggle"
+                                   href="#" role="button" data-toggle="dropdown">
+                                    <i class="icon-copy bi bi-gear-fill"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                    <a class="dropdown-item btnEditCategory" CategoryId="@item.CategoryId" data-toggle="modal" data-target="#modalEditCategory" href="#"><i class="dw dw-edit2"></i> Edit</a>
+                                    <a class="dropdown-item btnDeleteCategory" CategoryId="@item.CategoryId" CategoryName="@item.CategoryName" href="#"><i class="dw dw-delete-3"></i> Delete</a>
+                                </div>
+                            </div>
+
+                            @*<span class="dropdown">
+                                    <button id="btnSearchDrop2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" class="btn btn-primary dropdown-toggle dropdown-menu-right"><i class="fa fa-gear"></i></button>
+                                    <span aria-labelledby="btnSearchDrop2" class="dropdown-menu mt-1 dropdown-menu-right">
+                                        <a href="#" class="dropdown-item btnEditCategory" CategoryId="@item.CategoryId" data-toggle="modal" data-target="#modalEditCategory"><i class="la la-pencil"></i> Edit Category</a>
+                                        <a href="#" class="dropdown-item btnDeleteCategory" CategoryId="@item.CategoryId" CategoryName="@item.CategoryName"><i class="la la-trash"></i> Delete Category</a>
+                                    </span>
+                                </span>*@
+                        </td>
+                    </tr>
+                }
+
+
+            </tbody>
+
+        </table>
+
+
+
+        <div class="modal fade text-left" id="modalAddCategory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Create Category</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("CategoryAddNew", "Category", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccess" }, null))
+                    {
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Category Name</label>
+                                <input type="text" class="form-control" id="CategoryName" name="CategoryName" placeholder="">
+                            </fieldset>
+                            <br>
+
+                        </div>
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade text-left" id="modalEditCategory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="myModalLabel35"> Edit Category</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @using (Ajax.BeginForm("CategoryUpdate", "Category", null, new AjaxOptions()
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccessEdit" }, null))
+                    {
+                        <div class="modal-body">
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Category Id</label>
+                                <input type="text" class="form-control" id="EdCategoryId" name="EdCategoryId" placeholder="" readonly="readonly">
+                            </fieldset>
+                            <br>
+                            <fieldset class="form-group floating-label-form-group">
+                                <label for="email">Category Name</label>
+                                <input type="text" class="form-control" id="EdCategoryName" name="EdCategoryName" placeholder="">
+                            </fieldset>
+                            <br>
+
+                        </div>
+                        <div class="modal-footer">
+                            <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
+                            <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+

@@ -1,0 +1,22 @@
+﻿@using TimeTracker.Models;
+
+@{
+    List<WorkHours> workHours = Model;
+}
+
+
+<select>
+    @foreach (var item in workHours)
+    {
+        if (ViewBag.id == item.WorkHoursDesc)
+        {
+            <option value="@item.WorkHoursDesc" selected>@item.WorkHoursDesc</option>
+        }
+        else
+        {
+            <option value="@item.WorkHoursDesc" >@item.WorkHoursDesc</option>
+        }
+    }
+
+
+</select>

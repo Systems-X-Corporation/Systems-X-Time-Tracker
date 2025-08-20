@@ -1,0 +1,107 @@
+﻿
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+
+<div class="card">
+    <div class="card-header">
+
+        All Data
+
+    </div>
+
+    <div class="card-body">
+        <p>Filters</p>
+        <div class="row">
+
+            <div class="col-lg-3">
+                <label>Client:</label>
+                <div id="CboCustomerContent">
+                    @Html.Action("GetCboCustomer", "System")
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <label>Project:</label>
+                <div id="CboProjectContent">
+                    @Html.Action("GetCboProject", "System")
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <label>User:</label>
+
+                @Html.Action("GetCboUsers", "System")
+
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-3">
+                <label>From:</label>
+                <div id="cboDateContent">
+                    <input type="date" name="from" id="from" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <label>To:</label>
+                <div id="cboDatesContent">
+                    <input type="date" name="to" id="to" />
+                </div>
+            </div>
+            <div class="col-3">
+                <label>Show records:</label>
+                <div id="cboDatesContent">
+                    <select class="custom-select2 form-control" id="cboRecords" name="cboRecords">
+                        <option value="All">All</option>
+                        <option value="Sent">Sent</option>
+                        <option value="Approved">Approved</option>
+
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-1">
+                <label></label>
+                <div id="cboDatesContent">
+                    <button type="button" id="btnSearch" class="btn btn-success"><i class="dw dw-search"></i></button>
+                </div>
+            </div>
+
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-12">
+
+
+                <div class="pd-20 card-box mb-30">
+                    <div class="clearfix mb-20">
+                        <div class="pull-left">
+                            <h4 class="text-lime h4">Data</h4>
+
+                        </div>
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        @using (Html.BeginForm())
+                        {
+                            <div id="AllDataList" style="min-height: 750px;">
+                            </div>
+
+                        }
+
+                        </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+
+
+<script src="~/Scripts/Reports/AllData.js"></script>

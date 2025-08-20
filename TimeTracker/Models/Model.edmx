@@ -1,0 +1,2181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="timetrackerDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProjectId" Type="int" Nullable="false" />
+          <Property Name="ActivityName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Area">
+          <Key>
+            <PropertyRef Name="AreaId" />
+          </Key>
+          <Property Name="AreaId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AreaCode" Type="varchar" MaxLength="150" Nullable="false" />
+          <Property Name="AreaTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="AreaShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="AreaLongDesc" Type="varchar" MaxLength="250" />
+          <Property Name="AreaIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="AreaOrder" Type="int" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CategoryName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="CompanyId" />
+          </Key>
+          <Property Name="CompanyId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CompanyName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="ShortName" Type="varchar" MaxLength="256" />
+          <Property Name="Logo" Type="varbinary(max)" />
+          <Property Name="Icon" Type="varbinary(max)" />
+          <Property Name="Tittle" Type="varchar(max)" />
+          <Property Name="Descrip" Type="varchar(max)" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="CreateUser" Type="int" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="int" />
+          <Property Name="ModifyDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Customer">
+          <Key>
+            <PropertyRef Name="CustomerId" />
+          </Key>
+          <Property Name="CustomerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CustomerName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+          <Property Name="OfficeId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DaysForUse">
+          <Key>
+            <PropertyRef Name="DFU" />
+          </Key>
+          <Property Name="DFU" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DayDate" Type="date" />
+        </EntityType>
+        <EntityType Name="DaysUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="DayDate" />
+          </Key>
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="DayStatus" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DayDate" Type="date" Nullable="false" />
+          <Property Name="DayObservations" Type="varchar(max)" />
+        </EntityType>
+        <EntityType Name="GCToken">
+          <Key>
+            <PropertyRef Name="idGCToken" />
+          </Key>
+          <Property Name="idGCToken" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="idUsuario" Type="int" />
+          <Property Name="access_token" Type="varchar(max)" />
+          <Property Name="refresh_token" Type="varchar(max)" />
+          <Property Name="expires_in" Type="varchar(max)" />
+          <Property Name="scope" Type="varchar(max)" />
+          <Property Name="token_type" Type="varchar(max)" />
+          <Property Name="texto" Type="varchar(max)" />
+        </EntityType>
+        <EntityType Name="Logs">
+          <Key>
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="LogId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LogName" Type="varchar(max)" Nullable="false" />
+          <Property Name="LogTable" Type="varchar(max)" Nullable="false" />
+          <Property Name="LogAction" Type="varchar(max)" Nullable="false" />
+          <Property Name="LogDate" Type="datetime" Nullable="false" />
+          <Property Name="LogUserId" Type="int" />
+          <Property Name="LogIpAddress" Type="varchar" MaxLength="256" />
+          <Property Name="LogData1" Type="varchar(max)" />
+          <Property Name="LogData2" Type="varchar(max)" />
+          <Property Name="LogData3" Type="varchar(max)" />
+        </EntityType>
+        <EntityType Name="MFAMailRequest">
+          <Key>
+            <PropertyRef Name="MFAMailRequestId" />
+          </Key>
+          <Property Name="MFAMailRequestId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RequestDate" Type="datetime" Nullable="false" />
+          <Property Name="RequestCode" Type="varchar" MaxLength="100" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Module">
+          <Key>
+            <PropertyRef Name="ModuleId" />
+          </Key>
+          <Property Name="ModuleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AreaId" Type="int" Nullable="false" />
+          <Property Name="ModuleCode" Type="varchar" MaxLength="200" />
+          <Property Name="ModuleTitle" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModuleShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="ModuleLongDesc" Type="varchar" MaxLength="500" />
+          <Property Name="ModuleIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="ModuleOrder" Type="int" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Office">
+          <Key>
+            <PropertyRef Name="OfficeId" />
+          </Key>
+          <Property Name="OfficeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OfficeDescription" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="active" Type="bit" />
+        </EntityType>
+        <EntityType Name="Pages">
+          <Key>
+            <PropertyRef Name="PageId" />
+          </Key>
+          <Property Name="PageId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PageIdAccess" Type="varchar" MaxLength="200" />
+          <Property Name="PageUrl" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="PageTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageLongDesc" Type="varchar" MaxLength="500" />
+          <Property Name="PageHelpUrl" Type="varchar" MaxLength="300" />
+          <Property Name="AreaId" Type="int" Nullable="false" />
+          <Property Name="ModuleId" Type="int" Nullable="false" />
+          <Property Name="PageTypeId" Type="int" Nullable="false" />
+          <Property Name="Active" Type="bit" />
+          <Property Name="Visible" Type="varchar" MaxLength="1" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="100" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="PageType">
+          <Key>
+            <PropertyRef Name="PageTypeId" />
+          </Key>
+          <Property Name="PageTypeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PageTypeTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageTypeShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageTypeLongDesc" Type="varchar" MaxLength="500" />
+          <Property Name="PageTypeIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Privilege">
+          <Key>
+            <PropertyRef Name="PrivilegeId" />
+          </Key>
+          <Property Name="PrivilegeId" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="PrivilegeParent" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="PrivilegeDescrip" Type="varchar" MaxLength="300" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'timetrackerDB.dbo.Privilege_User' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="Privilege_User">
+          <Key>
+            <PropertyRef Name="PrivilegeId" />
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="PrivilegeId" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="Project">
+          <Key>
+            <PropertyRef Name="ProjectId" />
+          </Key>
+          <Property Name="ProjectId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CustomerId" Type="int" Nullable="false" />
+          <Property Name="ProjectName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+          <Property Name="ModifyDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="varchar" MaxLength="50" />
+          <Property Name="color" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="ProjectManager">
+          <Key>
+            <PropertyRef Name="ProjectManagerId" />
+          </Key>
+          <Property Name="ProjectManagerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="ProjectId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Roles">
+          <Key>
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="RoleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RoleDescription" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="RoleComment" Type="varchar(max)" />
+          <Property Name="RoleActive" Type="bit" />
+          <Property Name="CreateUser" Type="int" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="ModifyUser" Type="int" />
+          <Property Name="ModifyDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="RolesPrivileges">
+          <Key>
+            <PropertyRef Name="RolePrivId" />
+          </Key>
+          <Property Name="RolePrivId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RoleId" Type="int" Nullable="false" />
+          <Property Name="PrivilegeId" Type="varchar" MaxLength="200" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RolesUsers">
+          <Key>
+            <PropertyRef Name="RoleUserId" />
+          </Key>
+          <Property Name="RoleUserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="RoleId" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'timetrackerDB.dbo.temppagetype' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="temppagetype">
+          <Key>
+            <PropertyRef Name="PageTypeTitle" />
+            <PropertyRef Name="PageTypeShortDesc" />
+          </Key>
+          <Property Name="PageTypeTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageTypeShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageTypeLongDesc" Type="varchar" MaxLength="500" />
+          <Property Name="PageTypeIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="CreateDate" Type="datetime" />
+          <Property Name="CreateUser" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="TimeHours">
+          <Key>
+            <PropertyRef Name="TimeHoursId" />
+          </Key>
+          <Property Name="TimeHoursId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="THDate" Type="date" Nullable="false" />
+          <Property Name="THFrom" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="THTo" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Duration" Type="numeric" Precision="18" Scale="0" Nullable="false" />
+          <Property Name="Rate" Type="numeric" Precision="18" Scale="0" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="CustomerId" Type="int" Nullable="false" />
+          <Property Name="ProjectId" Type="int" Nullable="false" />
+          <Property Name="ActivityId" Type="int" Nullable="false" />
+          <Property Name="ActDescription" Type="varchar(max)" Nullable="false" />
+          <Property Name="Exported" Type="bit" />
+          <Property Name="Billable" Type="bit" Nullable="false" />
+          <Property Name="CategoryId" Type="int" Nullable="false" />
+          <Property Name="DayStatus" Type="varchar" MaxLength="20" />
+          <Property Name="DayApproved" Type="bit" />
+          <Property Name="InternalNote" Type="varchar(max)" />
+          <Property Name="TaskAllocation" Type="varchar(max)" />
+          <Property Name="Visible" Type="bit" />
+          <Property Name="ApprovalNote" Type="varchar(max)" />
+          <Property Name="THours" Type="numeric" Precision="18" Scale="2" />
+          <Property Name="GCalendarId" Type="varchar(max)" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CompanyId" Type="int" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="EmailConfirmed" Type="bit" Nullable="false" />
+          <Property Name="PasswordCry" Type="varchar(max)" />
+          <Property Name="SecurityStamp" Type="varchar(max)" />
+          <Property Name="LockoutEndDate" Type="datetime" />
+          <Property Name="LockoutEnable" Type="char" MaxLength="10" />
+          <Property Name="AccessFailedCount" Type="int" Nullable="false" />
+          <Property Name="UserName" Type="varchar" MaxLength="256" />
+          <Property Name="FirstName" Type="varchar" MaxLength="256" />
+          <Property Name="LastName" Type="varchar" MaxLength="256" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="IsSuperUser" Type="bit" Nullable="false" />
+          <Property Name="ProfilePict" Type="varbinary(max)" />
+          <Property Name="FactorEndDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UsersProject">
+          <Key>
+            <PropertyRef Name="UsersProjectId" />
+          </Key>
+          <Property Name="UsersProjectId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="ProjectId" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'timetrackerDB.dbo.view_DaysUserStatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="view_DaysUserStatus">
+          <Key>
+            <PropertyRef Name="THDate" />
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="THDate" Type="date" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="DayStatus" Type="varchar" MaxLength="50" />
+          <Property Name="DayDate" Type="date" />
+          <Property Name="DayObservations" Type="varchar(max)" />
+          <Property Name="quantity" Type="numeric" Precision="38" Scale="2" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'timetrackerDB.dbo.view_menu' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="view_menu">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="AreaShortDesc" />
+            <PropertyRef Name="AreaTitle" />
+            <PropertyRef Name="PageShortDesc" />
+            <PropertyRef Name="AreaId" />
+            <PropertyRef Name="ModuleId" />
+            <PropertyRef Name="PageId" />
+            <PropertyRef Name="ModuleShortDesc" />
+            <PropertyRef Name="ModuleTitle" />
+            <PropertyRef Name="PageTypeId" />
+            <PropertyRef Name="PageTypeTitle" />
+            <PropertyRef Name="PageTitle" />
+            <PropertyRef Name="PageUrl" />
+          </Key>
+          <Property Name="id" Type="bigint" Nullable="false" />
+          <Property Name="PageIdAccess" Type="varchar" MaxLength="200" />
+          <Property Name="AreaShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="AreaLongDesc" Type="varchar" MaxLength="250" />
+          <Property Name="AreaTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="AreaIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="AreaOrder" Type="int" />
+          <Property Name="PageShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageLongDesc" Type="varchar" MaxLength="500" />
+          <Property Name="AreaId" Type="int" Nullable="false" />
+          <Property Name="ModuleId" Type="int" Nullable="false" />
+          <Property Name="PageId" Type="int" Nullable="false" />
+          <Property Name="ModuleShortDesc" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="ModuleTitle" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModuleIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="ModuleOrder" Type="int" />
+          <Property Name="PageTypeId" Type="int" Nullable="false" />
+          <Property Name="PageTypeTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageTypeIconUrl" Type="varchar" MaxLength="500" />
+          <Property Name="PageTitle" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="PageUrl" Type="varchar" MaxLength="200" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'timetrackerDB.dbo.viewPMUser' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="viewPMUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="CompanyId" />
+            <PropertyRef Name="Email" />
+            <PropertyRef Name="EmailConfirmed" />
+            <PropertyRef Name="AccessFailedCount" />
+            <PropertyRef Name="Active" />
+            <PropertyRef Name="IsSuperUser" />
+          </Key>
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="CompanyId" Type="int" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="EmailConfirmed" Type="bit" Nullable="false" />
+          <Property Name="PasswordCry" Type="varchar(max)" />
+          <Property Name="SecurityStamp" Type="varchar(max)" />
+          <Property Name="LockoutEndDate" Type="datetime" />
+          <Property Name="LockoutEnable" Type="char" MaxLength="10" />
+          <Property Name="AccessFailedCount" Type="int" Nullable="false" />
+          <Property Name="UserName" Type="varchar" MaxLength="256" />
+          <Property Name="FirstName" Type="varchar" MaxLength="256" />
+          <Property Name="LastName" Type="varchar" MaxLength="256" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="IsSuperUser" Type="bit" Nullable="false" />
+          <Property Name="exits" Type="int" />
+          <Property Name="ProjectId" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'timetrackerDB.sys.database_firewall_rules' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="database_firewall_rules">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="name" />
+            <PropertyRef Name="start_ip_address" />
+            <PropertyRef Name="end_ip_address" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="modify_date" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="start_ip_address" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="end_ip_address" Type="varchar" MaxLength="45" Nullable="false" />
+          <Property Name="create_date" Type="datetime" Nullable="false" />
+          <Property Name="modify_date" Type="datetime" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Activity_Project">
+          <End Role="Project" Type="Self.Project" Multiplicity="1" />
+          <End Role="Activity" Type="Self.Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="Activity">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CustomerOffice">
+          <End Role="Office" Type="Self.Office" Multiplicity="1" />
+          <End Role="Customer" Type="Self.Customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Office">
+              <PropertyRef Name="OfficeId" />
+            </Principal>
+            <Dependent Role="Customer">
+              <PropertyRef Name="OfficeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Module_Area">
+          <End Role="Area" Type="Self.Area" Multiplicity="1" />
+          <End Role="Module" Type="Self.Module" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Area">
+              <PropertyRef Name="AreaId" />
+            </Principal>
+            <Dependent Role="Module">
+              <PropertyRef Name="AreaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Page_Area">
+          <End Role="Area" Type="Self.Area" Multiplicity="1" />
+          <End Role="Pages" Type="Self.Pages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Area">
+              <PropertyRef Name="AreaId" />
+            </Principal>
+            <Dependent Role="Pages">
+              <PropertyRef Name="AreaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_paginaN_modulo">
+          <End Role="Module" Type="Self.Module" Multiplicity="1" />
+          <End Role="Pages" Type="Self.Pages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Module">
+              <PropertyRef Name="ModuleId" />
+            </Principal>
+            <Dependent Role="Pages">
+              <PropertyRef Name="ModuleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_paginaN_tipo_pagina">
+          <End Role="PageType" Type="Self.PageType" Multiplicity="1" />
+          <End Role="Pages" Type="Self.Pages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PageType">
+              <PropertyRef Name="PageTypeId" />
+            </Principal>
+            <Dependent Role="Pages">
+              <PropertyRef Name="PageTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Privilege_User">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Privilege_User" Type="Self.Privilege_User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Privilege_User">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Privilege_User_Action">
+          <End Role="Privilege" Type="Self.Privilege" Multiplicity="1" />
+          <End Role="Privilege_User" Type="Self.Privilege_User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Privilege">
+              <PropertyRef Name="PrivilegeId" />
+            </Principal>
+            <Dependent Role="Privilege_User">
+              <PropertyRef Name="PrivilegeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Project_Customer">
+          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
+          <End Role="Project" Type="Self.Project" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customer">
+              <PropertyRef Name="CustomerId" />
+            </Principal>
+            <Dependent Role="Project">
+              <PropertyRef Name="CustomerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProjectManager_Project">
+          <End Role="Project" Type="Self.Project" Multiplicity="1" />
+          <End Role="ProjectManager" Type="Self.ProjectManager" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="ProjectManager">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProjectManager_User">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="ProjectManager" Type="Self.ProjectManager" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="ProjectManager">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RolePriv_Privilege">
+          <End Role="Privilege" Type="Self.Privilege" Multiplicity="1" />
+          <End Role="RolesPrivileges" Type="Self.RolesPrivileges" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Privilege">
+              <PropertyRef Name="PrivilegeId" />
+            </Principal>
+            <Dependent Role="RolesPrivileges">
+              <PropertyRef Name="PrivilegeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RolePriv_Roles">
+          <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
+          <End Role="RolesPrivileges" Type="Self.RolesPrivileges" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RoleId" />
+            </Principal>
+            <Dependent Role="RolesPrivileges">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RoleUser_Roles">
+          <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
+          <End Role="RolesUsers" Type="Self.RolesUsers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RoleId" />
+            </Principal>
+            <Dependent Role="RolesUsers">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RoleUser_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="RolesUsers" Type="Self.RolesUsers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="RolesUsers">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimeCategory">
+          <End Role="Category" Type="Self.Category" Multiplicity="1" />
+          <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="CategoryId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="CategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimerCustomer">
+          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
+          <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customer">
+              <PropertyRef Name="CustomerId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="CustomerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimerProject">
+          <End Role="Project" Type="Self.Project" Multiplicity="1" />
+          <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimerUsers">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UsersProject_Project">
+          <End Role="Project" Type="Self.Project" Multiplicity="1" />
+          <End Role="UsersProject" Type="Self.UsersProject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="UsersProject">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UsersProject_User">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="UsersProject" Type="Self.UsersProject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="UsersProject">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="timetrackerDBModelStoreContainer">
+          <EntitySet Name="Activity" EntityType="Self.Activity" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Area" EntityType="Self.Area" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Company" EntityType="Self.Company" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Customer" EntityType="Self.Customer" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DaysForUse" EntityType="Self.DaysForUse" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DaysUser" EntityType="Self.DaysUser" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GCToken" EntityType="Self.GCToken" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Logs" EntityType="Self.Logs" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MFAMailRequest" EntityType="Self.MFAMailRequest" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Module" EntityType="Self.Module" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Office" EntityType="Self.Office" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Pages" EntityType="Self.Pages" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PageType" EntityType="Self.PageType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Privilege" EntityType="Self.Privilege" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Project" EntityType="Self.Project" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProjectManager" EntityType="Self.ProjectManager" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RolesPrivileges" EntityType="Self.RolesPrivileges" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RolesUsers" EntityType="Self.RolesUsers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TimeHours" EntityType="Self.TimeHours" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UsersProject" EntityType="Self.UsersProject" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Privilege_User" EntityType="Self.Privilege_User" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [Privilege_User].[PrivilegeId] AS [PrivilegeId], 
+    [Privilege_User].[UserId] AS [UserId], 
+    [Privilege_User].[CreateDate] AS [CreateDate], 
+    [Privilege_User].[CreateUser] AS [CreateUser]
+    FROM [dbo].[Privilege_User] AS [Privilege_User]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="temppagetype" EntityType="Self.temppagetype" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [temppagetype].[PageTypeTitle] AS [PageTypeTitle], 
+    [temppagetype].[PageTypeShortDesc] AS [PageTypeShortDesc], 
+    [temppagetype].[PageTypeLongDesc] AS [PageTypeLongDesc], 
+    [temppagetype].[PageTypeIconUrl] AS [PageTypeIconUrl], 
+    [temppagetype].[CreateDate] AS [CreateDate], 
+    [temppagetype].[CreateUser] AS [CreateUser]
+    FROM [dbo].[temppagetype] AS [temppagetype]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="view_DaysUserStatus" EntityType="Self.view_DaysUserStatus" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [view_DaysUserStatus].[THDate] AS [THDate], 
+    [view_DaysUserStatus].[UserId] AS [UserId], 
+    [view_DaysUserStatus].[DayStatus] AS [DayStatus], 
+    [view_DaysUserStatus].[DayDate] AS [DayDate], 
+    [view_DaysUserStatus].[DayObservations] AS [DayObservations], 
+    [view_DaysUserStatus].[quantity] AS [quantity]
+    FROM [dbo].[view_DaysUserStatus] AS [view_DaysUserStatus]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="view_menu" EntityType="Self.view_menu" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [view_menu].[id] AS [id], 
+    [view_menu].[PageIdAccess] AS [PageIdAccess], 
+    [view_menu].[AreaShortDesc] AS [AreaShortDesc], 
+    [view_menu].[AreaLongDesc] AS [AreaLongDesc], 
+    [view_menu].[AreaTitle] AS [AreaTitle], 
+    [view_menu].[AreaIconUrl] AS [AreaIconUrl], 
+    [view_menu].[AreaOrder] AS [AreaOrder], 
+    [view_menu].[PageShortDesc] AS [PageShortDesc], 
+    [view_menu].[PageLongDesc] AS [PageLongDesc], 
+    [view_menu].[AreaId] AS [AreaId], 
+    [view_menu].[ModuleId] AS [ModuleId], 
+    [view_menu].[PageId] AS [PageId], 
+    [view_menu].[ModuleShortDesc] AS [ModuleShortDesc], 
+    [view_menu].[ModuleTitle] AS [ModuleTitle], 
+    [view_menu].[ModuleIconUrl] AS [ModuleIconUrl], 
+    [view_menu].[ModuleOrder] AS [ModuleOrder], 
+    [view_menu].[PageTypeId] AS [PageTypeId], 
+    [view_menu].[PageTypeTitle] AS [PageTypeTitle], 
+    [view_menu].[PageTypeIconUrl] AS [PageTypeIconUrl], 
+    [view_menu].[PageTitle] AS [PageTitle], 
+    [view_menu].[PageUrl] AS [PageUrl]
+    FROM [dbo].[view_menu] AS [view_menu]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="viewPMUser" EntityType="Self.viewPMUser" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [viewPMUser].[UserId] AS [UserId], 
+    [viewPMUser].[CompanyId] AS [CompanyId], 
+    [viewPMUser].[Email] AS [Email], 
+    [viewPMUser].[EmailConfirmed] AS [EmailConfirmed], 
+    [viewPMUser].[PasswordCry] AS [PasswordCry], 
+    [viewPMUser].[SecurityStamp] AS [SecurityStamp], 
+    [viewPMUser].[LockoutEndDate] AS [LockoutEndDate], 
+    [viewPMUser].[LockoutEnable] AS [LockoutEnable], 
+    [viewPMUser].[AccessFailedCount] AS [AccessFailedCount], 
+    [viewPMUser].[UserName] AS [UserName], 
+    [viewPMUser].[FirstName] AS [FirstName], 
+    [viewPMUser].[LastName] AS [LastName], 
+    [viewPMUser].[Active] AS [Active], 
+    [viewPMUser].[IsSuperUser] AS [IsSuperUser], 
+    [viewPMUser].[exits] AS [exits], 
+    [viewPMUser].[ProjectId] AS [ProjectId]
+    FROM [dbo].[viewPMUser] AS [viewPMUser]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="database_firewall_rules" EntityType="Self.database_firewall_rules" store:Type="Views" store:Schema="sys">
+            <DefiningQuery>SELECT 
+    [database_firewall_rules].[id] AS [id], 
+    [database_firewall_rules].[name] AS [name], 
+    [database_firewall_rules].[start_ip_address] AS [start_ip_address], 
+    [database_firewall_rules].[end_ip_address] AS [end_ip_address], 
+    [database_firewall_rules].[create_date] AS [create_date], 
+    [database_firewall_rules].[modify_date] AS [modify_date]
+    FROM [sys].[database_firewall_rules] AS [database_firewall_rules]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_Activity_Project" Association="Self.FK_Activity_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="Activity" EntitySet="Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CustomerOffice" Association="Self.FK_CustomerOffice">
+            <End Role="Office" EntitySet="Office" />
+            <End Role="Customer" EntitySet="Customer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Module_Area" Association="Self.FK_Module_Area">
+            <End Role="Area" EntitySet="Area" />
+            <End Role="Module" EntitySet="Module" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Page_Area" Association="Self.FK_Page_Area">
+            <End Role="Area" EntitySet="Area" />
+            <End Role="Pages" EntitySet="Pages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_paginaN_modulo" Association="Self.FK_paginaN_modulo">
+            <End Role="Module" EntitySet="Module" />
+            <End Role="Pages" EntitySet="Pages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_paginaN_tipo_pagina" Association="Self.FK_paginaN_tipo_pagina">
+            <End Role="PageType" EntitySet="PageType" />
+            <End Role="Pages" EntitySet="Pages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Privilege_User" Association="Self.FK_Privilege_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Privilege_User" EntitySet="Privilege_User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Privilege_User_Action" Association="Self.FK_Privilege_User_Action">
+            <End Role="Privilege" EntitySet="Privilege" />
+            <End Role="Privilege_User" EntitySet="Privilege_User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Project_Customer" Association="Self.FK_Project_Customer">
+            <End Role="Customer" EntitySet="Customer" />
+            <End Role="Project" EntitySet="Project" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProjectManager_Project" Association="Self.FK_ProjectManager_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="ProjectManager" EntitySet="ProjectManager" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProjectManager_User" Association="Self.FK_ProjectManager_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="ProjectManager" EntitySet="ProjectManager" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RolePriv_Privilege" Association="Self.FK_RolePriv_Privilege">
+            <End Role="Privilege" EntitySet="Privilege" />
+            <End Role="RolesPrivileges" EntitySet="RolesPrivileges" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RolePriv_Roles" Association="Self.FK_RolePriv_Roles">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="RolesPrivileges" EntitySet="RolesPrivileges" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RoleUser_Roles" Association="Self.FK_RoleUser_Roles">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="RolesUsers" EntitySet="RolesUsers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RoleUser_Users" Association="Self.FK_RoleUser_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="RolesUsers" EntitySet="RolesUsers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimeCategory" Association="Self.FK_TimeCategory">
+            <End Role="Category" EntitySet="Category" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimerCustomer" Association="Self.FK_TimerCustomer">
+            <End Role="Customer" EntitySet="Customer" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimerProject" Association="Self.FK_TimerProject">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimerUsers" Association="Self.FK_TimerUsers">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Company" Association="Self.FK_Users_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UsersProject_Project" Association="Self.FK_UsersProject_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="UsersProject" EntitySet="UsersProject" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UsersProject_User" Association="Self.FK_UsersProject_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UsersProject" EntitySet="UsersProject" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="timetrackerDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="timetrackerDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Activity" EntityType="timetrackerDBModel.Activity" />
+          <EntitySet Name="Area" EntityType="timetrackerDBModel.Area" />
+          <EntitySet Name="Category" EntityType="timetrackerDBModel.Category" />
+          <EntitySet Name="Company" EntityType="timetrackerDBModel.Company" />
+          <EntitySet Name="Customer" EntityType="timetrackerDBModel.Customer" />
+          <EntitySet Name="DaysForUse" EntityType="timetrackerDBModel.DaysForUse" />
+          <EntitySet Name="DaysUser" EntityType="timetrackerDBModel.DaysUser" />
+          <EntitySet Name="GCToken" EntityType="timetrackerDBModel.GCToken" />
+          <EntitySet Name="Logs" EntityType="timetrackerDBModel.Logs" />
+          <EntitySet Name="MFAMailRequest" EntityType="timetrackerDBModel.MFAMailRequest" />
+          <EntitySet Name="Module" EntityType="timetrackerDBModel.Module" />
+          <EntitySet Name="Office" EntityType="timetrackerDBModel.Office" />
+          <EntitySet Name="Pages" EntityType="timetrackerDBModel.Pages" />
+          <EntitySet Name="PageType" EntityType="timetrackerDBModel.PageType" />
+          <EntitySet Name="Privilege" EntityType="timetrackerDBModel.Privilege" />
+          <EntitySet Name="Project" EntityType="timetrackerDBModel.Project" />
+          <EntitySet Name="ProjectManager" EntityType="timetrackerDBModel.ProjectManager" />
+          <EntitySet Name="Roles" EntityType="timetrackerDBModel.Roles" />
+          <EntitySet Name="RolesPrivileges" EntityType="timetrackerDBModel.RolesPrivileges" />
+          <EntitySet Name="RolesUsers" EntityType="timetrackerDBModel.RolesUsers" />
+          <EntitySet Name="TimeHours" EntityType="timetrackerDBModel.TimeHours" />
+          <EntitySet Name="UsersProject" EntityType="timetrackerDBModel.UsersProject" />
+          <EntitySet Name="Privilege_User" EntityType="timetrackerDBModel.Privilege_User" />
+          <EntitySet Name="temppagetype" EntityType="timetrackerDBModel.temppagetype" />
+          <EntitySet Name="view_menu" EntityType="timetrackerDBModel.view_menu" />
+          <EntitySet Name="viewPMUser" EntityType="timetrackerDBModel.viewPMUser" />
+          <EntitySet Name="database_firewall_rules" EntityType="timetrackerDBModel.database_firewall_rules" />
+          <AssociationSet Name="FK_Activity_Project" Association="timetrackerDBModel.FK_Activity_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="Activity" EntitySet="Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Module_Area" Association="timetrackerDBModel.FK_Module_Area">
+            <End Role="Area" EntitySet="Area" />
+            <End Role="Module" EntitySet="Module" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Page_Area" Association="timetrackerDBModel.FK_Page_Area">
+            <End Role="Area" EntitySet="Area" />
+            <End Role="Pages" EntitySet="Pages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimeCategory" Association="timetrackerDBModel.FK_TimeCategory">
+            <End Role="Category" EntitySet="Category" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CustomerOffice" Association="timetrackerDBModel.FK_CustomerOffice">
+            <End Role="Office" EntitySet="Office" />
+            <End Role="Customer" EntitySet="Customer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Project_Customer" Association="timetrackerDBModel.FK_Project_Customer">
+            <End Role="Customer" EntitySet="Customer" />
+            <End Role="Project" EntitySet="Project" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimerCustomer" Association="timetrackerDBModel.FK_TimerCustomer">
+            <End Role="Customer" EntitySet="Customer" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_paginaN_modulo" Association="timetrackerDBModel.FK_paginaN_modulo">
+            <End Role="Module" EntitySet="Module" />
+            <End Role="Pages" EntitySet="Pages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_paginaN_tipo_pagina" Association="timetrackerDBModel.FK_paginaN_tipo_pagina">
+            <End Role="PageType" EntitySet="PageType" />
+            <End Role="Pages" EntitySet="Pages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Privilege_User_Action" Association="timetrackerDBModel.FK_Privilege_User_Action">
+            <End Role="Privilege" EntitySet="Privilege" />
+            <End Role="Privilege_User" EntitySet="Privilege_User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RolePriv_Privilege" Association="timetrackerDBModel.FK_RolePriv_Privilege">
+            <End Role="Privilege" EntitySet="Privilege" />
+            <End Role="RolesPrivileges" EntitySet="RolesPrivileges" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProjectManager_Project" Association="timetrackerDBModel.FK_ProjectManager_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="ProjectManager" EntitySet="ProjectManager" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimerProject" Association="timetrackerDBModel.FK_TimerProject">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UsersProject_Project" Association="timetrackerDBModel.FK_UsersProject_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="UsersProject" EntitySet="UsersProject" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RolePriv_Roles" Association="timetrackerDBModel.FK_RolePriv_Roles">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="RolesPrivileges" EntitySet="RolesPrivileges" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RoleUser_Roles" Association="timetrackerDBModel.FK_RoleUser_Roles">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="RolesUsers" EntitySet="RolesUsers" />
+          </AssociationSet>
+          <EntitySet Name="view_DaysUserStatus" EntityType="timetrackerDBModel.view_DaysUserStatus" />
+          <EntitySet Name="Users" EntityType="timetrackerDBModel.Users" />
+          <AssociationSet Name="FK_Users_Company" Association="timetrackerDBModel.FK_Users_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ProjectManager_User" Association="timetrackerDBModel.FK_ProjectManager_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="ProjectManager" EntitySet="ProjectManager" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RoleUser_Users" Association="timetrackerDBModel.FK_RoleUser_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="RolesUsers" EntitySet="RolesUsers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimerUsers" Association="timetrackerDBModel.FK_TimerUsers">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="TimeHours" EntitySet="TimeHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Privilege_User" Association="timetrackerDBModel.FK_Privilege_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Privilege_User" EntitySet="Privilege_User" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UsersProject_User" Association="timetrackerDBModel.FK_UsersProject_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UsersProject" EntitySet="UsersProject" />
+          </AssociationSet>
+          </EntityContainer>
+        <EntityType Name="Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProjectId" Type="Int32" Nullable="false" />
+          <Property Name="ActivityName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Project" Relationship="timetrackerDBModel.FK_Activity_Project" FromRole="Activity" ToRole="Project" />
+        </EntityType>
+        <EntityType Name="Area">
+          <Key>
+            <PropertyRef Name="AreaId" />
+          </Key>
+          <Property Name="AreaId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AreaCode" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="AreaTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AreaShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AreaLongDesc" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="AreaIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="AreaOrder" Type="Int32" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Module" Relationship="timetrackerDBModel.FK_Module_Area" FromRole="Area" ToRole="Module" />
+          <NavigationProperty Name="Pages" Relationship="timetrackerDBModel.FK_Page_Area" FromRole="Area" ToRole="Pages" />
+        </EntityType>
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CategoryName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="TimeHours" Relationship="timetrackerDBModel.FK_TimeCategory" FromRole="Category" ToRole="TimeHours" />
+        </EntityType>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="CompanyId" />
+          </Key>
+          <Property Name="CompanyId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CompanyName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="ShortName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="Logo" Type="Binary" MaxLength="Max" FixedLength="false" />
+          <Property Name="Icon" Type="Binary" MaxLength="Max" FixedLength="false" />
+          <Property Name="Tittle" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Descrip" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="CreateUser" Type="Int32" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="Int32" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_Users_Company" FromRole="Company" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Customer">
+          <Key>
+            <PropertyRef Name="CustomerId" />
+          </Key>
+          <Property Name="CustomerId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CustomerName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="OfficeId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Office" Relationship="timetrackerDBModel.FK_CustomerOffice" FromRole="Customer" ToRole="Office" />
+          <NavigationProperty Name="Project" Relationship="timetrackerDBModel.FK_Project_Customer" FromRole="Customer" ToRole="Project" />
+          <NavigationProperty Name="TimeHours" Relationship="timetrackerDBModel.FK_TimerCustomer" FromRole="Customer" ToRole="TimeHours" />
+        </EntityType>
+        <EntityType Name="DaysForUse">
+          <Key>
+            <PropertyRef Name="DFU" />
+          </Key>
+          <Property Name="DFU" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DayDate" Type="DateTime" Precision="0" />
+        </EntityType>
+        <EntityType Name="DaysUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="DayDate" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="DayStatus" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DayDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="DayObservations" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="GCToken">
+          <Key>
+            <PropertyRef Name="idGCToken" />
+          </Key>
+          <Property Name="idGCToken" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="idUsuario" Type="Int32" />
+          <Property Name="access_token" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="refresh_token" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="expires_in" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="scope" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="token_type" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="texto" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="Logs">
+          <Key>
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="LogId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LogName" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LogTable" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LogAction" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LogDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="LogUserId" Type="Int32" />
+          <Property Name="LogIpAddress" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="LogData1" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LogData2" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LogData3" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="MFAMailRequest">
+          <Key>
+            <PropertyRef Name="MFAMailRequestId" />
+          </Key>
+          <Property Name="MFAMailRequestId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RequestDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="RequestCode" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Module">
+          <Key>
+            <PropertyRef Name="ModuleId" />
+          </Key>
+          <Property Name="ModuleId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AreaId" Type="Int32" Nullable="false" />
+          <Property Name="ModuleCode" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleTitle" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleLongDesc" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleOrder" Type="Int32" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Area" Relationship="timetrackerDBModel.FK_Module_Area" FromRole="Module" ToRole="Area" />
+          <NavigationProperty Name="Pages" Relationship="timetrackerDBModel.FK_paginaN_modulo" FromRole="Module" ToRole="Pages" />
+        </EntityType>
+        <EntityType Name="Office">
+          <Key>
+            <PropertyRef Name="OfficeId" />
+          </Key>
+          <Property Name="OfficeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OfficeDescription" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="active" Type="Boolean" />
+          <NavigationProperty Name="Customer" Relationship="timetrackerDBModel.FK_CustomerOffice" FromRole="Office" ToRole="Customer" />
+        </EntityType>
+        <EntityType Name="Pages">
+          <Key>
+            <PropertyRef Name="PageId" />
+          </Key>
+          <Property Name="PageId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageIdAccess" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PageUrl" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PageTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageLongDesc" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PageHelpUrl" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="AreaId" Type="Int32" Nullable="false" />
+          <Property Name="ModuleId" Type="Int32" Nullable="false" />
+          <Property Name="PageTypeId" Type="Int32" Nullable="false" />
+          <Property Name="Active" Type="Boolean" />
+          <Property Name="Visible" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Area" Relationship="timetrackerDBModel.FK_Page_Area" FromRole="Pages" ToRole="Area" />
+          <NavigationProperty Name="Module" Relationship="timetrackerDBModel.FK_paginaN_modulo" FromRole="Pages" ToRole="Module" />
+          <NavigationProperty Name="PageType" Relationship="timetrackerDBModel.FK_paginaN_tipo_pagina" FromRole="Pages" ToRole="PageType" />
+        </EntityType>
+        <EntityType Name="PageType">
+          <Key>
+            <PropertyRef Name="PageTypeId" />
+          </Key>
+          <Property Name="PageTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageTypeTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeLongDesc" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Pages" Relationship="timetrackerDBModel.FK_paginaN_tipo_pagina" FromRole="PageType" ToRole="Pages" />
+        </EntityType>
+        <EntityType Name="Privilege">
+          <Key>
+            <PropertyRef Name="PrivilegeId" />
+          </Key>
+          <Property Name="PrivilegeId" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PrivilegeParent" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="PrivilegeDescrip" Type="String" Nullable="false" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Privilege_User" Relationship="timetrackerDBModel.FK_Privilege_User_Action" FromRole="Privilege" ToRole="Privilege_User" />
+          <NavigationProperty Name="RolesPrivileges" Relationship="timetrackerDBModel.FK_RolePriv_Privilege" FromRole="Privilege" ToRole="RolesPrivileges" />
+        </EntityType>
+        <EntityType Name="Project">
+          <Key>
+            <PropertyRef Name="ProjectId" />
+          </Key>
+          <Property Name="ProjectId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CustomerId" Type="Int32" Nullable="false" />
+          <Property Name="ProjectName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="color" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Activity" Relationship="timetrackerDBModel.FK_Activity_Project" FromRole="Project" ToRole="Activity" />
+          <NavigationProperty Name="Customer" Relationship="timetrackerDBModel.FK_Project_Customer" FromRole="Project" ToRole="Customer" />
+          <NavigationProperty Name="ProjectManager" Relationship="timetrackerDBModel.FK_ProjectManager_Project" FromRole="Project" ToRole="ProjectManager" />
+          <NavigationProperty Name="TimeHours" Relationship="timetrackerDBModel.FK_TimerProject" FromRole="Project" ToRole="TimeHours" />
+          <NavigationProperty Name="UsersProject" Relationship="timetrackerDBModel.FK_UsersProject_Project" FromRole="Project" ToRole="UsersProject" />
+        </EntityType>
+        <EntityType Name="ProjectManager">
+          <Key>
+            <PropertyRef Name="ProjectManagerId" />
+          </Key>
+          <Property Name="ProjectManagerId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="ProjectId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Project" Relationship="timetrackerDBModel.FK_ProjectManager_Project" FromRole="ProjectManager" ToRole="Project" />
+          <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_ProjectManager_User" FromRole="ProjectManager" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Roles">
+          <Key>
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="RoleId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoleDescription" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="RoleComment" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="RoleActive" Type="Boolean" />
+          <Property Name="CreateUser" Type="Int32" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifyUser" Type="Int32" />
+          <Property Name="ModifyDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="RolesPrivileges" Relationship="timetrackerDBModel.FK_RolePriv_Roles" FromRole="Roles" ToRole="RolesPrivileges" />
+          <NavigationProperty Name="RolesUsers" Relationship="timetrackerDBModel.FK_RoleUser_Roles" FromRole="Roles" ToRole="RolesUsers" />
+        </EntityType>
+        <EntityType Name="RolesPrivileges">
+          <Key>
+            <PropertyRef Name="RolePrivId" />
+          </Key>
+          <Property Name="RolePrivId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <Property Name="PrivilegeId" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Privilege" Relationship="timetrackerDBModel.FK_RolePriv_Privilege" FromRole="RolesPrivileges" ToRole="Privilege" />
+          <NavigationProperty Name="Roles" Relationship="timetrackerDBModel.FK_RolePriv_Roles" FromRole="RolesPrivileges" ToRole="Roles" />
+        </EntityType>
+        <EntityType Name="RolesUsers">
+          <Key>
+            <PropertyRef Name="RoleUserId" />
+          </Key>
+          <Property Name="RoleUserId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Roles" Relationship="timetrackerDBModel.FK_RoleUser_Roles" FromRole="RolesUsers" ToRole="Roles" />
+          <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_RoleUser_Users" FromRole="RolesUsers" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="TimeHours">
+          <Key>
+            <PropertyRef Name="TimeHoursId" />
+          </Key>
+          <Property Name="TimeHoursId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="THDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="THFrom" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="THTo" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Duration" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <Property Name="Rate" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="CustomerId" Type="Int32" Nullable="false" />
+          <Property Name="ProjectId" Type="Int32" Nullable="false" />
+          <Property Name="ActivityId" Type="Int32" Nullable="false" />
+          <Property Name="ActDescription" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Exported" Type="Boolean" />
+          <Property Name="Billable" Type="Boolean" Nullable="false" />
+          <Property Name="CategoryId" Type="Int32" Nullable="false" />
+          <Property Name="DayStatus" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="DayApproved" Type="Boolean" />
+          <Property Name="InternalNote" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="TaskAllocation" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Visible" Type="Boolean" />
+          <Property Name="ApprovalNote" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="THours" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="GCalendarId" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Category" Relationship="timetrackerDBModel.FK_TimeCategory" FromRole="TimeHours" ToRole="Category" />
+          <NavigationProperty Name="Customer" Relationship="timetrackerDBModel.FK_TimerCustomer" FromRole="TimeHours" ToRole="Customer" />
+          <NavigationProperty Name="Project" Relationship="timetrackerDBModel.FK_TimerProject" FromRole="TimeHours" ToRole="Project" />
+          <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_TimerUsers" FromRole="TimeHours" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="UsersProject">
+          <Key>
+            <PropertyRef Name="UsersProjectId" />
+          </Key>
+          <Property Name="UsersProjectId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="ProjectId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Project" Relationship="timetrackerDBModel.FK_UsersProject_Project" FromRole="UsersProject" ToRole="Project" />
+          <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_UsersProject_User" FromRole="UsersProject" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Privilege_User">
+          <Key>
+            <PropertyRef Name="PrivilegeId" />
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="PrivilegeId" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Privilege" Relationship="timetrackerDBModel.FK_Privilege_User_Action" FromRole="Privilege_User" ToRole="Privilege" />
+          <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_Privilege_User" FromRole="Privilege_User" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="temppagetype">
+          <Key>
+            <PropertyRef Name="PageTypeTitle" />
+            <PropertyRef Name="PageTypeShortDesc" />
+          </Key>
+          <Property Name="PageTypeTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeLongDesc" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDate" Type="DateTime" Precision="3" />
+          <Property Name="CreateUser" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="view_menu">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="AreaShortDesc" />
+            <PropertyRef Name="AreaTitle" />
+            <PropertyRef Name="PageShortDesc" />
+            <PropertyRef Name="AreaId" />
+            <PropertyRef Name="ModuleId" />
+            <PropertyRef Name="PageId" />
+            <PropertyRef Name="ModuleShortDesc" />
+            <PropertyRef Name="ModuleTitle" />
+            <PropertyRef Name="PageTypeId" />
+            <PropertyRef Name="PageTypeTitle" />
+            <PropertyRef Name="PageTitle" />
+            <PropertyRef Name="PageUrl" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" />
+          <Property Name="PageIdAccess" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AreaShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AreaLongDesc" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="AreaTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AreaIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="AreaOrder" Type="Int32" />
+          <Property Name="PageShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageLongDesc" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="AreaId" Type="Int32" Nullable="false" />
+          <Property Name="ModuleId" Type="Int32" Nullable="false" />
+          <Property Name="PageId" Type="Int32" Nullable="false" />
+          <Property Name="ModuleShortDesc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleTitle" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleOrder" Type="Int32" />
+          <Property Name="PageTypeId" Type="Int32" Nullable="false" />
+          <Property Name="PageTypeTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageTypeIconUrl" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="PageTitle" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageUrl" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="viewPMUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="CompanyId" />
+            <PropertyRef Name="Email" />
+            <PropertyRef Name="EmailConfirmed" />
+            <PropertyRef Name="AccessFailedCount" />
+            <PropertyRef Name="Active" />
+            <PropertyRef Name="IsSuperUser" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="Email" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="EmailConfirmed" Type="Boolean" Nullable="false" />
+          <Property Name="PasswordCry" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SecurityStamp" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LockoutEndDate" Type="DateTime" Precision="3" />
+          <Property Name="LockoutEnable" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="AccessFailedCount" Type="Int32" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="FirstName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="IsSuperUser" Type="Boolean" Nullable="false" />
+          <Property Name="exits" Type="Int32" />
+          <Property Name="ProjectId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="database_firewall_rules">
+          <Key>
+            <PropertyRef Name="id" />
+            <PropertyRef Name="name" />
+            <PropertyRef Name="start_ip_address" />
+            <PropertyRef Name="end_ip_address" />
+            <PropertyRef Name="create_date" />
+            <PropertyRef Name="modify_date" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="start_ip_address" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="end_ip_address" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+          <Property Name="create_date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="modify_date" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <Association Name="FK_Activity_Project">
+          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Activity" Role="Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="Activity">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Module_Area">
+          <End Type="timetrackerDBModel.Area" Role="Area" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Module" Role="Module" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Area">
+              <PropertyRef Name="AreaId" />
+            </Principal>
+            <Dependent Role="Module">
+              <PropertyRef Name="AreaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Page_Area">
+          <End Type="timetrackerDBModel.Area" Role="Area" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Pages" Role="Pages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Area">
+              <PropertyRef Name="AreaId" />
+            </Principal>
+            <Dependent Role="Pages">
+              <PropertyRef Name="AreaId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimeCategory">
+          <End Type="timetrackerDBModel.Category" Role="Category" Multiplicity="1" />
+          <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="CategoryId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="CategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CustomerOffice">
+          <End Type="timetrackerDBModel.Office" Role="Office" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Customer" Role="Customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Office">
+              <PropertyRef Name="OfficeId" />
+            </Principal>
+            <Dependent Role="Customer">
+              <PropertyRef Name="OfficeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Project_Customer">
+          <End Type="timetrackerDBModel.Customer" Role="Customer" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customer">
+              <PropertyRef Name="CustomerId" />
+            </Principal>
+            <Dependent Role="Project">
+              <PropertyRef Name="CustomerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimerCustomer">
+          <End Type="timetrackerDBModel.Customer" Role="Customer" Multiplicity="1" />
+          <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customer">
+              <PropertyRef Name="CustomerId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="CustomerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_paginaN_modulo">
+          <End Type="timetrackerDBModel.Module" Role="Module" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Pages" Role="Pages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Module">
+              <PropertyRef Name="ModuleId" />
+            </Principal>
+            <Dependent Role="Pages">
+              <PropertyRef Name="ModuleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_paginaN_tipo_pagina">
+          <End Type="timetrackerDBModel.PageType" Role="PageType" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Pages" Role="Pages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PageType">
+              <PropertyRef Name="PageTypeId" />
+            </Principal>
+            <Dependent Role="Pages">
+              <PropertyRef Name="PageTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Privilege_User_Action">
+          <End Type="timetrackerDBModel.Privilege" Role="Privilege" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Privilege_User" Role="Privilege_User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Privilege">
+              <PropertyRef Name="PrivilegeId" />
+            </Principal>
+            <Dependent Role="Privilege_User">
+              <PropertyRef Name="PrivilegeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RolePriv_Privilege">
+          <End Type="timetrackerDBModel.Privilege" Role="Privilege" Multiplicity="1" />
+          <End Type="timetrackerDBModel.RolesPrivileges" Role="RolesPrivileges" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Privilege">
+              <PropertyRef Name="PrivilegeId" />
+            </Principal>
+            <Dependent Role="RolesPrivileges">
+              <PropertyRef Name="PrivilegeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProjectManager_Project">
+          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="1" />
+          <End Type="timetrackerDBModel.ProjectManager" Role="ProjectManager" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="ProjectManager">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimerProject">
+          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="1" />
+          <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UsersProject_Project">
+          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="1" />
+          <End Type="timetrackerDBModel.UsersProject" Role="UsersProject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectId" />
+            </Principal>
+            <Dependent Role="UsersProject">
+              <PropertyRef Name="ProjectId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RolePriv_Roles">
+          <End Type="timetrackerDBModel.Roles" Role="Roles" Multiplicity="1" />
+          <End Type="timetrackerDBModel.RolesPrivileges" Role="RolesPrivileges" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RoleId" />
+            </Principal>
+            <Dependent Role="RolesPrivileges">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RoleUser_Roles">
+          <End Type="timetrackerDBModel.Roles" Role="Roles" Multiplicity="1" />
+          <End Type="timetrackerDBModel.RolesUsers" Role="RolesUsers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RoleId" />
+            </Principal>
+            <Dependent Role="RolesUsers">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="view_DaysUserStatus">
+          <Key>
+            <PropertyRef Name="THDate" />
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="THDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="DayStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DayDate" Type="DateTime" Precision="0" />
+          <Property Name="DayObservations" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="quantity" Type="Decimal" Precision="38" Scale="2" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CompanyId" Type="Int32" Nullable="false" />
+          <Property Name="Email" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="EmailConfirmed" Type="Boolean" Nullable="false" />
+          <Property Name="PasswordCry" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SecurityStamp" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="LockoutEndDate" Type="DateTime" Precision="3" />
+          <Property Name="LockoutEnable" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="AccessFailedCount" Type="Int32" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="FirstName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="IsSuperUser" Type="Boolean" Nullable="false" />
+          <Property Name="ProfilePict" Type="Binary" MaxLength="Max" FixedLength="false" />
+          <Property Name="FactorEndDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Company" Relationship="timetrackerDBModel.FK_Users_Company" FromRole="Users" ToRole="Company" />
+          <NavigationProperty Name="ProjectManager" Relationship="timetrackerDBModel.FK_ProjectManager_User" FromRole="Users" ToRole="ProjectManager" />
+          <NavigationProperty Name="RolesUsers" Relationship="timetrackerDBModel.FK_RoleUser_Users" FromRole="Users" ToRole="RolesUsers" />
+          <NavigationProperty Name="TimeHours" Relationship="timetrackerDBModel.FK_TimerUsers" FromRole="Users" ToRole="TimeHours" />
+          <NavigationProperty Name="Privilege_User" Relationship="timetrackerDBModel.FK_Privilege_User" FromRole="Users" ToRole="Privilege_User" />
+          <NavigationProperty Name="UsersProject" Relationship="timetrackerDBModel.FK_UsersProject_User" FromRole="Users" ToRole="UsersProject" />
+        </EntityType>
+        <Association Name="FK_Users_Company">
+          <End Type="timetrackerDBModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Users" Role="Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyId" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ProjectManager_User">
+          <End Type="timetrackerDBModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="timetrackerDBModel.ProjectManager" Role="ProjectManager" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="ProjectManager">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RoleUser_Users">
+          <End Type="timetrackerDBModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="timetrackerDBModel.RolesUsers" Role="RolesUsers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="RolesUsers">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimerUsers">
+          <End Type="timetrackerDBModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="TimeHours">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Privilege_User">
+          <End Type="timetrackerDBModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Privilege_User" Role="Privilege_User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="Privilege_User">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UsersProject_User">
+          <End Type="timetrackerDBModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="timetrackerDBModel.UsersProject" Role="UsersProject" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="UsersProject">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="timetrackerDBModelStoreContainer" CdmEntityContainer="timetrackerDBEntities">
+          <EntitySetMapping Name="Activity">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Activity">
+              <MappingFragment StoreEntitySet="Activity">
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="ActivityName" ColumnName="ActivityName" />
+                <ScalarProperty Name="ProjectId" ColumnName="ProjectId" />
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Area">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Area">
+              <MappingFragment StoreEntitySet="Area">
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="AreaOrder" ColumnName="AreaOrder" />
+                <ScalarProperty Name="AreaIconUrl" ColumnName="AreaIconUrl" />
+                <ScalarProperty Name="AreaLongDesc" ColumnName="AreaLongDesc" />
+                <ScalarProperty Name="AreaShortDesc" ColumnName="AreaShortDesc" />
+                <ScalarProperty Name="AreaTitle" ColumnName="AreaTitle" />
+                <ScalarProperty Name="AreaCode" ColumnName="AreaCode" />
+                <ScalarProperty Name="AreaId" ColumnName="AreaId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Category">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Category">
+              <MappingFragment StoreEntitySet="Category">
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Company">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Company">
+              <MappingFragment StoreEntitySet="Company">
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="Descrip" ColumnName="Descrip" />
+                <ScalarProperty Name="Tittle" ColumnName="Tittle" />
+                <ScalarProperty Name="Icon" ColumnName="Icon" />
+                <ScalarProperty Name="Logo" ColumnName="Logo" />
+                <ScalarProperty Name="ShortName" ColumnName="ShortName" />
+                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Customer">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Customer">
+              <MappingFragment StoreEntitySet="Customer">
+                <ScalarProperty Name="OfficeId" ColumnName="OfficeId" />
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CustomerName" ColumnName="CustomerName" />
+                <ScalarProperty Name="CustomerId" ColumnName="CustomerId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DaysForUse">
+            <EntityTypeMapping TypeName="timetrackerDBModel.DaysForUse">
+              <MappingFragment StoreEntitySet="DaysForUse">
+                <ScalarProperty Name="DayDate" ColumnName="DayDate" />
+                <ScalarProperty Name="DFU" ColumnName="DFU" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DaysUser">
+            <EntityTypeMapping TypeName="timetrackerDBModel.DaysUser">
+              <MappingFragment StoreEntitySet="DaysUser">
+                <ScalarProperty Name="DayObservations" ColumnName="DayObservations" />
+                <ScalarProperty Name="DayDate" ColumnName="DayDate" />
+                <ScalarProperty Name="DayStatus" ColumnName="DayStatus" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GCToken">
+            <EntityTypeMapping TypeName="timetrackerDBModel.GCToken">
+              <MappingFragment StoreEntitySet="GCToken">
+                <ScalarProperty Name="texto" ColumnName="texto" />
+                <ScalarProperty Name="token_type" ColumnName="token_type" />
+                <ScalarProperty Name="scope" ColumnName="scope" />
+                <ScalarProperty Name="expires_in" ColumnName="expires_in" />
+                <ScalarProperty Name="refresh_token" ColumnName="refresh_token" />
+                <ScalarProperty Name="access_token" ColumnName="access_token" />
+                <ScalarProperty Name="idUsuario" ColumnName="idUsuario" />
+                <ScalarProperty Name="idGCToken" ColumnName="idGCToken" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Logs">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Logs">
+              <MappingFragment StoreEntitySet="Logs">
+                <ScalarProperty Name="LogData3" ColumnName="LogData3" />
+                <ScalarProperty Name="LogData2" ColumnName="LogData2" />
+                <ScalarProperty Name="LogData1" ColumnName="LogData1" />
+                <ScalarProperty Name="LogIpAddress" ColumnName="LogIpAddress" />
+                <ScalarProperty Name="LogUserId" ColumnName="LogUserId" />
+                <ScalarProperty Name="LogDate" ColumnName="LogDate" />
+                <ScalarProperty Name="LogAction" ColumnName="LogAction" />
+                <ScalarProperty Name="LogTable" ColumnName="LogTable" />
+                <ScalarProperty Name="LogName" ColumnName="LogName" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MFAMailRequest">
+            <EntityTypeMapping TypeName="timetrackerDBModel.MFAMailRequest">
+              <MappingFragment StoreEntitySet="MFAMailRequest">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="RequestCode" ColumnName="RequestCode" />
+                <ScalarProperty Name="RequestDate" ColumnName="RequestDate" />
+                <ScalarProperty Name="MFAMailRequestId" ColumnName="MFAMailRequestId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Module">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Module">
+              <MappingFragment StoreEntitySet="Module">
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="ModuleOrder" ColumnName="ModuleOrder" />
+                <ScalarProperty Name="ModuleIconUrl" ColumnName="ModuleIconUrl" />
+                <ScalarProperty Name="ModuleLongDesc" ColumnName="ModuleLongDesc" />
+                <ScalarProperty Name="ModuleShortDesc" ColumnName="ModuleShortDesc" />
+                <ScalarProperty Name="ModuleTitle" ColumnName="ModuleTitle" />
+                <ScalarProperty Name="ModuleCode" ColumnName="ModuleCode" />
+                <ScalarProperty Name="AreaId" ColumnName="AreaId" />
+                <ScalarProperty Name="ModuleId" ColumnName="ModuleId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Office">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Office">
+              <MappingFragment StoreEntitySet="Office">
+                <ScalarProperty Name="active" ColumnName="active" />
+                <ScalarProperty Name="OfficeDescription" ColumnName="OfficeDescription" />
+                <ScalarProperty Name="OfficeId" ColumnName="OfficeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Pages">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Pages">
+              <MappingFragment StoreEntitySet="Pages">
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="Visible" ColumnName="Visible" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="PageTypeId" ColumnName="PageTypeId" />
+                <ScalarProperty Name="ModuleId" ColumnName="ModuleId" />
+                <ScalarProperty Name="AreaId" ColumnName="AreaId" />
+                <ScalarProperty Name="PageHelpUrl" ColumnName="PageHelpUrl" />
+                <ScalarProperty Name="PageLongDesc" ColumnName="PageLongDesc" />
+                <ScalarProperty Name="PageShortDesc" ColumnName="PageShortDesc" />
+                <ScalarProperty Name="PageTitle" ColumnName="PageTitle" />
+                <ScalarProperty Name="PageUrl" ColumnName="PageUrl" />
+                <ScalarProperty Name="PageIdAccess" ColumnName="PageIdAccess" />
+                <ScalarProperty Name="PageId" ColumnName="PageId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PageType">
+            <EntityTypeMapping TypeName="timetrackerDBModel.PageType">
+              <MappingFragment StoreEntitySet="PageType">
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="PageTypeIconUrl" ColumnName="PageTypeIconUrl" />
+                <ScalarProperty Name="PageTypeLongDesc" ColumnName="PageTypeLongDesc" />
+                <ScalarProperty Name="PageTypeShortDesc" ColumnName="PageTypeShortDesc" />
+                <ScalarProperty Name="PageTypeTitle" ColumnName="PageTypeTitle" />
+                <ScalarProperty Name="PageTypeId" ColumnName="PageTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Privilege">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Privilege">
+              <MappingFragment StoreEntitySet="Privilege">
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="PrivilegeDescrip" ColumnName="PrivilegeDescrip" />
+                <ScalarProperty Name="PrivilegeParent" ColumnName="PrivilegeParent" />
+                <ScalarProperty Name="PrivilegeId" ColumnName="PrivilegeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Project">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Project">
+              <MappingFragment StoreEntitySet="Project">
+                <ScalarProperty Name="color" ColumnName="color" />
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="ProjectName" ColumnName="ProjectName" />
+                <ScalarProperty Name="CustomerId" ColumnName="CustomerId" />
+                <ScalarProperty Name="ProjectId" ColumnName="ProjectId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProjectManager">
+            <EntityTypeMapping TypeName="timetrackerDBModel.ProjectManager">
+              <MappingFragment StoreEntitySet="ProjectManager">
+                <ScalarProperty Name="ProjectId" ColumnName="ProjectId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="ProjectManagerId" ColumnName="ProjectManagerId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Roles">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Roles">
+              <MappingFragment StoreEntitySet="Roles">
+                <ScalarProperty Name="ModifyDate" ColumnName="ModifyDate" />
+                <ScalarProperty Name="ModifyUser" ColumnName="ModifyUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="RoleActive" ColumnName="RoleActive" />
+                <ScalarProperty Name="RoleComment" ColumnName="RoleComment" />
+                <ScalarProperty Name="RoleDescription" ColumnName="RoleDescription" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RolesPrivileges">
+            <EntityTypeMapping TypeName="timetrackerDBModel.RolesPrivileges">
+              <MappingFragment StoreEntitySet="RolesPrivileges">
+                <ScalarProperty Name="PrivilegeId" ColumnName="PrivilegeId" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="RolePrivId" ColumnName="RolePrivId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RolesUsers">
+            <EntityTypeMapping TypeName="timetrackerDBModel.RolesUsers">
+              <MappingFragment StoreEntitySet="RolesUsers">
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="RoleUserId" ColumnName="RoleUserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TimeHours">
+            <EntityTypeMapping TypeName="timetrackerDBModel.TimeHours">
+              <MappingFragment StoreEntitySet="TimeHours">
+                <ScalarProperty Name="GCalendarId" ColumnName="GCalendarId" />
+                <ScalarProperty Name="THours" ColumnName="THours" />
+                <ScalarProperty Name="ApprovalNote" ColumnName="ApprovalNote" />
+                <ScalarProperty Name="Visible" ColumnName="Visible" />
+                <ScalarProperty Name="TaskAllocation" ColumnName="TaskAllocation" />
+                <ScalarProperty Name="InternalNote" ColumnName="InternalNote" />
+                <ScalarProperty Name="DayApproved" ColumnName="DayApproved" />
+                <ScalarProperty Name="DayStatus" ColumnName="DayStatus" />
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+                <ScalarProperty Name="Billable" ColumnName="Billable" />
+                <ScalarProperty Name="Exported" ColumnName="Exported" />
+                <ScalarProperty Name="ActDescription" ColumnName="ActDescription" />
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+                <ScalarProperty Name="ProjectId" ColumnName="ProjectId" />
+                <ScalarProperty Name="CustomerId" ColumnName="CustomerId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="Duration" ColumnName="Duration" />
+                <ScalarProperty Name="THTo" ColumnName="THTo" />
+                <ScalarProperty Name="THFrom" ColumnName="THFrom" />
+                <ScalarProperty Name="THDate" ColumnName="THDate" />
+                <ScalarProperty Name="TimeHoursId" ColumnName="TimeHoursId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UsersProject">
+            <EntityTypeMapping TypeName="timetrackerDBModel.UsersProject">
+              <MappingFragment StoreEntitySet="UsersProject">
+                <ScalarProperty Name="ProjectId" ColumnName="ProjectId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="UsersProjectId" ColumnName="UsersProjectId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Privilege_User">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Privilege_User">
+              <MappingFragment StoreEntitySet="Privilege_User">
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="PrivilegeId" ColumnName="PrivilegeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="temppagetype">
+            <EntityTypeMapping TypeName="timetrackerDBModel.temppagetype">
+              <MappingFragment StoreEntitySet="temppagetype">
+                <ScalarProperty Name="CreateUser" ColumnName="CreateUser" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="PageTypeIconUrl" ColumnName="PageTypeIconUrl" />
+                <ScalarProperty Name="PageTypeLongDesc" ColumnName="PageTypeLongDesc" />
+                <ScalarProperty Name="PageTypeShortDesc" ColumnName="PageTypeShortDesc" />
+                <ScalarProperty Name="PageTypeTitle" ColumnName="PageTypeTitle" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="view_menu">
+            <EntityTypeMapping TypeName="timetrackerDBModel.view_menu">
+              <MappingFragment StoreEntitySet="view_menu">
+                <ScalarProperty Name="PageUrl" ColumnName="PageUrl" />
+                <ScalarProperty Name="PageTitle" ColumnName="PageTitle" />
+                <ScalarProperty Name="PageTypeIconUrl" ColumnName="PageTypeIconUrl" />
+                <ScalarProperty Name="PageTypeTitle" ColumnName="PageTypeTitle" />
+                <ScalarProperty Name="PageTypeId" ColumnName="PageTypeId" />
+                <ScalarProperty Name="ModuleOrder" ColumnName="ModuleOrder" />
+                <ScalarProperty Name="ModuleIconUrl" ColumnName="ModuleIconUrl" />
+                <ScalarProperty Name="ModuleTitle" ColumnName="ModuleTitle" />
+                <ScalarProperty Name="ModuleShortDesc" ColumnName="ModuleShortDesc" />
+                <ScalarProperty Name="PageId" ColumnName="PageId" />
+                <ScalarProperty Name="ModuleId" ColumnName="ModuleId" />
+                <ScalarProperty Name="AreaId" ColumnName="AreaId" />
+                <ScalarProperty Name="PageLongDesc" ColumnName="PageLongDesc" />
+                <ScalarProperty Name="PageShortDesc" ColumnName="PageShortDesc" />
+                <ScalarProperty Name="AreaOrder" ColumnName="AreaOrder" />
+                <ScalarProperty Name="AreaIconUrl" ColumnName="AreaIconUrl" />
+                <ScalarProperty Name="AreaTitle" ColumnName="AreaTitle" />
+                <ScalarProperty Name="AreaLongDesc" ColumnName="AreaLongDesc" />
+                <ScalarProperty Name="AreaShortDesc" ColumnName="AreaShortDesc" />
+                <ScalarProperty Name="PageIdAccess" ColumnName="PageIdAccess" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="viewPMUser">
+            <EntityTypeMapping TypeName="timetrackerDBModel.viewPMUser">
+              <MappingFragment StoreEntitySet="viewPMUser">
+                <ScalarProperty Name="ProjectId" ColumnName="ProjectId" />
+                <ScalarProperty Name="exits" ColumnName="exits" />
+                <ScalarProperty Name="IsSuperUser" ColumnName="IsSuperUser" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="AccessFailedCount" ColumnName="AccessFailedCount" />
+                <ScalarProperty Name="LockoutEnable" ColumnName="LockoutEnable" />
+                <ScalarProperty Name="LockoutEndDate" ColumnName="LockoutEndDate" />
+                <ScalarProperty Name="SecurityStamp" ColumnName="SecurityStamp" />
+                <ScalarProperty Name="PasswordCry" ColumnName="PasswordCry" />
+                <ScalarProperty Name="EmailConfirmed" ColumnName="EmailConfirmed" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="database_firewall_rules">
+            <EntityTypeMapping TypeName="timetrackerDBModel.database_firewall_rules">
+              <MappingFragment StoreEntitySet="database_firewall_rules">
+                <ScalarProperty Name="modify_date" ColumnName="modify_date" />
+                <ScalarProperty Name="create_date" ColumnName="create_date" />
+                <ScalarProperty Name="end_ip_address" ColumnName="end_ip_address" />
+                <ScalarProperty Name="start_ip_address" ColumnName="start_ip_address" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="view_DaysUserStatus">
+            <EntityTypeMapping TypeName="timetrackerDBModel.view_DaysUserStatus">
+              <MappingFragment StoreEntitySet="view_DaysUserStatus">
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="DayObservations" ColumnName="DayObservations" />
+                <ScalarProperty Name="DayDate" ColumnName="DayDate" />
+                <ScalarProperty Name="DayStatus" ColumnName="DayStatus" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="THDate" ColumnName="THDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="timetrackerDBModel.Users">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="FactorEndDate" ColumnName="FactorEndDate" />
+                <ScalarProperty Name="ProfilePict" ColumnName="ProfilePict" />
+                <ScalarProperty Name="IsSuperUser" ColumnName="IsSuperUser" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="AccessFailedCount" ColumnName="AccessFailedCount" />
+                <ScalarProperty Name="LockoutEnable" ColumnName="LockoutEnable" />
+                <ScalarProperty Name="LockoutEndDate" ColumnName="LockoutEndDate" />
+                <ScalarProperty Name="SecurityStamp" ColumnName="SecurityStamp" />
+                <ScalarProperty Name="PasswordCry" ColumnName="PasswordCry" />
+                <ScalarProperty Name="EmailConfirmed" ColumnName="EmailConfirmed" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

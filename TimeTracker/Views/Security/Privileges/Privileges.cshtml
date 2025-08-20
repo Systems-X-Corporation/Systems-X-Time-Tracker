@@ -1,0 +1,32 @@
+﻿
+
+@{
+    ViewBag.Title = "Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="card">
+    <div class="card-header">
+
+        Roles
+
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                @Html.Action("GetCboRoles", "System")
+            </div>
+        </div>
+        
+
+    </div>
+</div>
+
+
+<div id="Treecontainer" style="min-height:500px">
+
+</div>
+
+<script src="~/Scripts/Security/Privileges.js"></script>

@@ -1,0 +1,34 @@
+﻿<table>
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+
+        
+        <tr>
+            <td>Week </td>
+            <td>@item.CustomerName</td>
+
+            <td>
+                <div class="dropdown">
+                    <a class="btn btn-link font-24 p-0 line-height-1  dropdown-toggle"
+                       href="#" role="button" data-toggle="dropdown">
+                        <i class="icon-copy bi bi-gear-fill"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                        <a class="dropdown-item btnEditCustomer" CustomerId="@item.CustomerId" data-toggle="modal" data-target="#modalEditCustomer" href="#"><i class="dw dw-edit2"></i> Edit</a>
+                        <a class="dropdown-item btnDeleteCustomer" CustomerId="@item.CustomerId" CustomerName="@item.CustomerName" href="#"><i class="dw dw-delete-3"></i> Delete</a>
+                    </div>
+                </div>
+
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

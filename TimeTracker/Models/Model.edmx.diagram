@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="2a13e97d38ad4541b29c2e713e326594" Name="Diagram1">
+        <EntityTypeShape EntityType="timetrackerDBModel.Activity" Width="1.5" PointX="8.25" PointY="0.75" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Area" Width="1.5" PointX="10.75" PointY="2.375" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Category" Width="1.5" PointX="6" PointY="16.875" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Company" Width="1.5" PointX="0.75" PointY="9.25" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Customer" Width="1.5" PointX="3.75" PointY="2.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.DaysForUse" Width="1.5" PointX="10.75" PointY="11.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.DaysUser" Width="1.5" PointX="12.75" PointY="11.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.GCToken" Width="1.5" PointX="10.75" PointY="14.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Logs" Width="1.5" PointX="12.75" PointY="14.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.MFAMailRequest" Width="1.5" PointX="14.75" PointY="11.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Module" Width="1.5" PointX="13" PointY="2.375" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Office" Width="1.5" PointX="1.5" PointY="3.125" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Pages" Width="1.5" PointX="15.25" PointY="1.875" />
+        <EntityTypeShape EntityType="timetrackerDBModel.PageType" Width="1.5" PointX="13" PointY="7.75" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Privilege" Width="1.5" PointX="3" PointY="19.875" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Project" Width="1.5" PointX="6" PointY="2.25" />
+        <EntityTypeShape EntityType="timetrackerDBModel.ProjectManager" Width="1.5" PointX="5.25" PointY="10" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Roles" Width="1.5" PointX="3" PointY="15.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.RolesPrivileges" Width="1.5" PointX="5.25" PointY="20.875" />
+        <EntityTypeShape EntityType="timetrackerDBModel.RolesUsers" Width="1.5" PointX="5.25" PointY="7" />
+        <EntityTypeShape EntityType="timetrackerDBModel.TimeHours" Width="1.5" PointX="8.25" PointY="8" />
+        <EntityTypeShape EntityType="timetrackerDBModel.UsersProject" Width="1.5" PointX="8.25" PointY="5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Privilege_User" Width="1.5" PointX="5.25" PointY="13" />
+        <EntityTypeShape EntityType="timetrackerDBModel.temppagetype" Width="1.5" PointX="14.75" PointY="14.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.view_menu" Width="1.5" PointX="16.75" PointY="10.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.viewPMUser" Width="1.5" PointX="14.75" PointY="17.5" />
+        <EntityTypeShape EntityType="timetrackerDBModel.database_firewall_rules" Width="1.5" PointX="16.75" PointY="16.5" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Activity_Project" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Module_Area" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Page_Area" />
+        <AssociationConnector Association="timetrackerDBModel.FK_TimeCategory" />
+        <AssociationConnector Association="timetrackerDBModel.FK_CustomerOffice" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Project_Customer" />
+        <AssociationConnector Association="timetrackerDBModel.FK_TimerCustomer" />
+        <AssociationConnector Association="timetrackerDBModel.FK_paginaN_modulo" />
+        <AssociationConnector Association="timetrackerDBModel.FK_paginaN_tipo_pagina" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Privilege_User_Action" />
+        <AssociationConnector Association="timetrackerDBModel.FK_RolePriv_Privilege" />
+        <AssociationConnector Association="timetrackerDBModel.FK_ProjectManager_Project" />
+        <AssociationConnector Association="timetrackerDBModel.FK_TimerProject" />
+        <AssociationConnector Association="timetrackerDBModel.FK_UsersProject_Project" />
+        <AssociationConnector Association="timetrackerDBModel.FK_RolePriv_Roles" />
+        <AssociationConnector Association="timetrackerDBModel.FK_RoleUser_Roles" />
+        <EntityTypeShape EntityType="timetrackerDBModel.view_DaysUserStatus" Width="1.5" PointX="17.375" PointY="0.75" />
+        <EntityTypeShape EntityType="timetrackerDBModel.Users" Width="1.5" PointX="3" PointY="8.375" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Users_Company" />
+        <AssociationConnector Association="timetrackerDBModel.FK_ProjectManager_User" />
+        <AssociationConnector Association="timetrackerDBModel.FK_RoleUser_Users" />
+        <AssociationConnector Association="timetrackerDBModel.FK_TimerUsers" />
+        <AssociationConnector Association="timetrackerDBModel.FK_Privilege_User" />
+        <AssociationConnector Association="timetrackerDBModel.FK_UsersProject_User" />
+        </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

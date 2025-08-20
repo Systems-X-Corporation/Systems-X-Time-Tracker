@@ -1,0 +1,149 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    TimeTracker.Controllers.OAuthController oAuthController = new TimeTracker.Controllers.OAuthController();
+
+}
+
+
+<div class="content-body">
+    <!-- Basic form layout section start -->
+    <section id="horizontal-form-layouts">
+        <div class="row">
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title" id="horz-layout-basic">User</h4>
+                        <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+                        <div class="heading-elements">
+                            <ul class="list-inline mb-0">
+                                <li><a data-action="collapse"><i class="ft-minus"></i></a></li>
+                                <li><a data-action="reload"><i class="ft-rotate-cw"></i></a></li>
+                                <li><a data-action="expand"><i class="ft-maximize"></i></a></li>
+                                @*<li><a data-action="close"><i class="ft-x"></i></a></li>*@
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-content collpase show">
+                        <div class="card-body">
+                            <div class="card-text">
+                                @*<p>This is the basic horizontal form with labels on left and form controls on right in one line. Add <code>.form-horizontal</code> class to the form tag to have horizontal form styling. To define form sections use <code>form-section</code> class with any heading tags.</p>*@
+                            </div>
+                            @*@using (Ajax.BeginForm("SaveProfile", "UserAccount", null, new AjaxOptions()
+                            { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccess", InsertionMode = InsertionMode.ReplaceWith }, new { enctype = "multipart/form-data", @id = "NewFileFormID" }))*@
+
+
+
+                            @using (Html.BeginForm("SaveProfile", "UserAccount",FormMethod.Post, new { enctype = "multipart/form-data", id = "myform" }))
+                            {
+                                <input type="hidden" id="userId" name="userId" value="@Model[0].UserId" />
+                                <div class="form-body">
+                                    <h4 class="form-section"><i class="ft-user"></i> User Information</h4>
+                                    <div class="form-group row">
+
+                                        <div class="col-md-9 mx-auto">
+                                            <label for="projectinput1">First Name</label>
+                                            <input type="text" id="fname" class="form-control" placeholder="First Name" name="fname" value="@Model[0].FirstName" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+
+                                        <div class="col-md-9 mx-auto">
+                                            <label for="projectinput2">Last Name</label>
+                                            <input type="text" id="lname" class="form-control" placeholder="Last Name" name="lname" value="@Model[0].LastName" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-9 mx-auto">
+                                            <label for="projectinput3">E-mail</label>
+                                            <input type="text" id="email" class="form-control" placeholder="E-mail" name="email" value="@Model[0].Email" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-9 mx-auto">
+                                            <label for="projectinput3">Username</label>
+                                            <input type="text" id="username" class="form-control" placeholder="Username" name="username" value="@Model[0].UserName" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-9 mx-auto">
+                                            <label for="projectinput3">Profile photo</label> <br />
+                                            <input type="file" name="profilePhoto" accept="image/png, image/gif, image/jpeg"> <br />
+                                            <p>Your profile picture will display at 52 x 52px. A 320 x 320px image will ensure it looks good across all devices. Keep the aspect ratio to 1:1.</p>
+                                        </div>
+                                       
+                                    </div>
+
+                                    @{if (ViewBag.MsgProfile != null)
+                                        {
+                                            <div class="alert alert-success mb-2" role="alert">
+                                                @ViewBag.MsgProfile
+                                            </div>
+                                        } }
+                                    <div class="form-actions">
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="la la-check-square-o"></i> Save
+                                        </button>
+                                    </div>
+                                </div>
+
+
+                            }
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title" id="horz-layout-basic">Google Calendar</h4>
+                        <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
+
+                    </div>
+                    <div class="card-content collpase show">
+                        <div class="card-body">
+                            <div class="form-body">
+
+                                Connect with Google Calendar:
+                                @if (oAuthController.IsConnected(@Model[0].UserId))
+                                {
+                                    <button onclick="location.href = '@Url.Action("OauthRedirect","OAuth")'" class="btn btn-secondary">
+                                        Re-connect
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button onclick="location.href = '@Url.Action("OauthRedirect","OAuth")'" class="btn btn-primary">
+                                        Connect
+                                    </button>
+                                }
+
+                                <br />
+
+                                Sync Google Calendar:  <button id="btnSync" class="btn btn-primary">
+                                    Sync
+
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- // Basic form layout section end -->
+</div>
+
+
+<script src="~/Scripts/Security/UserProfile.js"></script>

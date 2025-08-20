@@ -1,0 +1,15 @@
+﻿
+
+@{
+    List<TimeTracker.Models.Roles> roles = Model;
+}
+
+
+<select class="custom-select2 form-control" id="cboRoleId" name="cboRoleId" style="width: 100%; height: 38px">
+    @foreach (var item in roles)
+    {
+        <option value="@item.RoleId">@item.RoleDescription</option>
+    }
+
+</select>
+

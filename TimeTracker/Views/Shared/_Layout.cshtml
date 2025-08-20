@@ -1,0 +1,227 @@
+﻿@using System.Web.Optimization
+
+
+@if (Request.IsAuthenticated)
+{
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <!-- Basic Page Info -->
+        <meta charset="utf-8" />
+        <title>Time Tracker</title>
+
+
+
+        <!-- Mobile Specific Metas -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <link rel="icon" type="image/x-icon" href="~/Content/img/W_Timer.png">
+        <!-- Google Font -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/core.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/icon-font.min.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/src/plugins/datatables/css/dataTables.bootstrap4.min.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/src/plugins/datatables/css/responsive.bootstrap4.min.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/src/plugins/jquery-asColorPicker/dist/css/asColorPicker.css" />
+
+        <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/style.css" />
+
+        <link href="~/Content/src/plugins/select2/dist/css/select2.css" rel="stylesheet" />
+        @*<link href="~/Content/src/plugins/fullcalendar/fullcalendar.css" rel="stylesheet" />*@
+
+        @*<script src="~/Content/js/plugins/jquery/jquery-3.3.1.js"></script>*@
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+
+        <link href="~/Content/DualListbox/bootstrap-duallistbox.css" rel="stylesheet" />
+        <link href="~/Content/plugins/jquery-ui/jquery-ui.css" rel="stylesheet" />
+
+
+        @Html.DevExpress().GetStyleSheets(
+     new StyleSheet { ExtensionSuite = ExtensionSuite.TreeList },
+     new StyleSheet { ExtensionSuite = ExtensionSuite.GridView }
+)
+
+
+
+
+        @Html.DevExpress().GetScripts(
+               new Script { ExtensionSuite = ExtensionSuite.TreeList },
+                   new Script { ExtensionSuite = ExtensionSuite.GridView }
+       )
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+
+        <script src="~/Content/plugins/jquery-ui/jquery-ui.js"></script>
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.1/index.global.min.js'></script>
+    </head>
+
+    <body>
+
+        <div id="navbardiv">
+            @Html.Action("Navbar", "System", new { userData = User.Identity.Name })
+        </div>
+        <div> @Html.Action("Sidebar", "System", new { userData = User.Identity.Name })  </div>
+
+
+        <div class="main-container">
+            <div class="pd-ltr-20 xs-pd-20-10">
+                <div class="min-height-200px">
+                    @if (ViewBag.page != null)
+                    {
+                        @Html.Partial("~/Views/Shared/PageHeader.cshtml")
+                    }
+
+
+                    @RenderBody()
+
+
+                    <div class="modal  text-left" id="default" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel1">Change Password</h4>
+                                    @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>*@
+                                </div>
+                                <div class="modal-body">
+                                    <h5>You need to change the password</h5>
+
+                                    @using (Html.BeginForm("ChangePassFirst", "UserAccount", FormMethod.Post, new { @class = "form-horizontal form-simple" }))
+                                    {
+                                        <div class="form-body">
+                                            <h4 class="form-section"><i class="ft-lock"></i> Password</h4>
+                                            <div class="form-group row">
+                                                <div class="col-md-9 mx-auto">
+                                                    <label for="projectinput5">Current Password</label>
+                                                    <input type="password" id="current-password" class="form-control" placeholder="Current Password" name="current-password" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-md-9 mx-auto">
+                                                    <label for="projectinput6">New Password</label>
+                                                    <input type="password" id="new-password" class="form-control" placeholder="New Password" name="new-password" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-md-9 mx-auto">
+                                                    <label for="projectinput7">Confirm New Password</label>
+                                                    <input type="password" id="confirm-password" class="form-control" placeholder="Confirm New Password" name="confirm-password" required>
+                                                    <span id="message"></span>
+                                                </div>
+                                            </div>
+                                            @{
+                                                if (ViewBag.MsgPass != null)
+                                                {
+                                                    <div class="alert alert-success mb-2" role="alert">
+                                                        @ViewBag.MsgPass
+                                                    </div>
+                                                }
+                                                if (ViewBag.MsgPassW != null)
+                                                {
+                                                    <div class="alert alert-danger mb-2" role="alert">
+                                                        @ViewBag.MsgPassW
+                                                    </div>
+                                                }
+                                            }
+                                            <div class="row">
+                                                <div class="col-md-3 mx-auto">
+                                                    <button type="submit" class="btn btn-primary" id="submit-pass" disabled>
+                                                        <i class="la la-check-square-o"></i> Save
+                                                    </button>
+                                                </div>
+                                                <div class="col-md- mx-auto">
+                                                    <a href="@Url.Action("LogOut","UserAccount")" class="btn btn-light waves-effect waves-light">
+                                                        <i class="ft-power"></i> Log Out
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                  
+                    @* @Html.Action("Footer", "System", User.Identity.Name)*@
+
+                </div>
+
+
+            </div>
+        </div>
+
+        @Html.DevExpress().LoadingPanel(
+    settings =>
+    {
+        settings.Name = "LoadingPanel";
+        settings.Modal = true;
+        settings.ContainerElementID = true ? "Panel" : "";
+    }
+    ).GetHtml()
+
+
+
+
+      @*  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>*@
+
+
+        <script src="~/Content/vendors/scripts/core.js"></script>
+        <script src="~/Content/vendors/scripts/script.min.js"></script>
+        <script src="~/Content/vendors/scripts/process.js"></script>
+        <script src="~/Content/vendors/scripts/layout-settings.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/dataTables.responsive.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
+        @*<script src="~/Content/vendors/scripts/dashboard3.js"></script>*@
+        <script src="~/Content/src/scripts/setting.js"></script>
+        <!-- buttons for Export datatable -->
+        @*<script src="~/Content/src/plugins/datatables/js/dataTables.buttons.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/buttons.bootstrap4.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/buttons.print.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/buttons.html5.min.js"></script>
+        <script src="~/Content/src/plugins/datatables/js/buttons.flash.min.js"></script>*@
+        @*<script src="~/Content/src/plugins/datatables/js/pdfmake.min.js"></script>*@
+        <script src="~/Content/src/plugins/datatables/js/vfs_fonts.js"></script>
+        <!-- Datatable Setting js -->
+        <script src="~/Content/vendors/scripts/datatable-setting.js"></script>
+        <script src="~/Content/src/plugins/select2/dist/js/select2.js"></script>
+
+        <script src="~/Content/src/plugins/jquery-asColor/dist/jquery-asColor.js"></script>
+        <script src="~/Content/src/plugins/jquery-asGradient/dist/jquery-asGradient.js"></script>
+        <script src="~/Content/src/plugins/jquery-asColorPicker/jquery-asColorPicker.js"></script>
+        <script src="~/Content/vendors/scripts/colorpicker.js"></script>
+        <script src="~/Content/DualListbox/jquery.bootstrap-duallistbox.js"></script>
+
+        <script src="~/Content/vendors/scripts/advanced-components.js"></script>
+        <script src="~/Content/vendors/scripts/script.js"></script>
+        @*<script src="~/Content/src/plugins/fullcalendar/fullcalendar.min.js"></script>*@
+        @*<script src="~/Content/vendors/scripts/calendar-setting.js"></script>*@
+        <script src="~/Scripts/Shared/global.js"></script>
+
+
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+       
+    </body>
+</html>
+
+
+}
+else
+{
+if (!Response.IsRequestBeingRedirected)
+{
+    Response.Redirect("~/Login");
+    //Html.RenderAction("Login", "UserAccount");
+    //Response.Redirect("~/Login.aspx");
+}
+}
+
+
+

@@ -1,0 +1,117 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Basic Page Info -->
+    <meta charset="utf-8" />
+    <title>Login | Time Tracker</title>
+
+    <!-- Site favicon -->
+    <link rel="icon" type="image/x-icon" href="~/Content/img/W_Timer.png">
+
+    <!-- Mobile Specific Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/core.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/icon-font.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/style.css" />
+
+    <style>
+        .dw-eye:hover {
+            background-color: darkblue;
+            cursor: pointer;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+</head>
+<body class="login-page">
+
+    <div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-lg-7">
+                    <img src="~/Content/vendors/images/login-page-img.png" alt="" />
+                </div>
+                <div class="col-md-12 col-lg-5">
+                    <div class="login-box bg-white box-shadow border-radius-10">
+                        <div class="login-title">
+                            <h2 class="text-center text-primary">Login To Time Tracker</h2>
+                        </div>
+
+                        @using (Html.BeginForm("LogAction", "UserAccount", FormMethod.Post, new { @class = "form-horizontal form-simple" }))
+                        {
+
+                            <div class="input-group custom">
+                                <input type="text" id="user-name" name="user-name"
+                                       class="form-control form-control-lg"
+                                       placeholder="Username" required />
+                                <div class="input-group-append custom">
+                                    <span class="input-group-text">
+                                        <i class="icon-copy dw dw-user1"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="input-group custom">
+                                <input type="password" id="user-password" name="user-password"
+                                       class="form-control form-control-lg"
+                                       placeholder="**********" required />
+                                <div class="input-group-append custom">
+                                    <span class="input-group-text">
+                                        <i class="dw dw-eye" id="showpass" data-text="Show password" ></i> &nbsp;
+                                        <i class="dw dw-padlock1"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row pb-30">
+
+                                <div class="col-12">
+                                    <div class="forgot-password">
+                                        <a href="@Url.Action("RecoverPassword","UserAccount")">Forgot Password</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="input-group mb-0">
+
+
+                                        <input class="btn btn-primary btn-lg btn-block" type="submit" value="Sign In">
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+</html>
+
+<!-- welcome modal end -->
+<!-- js -->
+<script src="~/Content/vendors/scripts/core.js"></script>
+<script src="~/Content/vendors/scripts/script.min.js"></script>
+<script src="~/Content/vendors/scripts/process.js"></script>
+<script src="~/Content/vendors/scripts/layout-settings.js"></script>
+
+
+
+<script src="~/Scripts/Security/Login.js"></script>
+
+
+

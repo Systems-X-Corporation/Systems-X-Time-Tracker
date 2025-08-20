@@ -1,0 +1,93 @@
+﻿@using TimeTracker.Models;
+@{
+    List<WeekDetail> weekDetails = Model;
+}
+
+
+<div class="table-responsive">
+    <table id="week-list" class="table table-white-space table-bordered row-grouping display no-wrap icheck table-middle">
+        <thead>
+            <tr>
+
+                <th>Activity</th>
+                @*<th>Billeable</th>*@
+                <th>Description</th>
+                <th>@ViewBag.mon</th>
+                <th>@ViewBag.tue</th>
+                <th>@ViewBag.wed</th>
+                <th>@ViewBag.thu</th>
+                <th>@ViewBag.fri</th>
+                <th>Action</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @{ if (Model.Count > 0)
+                {
+                    foreach (var item in weekDetails)
+                    {
+                        <tr>
+                            <td>@Html.Action("GetCboAllActivity", "System", new { id = item.ActivityId })</td>
+                            <td><input type="text" name="name" value="@item.ActDescription" /></td>
+                            <td>
+                                @Html.Action("GetCboHours", "System", new { id = item.Mon })
+                            </td>
+                            <td>
+                                @Html.Action("GetCboHours", "System", new { id = item.Tue })
+                            </td>
+                            <td>
+                                @Html.Action("GetCboHours", "System", new { id = item.Wed })
+                            </td>
+                            <td>
+                                @Html.Action("GetCboHours", "System", new { id = item.Thu })
+                            </td>
+                            <td>
+                                @Html.Action("GetCboHours", "System", new { id = item.Fri })
+                            </td>
+                            <td> <a class="dropdown-item btnDelete" href="#"><i class="dw dw-delete-3"></i></a></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+
+                        <td>
+
+                            @Html.Action("GetCboAllActivity", "System")
+
+                        </td>
+                        <td><input type="text" name="name" value="" /></td>
+                        <td>
+                            @Html.Action("GetCboHours", "System")
+                        </td>
+                        <td>
+                            @Html.Action("GetCboHours", "System")
+                        </td>
+                        <td>
+                            @Html.Action("GetCboHours", "System")
+                        </td>
+                        <td>
+                            @Html.Action("GetCboHours", "System")
+                        </td>
+                        <td>
+                            @Html.Action("GetCboHours", "System")
+                        </td>
+                        <td> <a class="dropdown-item btnDelete" href="#"><i class="dw dw-delete-3"></i></a></td>
+
+                    </tr>
+                }
+            }
+
+
+
+        </tbody>
+
+    </table>
+
+
+
+</div>
+
+
+

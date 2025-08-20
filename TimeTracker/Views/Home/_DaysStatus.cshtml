@@ -1,0 +1,73 @@
+﻿
+
+@{ 
+    decimal total = 0;
+}
+
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix mb-20">
+        <div class="pull-left">
+            <h4 class="text-lime h4">Daily Status</h4>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="tblDaysStatus" class="table data-table table-white-space table-bordered row-grouping display no-wrap icheck table-middle">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Day Hours</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    total = total + item.quantity;
+
+                    <tr>
+                        <td>@item.THDate.ToShortDateString() </td>
+                        <td>@item.quantity </td>
+                        @if (item.DayStatus != null)
+                        {
+                            <td>@item.DayStatus</td>
+                        }
+                        else
+                        {
+                            <td>
+                                <div class="dropdown">
+                                    <a class="btn btn-link font-24 p-0 line-height-1  dropdown-toggle"
+                                       href="#" role="button" data-toggle="dropdown">
+                                        <i class="icon-copy bi bi-gear-fill"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                        <a class="dropdown-item btnSendApproval" DayDate="@item.THDate.ToShortDateString()" href="#"><i class="dw dw-paper-plane1"></i> Send for Approval</a>
+                                    </div>
+                                </div>
+
+                            </td>
+
+
+
+                        }
+
+
+
+
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total Hours</td>
+                    <td>@total</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+    </div>
+</div>
+
+

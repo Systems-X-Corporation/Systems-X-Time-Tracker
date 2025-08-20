@@ -1,0 +1,72 @@
+﻿@using TimeTracker.Models
+
+@{
+    List<view_menu> list = Model;
+
+    var areaList = list.GroupBy(x => x.AreaId).Select(x => x.First());
+
+    var moduleList = list.GroupBy(x => x.ModuleId).Select(x => x.First());
+
+}
+
+
+
+
+<div class="left-side-bar">
+    <div class="brand-logo">
+        <a href="/Home">
+            
+           Time Tracker
+        </a>
+        <div class="close-sidebar" data-toggle="left-sidebar-close">
+            <i class="ion-close-round"></i>
+        </div>
+    </div>
+    <div class="menu-block customscroll">
+        <div class="sidebar-menu">
+            <ul id="accordion-menu">
+
+                @foreach (var area in areaList.OrderBy(x => x.AreaOrder))
+                {
+                    <li>
+                        <div class="sidebar-small-cap">@area.AreaShortDesc</div>
+                    </li>
+
+                    foreach (var modulo in moduleList.OrderBy(x => x.ModuleOrder))
+                    {
+                        if (area.AreaId == modulo.AreaId)
+                        {
+                            <li class="dropdown">
+                                <a href="javascript:;" class="dropdown-toggle">
+                                    @*<span class="@modulo.ModuleIconUrl"></span>*@
+                                    <img style=" max-height:28px; max-width:28px;" src="@modulo.ModuleIconUrl" alt="Icon 2">
+                                    <span class="mtext">@modulo.ModuleTitle</span>
+                                </a>
+                           
+
+
+                                <ul class="submenu">
+                                    @foreach (var page in list)
+                                    {
+                                        if (page.ModuleId == modulo.ModuleId)
+                                        {
+                                            <li><a href="@page.PageUrl">@page.PageTitle</a></li>
+
+                                           
+                                        }
+                                    }
+                                </ul>
+
+
+                            </li>
+                            }
+                            }
+                            }
+                        </ul>
+
+        </div>
+    </div>
+</div>
+
+
+

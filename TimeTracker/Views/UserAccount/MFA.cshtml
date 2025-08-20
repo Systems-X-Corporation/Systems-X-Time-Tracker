@@ -1,0 +1,149 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Basic Page Info -->
+    <meta charset="utf-8" />
+    <title>Login | Time Tracker</title>
+
+    <!-- Site favicon -->
+    <link rel="icon" type="image/x-icon" href="~/Content/img/W_Timer.png">
+
+    <!-- Mobile Specific Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/core.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/icon-font.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/vendors/styles/style.css" />
+
+    @Html.DevExpress().GetStyleSheets(
+new StyleSheet { ExtensionSuite = ExtensionSuite.TreeList },
+new StyleSheet { ExtensionSuite = ExtensionSuite.GridView }
+)
+
+
+
+
+    @Html.DevExpress().GetScripts(
+           new Script { ExtensionSuite = ExtensionSuite.TreeList },
+               new Script { ExtensionSuite = ExtensionSuite.GridView }
+   )
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+    <link href="~/Content/plugins/jquery-ui/jquery-ui.css" rel="stylesheet" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+</head>
+<body class="login-page">
+
+    <div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <img src="~/Content/vendors/images/forgot-password.png" alt="" />
+                </div>
+                <div class="col-md-6">
+                    <div class="login-box bg-white box-shadow border-radius-10">
+                        <div class="login-title">
+                            <h2 class="text-center text-primary">Multi-Factor Authentication</h2>
+                        </div>
+                        <h6 class="mb-20">
+                            Select method
+                        </h6>
+                        @using (Html.BeginForm("VerifyCode", "UserAccount", FormMethod.Post, new { @class = "form-horizontal form-simple" }))
+                        {
+                            <input type="hidden" class="form-control" id="user" name="user" value="@ViewData["user"]">
+                            <input type="hidden" class="form-control" id="HO2Factor" name="HO2Factor" value="@ViewData["cboHO2Factor"]">
+                            <input type="hidden" class="form-control" id="request" name="request" value="">
+
+                            <fieldset class="form-group position-relative has-icon-left">
+                                @Html.Action("MFAoptions", "UserAccount", new { id = ViewData["user"] })
+                            </fieldset>
+                            <h6 class="mb-20">
+                                Require Two-Factor:
+                            </h6>
+                            <fieldset class="form-group position-relative has-icon-left">
+                                @Html.Action("HO2Factor", "System", new { id = ViewData["user"] })
+                            </fieldset>
+
+                            if (ViewBag.BarcodeImageUrl != null)
+                            {
+                                <div>
+                                    <img src="@ViewBag.BarcodeImageUrl" width="300" height="300" />
+
+                                </div>
+                                <div>
+                                    Manual Setup Code : @ViewBag.SetupCode
+                                </div>
+                            }
+
+
+
+                            <fieldset>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Code" id="txtCode" name="txtCode" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success" id="btnCode" type="button">Get Code</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+
+                            <br />
+
+                            @*<fieldset>
+                <div class="form-group">
+                    <input type="checkbox" name="customCheck" id="customCheck">
+                    <label class="custom-control-label" for="customCheck">Save device as safe </label>
+                </div>
+
+
+            </fieldset>*@
+
+                            <br />
+                            <button type="submit" class="btn btn-info btn-block"><i class="ft-unlock"></i> Verify</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+@Html.DevExpress().LoadingPanel(
+settings =>
+{
+settings.Name = "LoadingPanel";
+settings.Modal = true;
+settings.ContainerElementID = true ? "Panel" : "";
+}
+).GetHtml()
+
+
+</html>
+
+<!-- welcome modal end -->
+<!-- js -->
+<script src="~/Content/vendors/scripts/core.js"></script>
+<script src="~/Content/vendors/scripts/script.min.js"></script>
+<script src="~/Content/vendors/scripts/process.js"></script>
+<script src="~/Content/vendors/scripts/layout-settings.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+<script src="~/Content/plugins/jquery-ui/jquery-ui.js"></script>
+
+
+
+<script src="~/Scripts/Security/MFA.js"></script>
+
+
+

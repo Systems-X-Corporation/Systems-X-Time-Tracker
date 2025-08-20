@@ -1,0 +1,44 @@
+﻿@{ 
+    TimeTracker.Controllers.SystemController systemController = new TimeTracker.Controllers.SystemController();
+}
+
+<div class="header">
+    <div class="header-left">
+        <div class="menu-icon bi bi-list"></div>
+        <div class="search-toggle-icon bi bi-search"
+             data-toggle="header_search"></div>
+     
+    </div>
+    <div class="header-right">
+        
+     
+        <div class="user-info-dropdown">
+            <div class="dropdown">
+                <a class="dropdown-toggle"
+                   href="#"
+                   role="button"
+                   data-toggle="dropdown">
+                    <span class="user-icon">
+                        @if (ViewBag.profilePic != null)
+                        {
+                            <img class="img2" src="@systemController.returnImage(ViewBag.profilePic)" alt="" />
+                        }
+                        @**@
+                    </span>
+                    <span class="user-name">@ViewBag.FullName</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                    <a class="dropdown-item" href="/UserProfile"><i class="dw dw-user1"></i> Profile</a>
+                    <a class="dropdown-item" href="/ChangePassword" )"><i class="dw dw-settings2"></i> Change Password</a>
+                    <a class="dropdown-item" href="@Url.Action("LogOut","UserAccount")"><i class="dw dw-logout"></i> Log Out</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+
+
+
+

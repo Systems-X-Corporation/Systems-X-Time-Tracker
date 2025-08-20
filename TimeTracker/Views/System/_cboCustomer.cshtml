@@ -1,0 +1,16 @@
+﻿
+
+@using TimeTracker.Models;
+
+@{
+    List<Customer> customers = Model;
+}
+
+<select class="custom-select2 form-control" id="cboCustomer" name="CustomerId" style="width: 100%; height: 38px" required>
+    <option value=""> </option>
+    @foreach (var item in customers)
+    {
+        <option value="@item.CustomerId">@item.CustomerName</option>
+    }
+
+</select>

@@ -1,0 +1,16 @@
+﻿@using TimeTracker.Models;
+
+@{
+    List<Office> office = Model;
+}
+
+<select class="custom-select2 form-control" id="eOfficeId" name="eOfficeId" style="width: 100%; height: 38px">
+    <option value="0"></option>
+    @foreach (var item in office)
+    {
+        <option value="@item.OfficeId">@item.OfficeDescription</option>
+    }
+
+</select>
+
+

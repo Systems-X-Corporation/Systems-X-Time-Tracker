@@ -1,0 +1,25 @@
+﻿@using TimeTracker.Models;
+
+@{
+    List<Activity> activities = Model;
+}
+
+<select class=" form-control" id="cboAllActivity" name="cboAllActivity" style="width: 100%; height: 38px; min-width:100px">
+    <option value="0"></option>
+    @foreach (var item in activities)
+    {
+        string name = item.Project.Customer.CustomerName + " / " + item.Project.ProjectName + " / " + item.ActivityName;
+        if (ViewBag.id == item.ActivityId)
+        {
+            <option value="@item.ActivityId" selected>@name</option>
+        }
+        else
+        {
+            <option value="@item.ActivityId">@name</option>
+        }
+
+
+    }
+
+</select>
+

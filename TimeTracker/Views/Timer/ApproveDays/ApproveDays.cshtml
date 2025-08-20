@@ -1,0 +1,169 @@
+﻿
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+
+<div class="card">
+    <div class="card-header">
+
+        Approve Days
+
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                <div id="CboProjectContent">
+                    @Html.Action("GetCboUsers", "System")
+                </div>
+            </div>
+            <div class="col-6">
+                <div id="cboDatesContent">
+                    @Html.Action("GetCboSendDays", "System")
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8">
+                <div class="calendar-wrap" style="width:100%; padding:10px; align-self:center">
+                    <div id="calendarList"></div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="modal-footer">
+                    <button id="btnApprove" class="btn btn-success">
+                        Approve
+                    </button>
+                    <button id="btnDismiss" class="btn btn-danger">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="modal-view-event-add"
+     class="modal modal-top fade calendar-modal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h4 class="text-blue h4 mb-10">Add Hours</h4>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="issueinput3">Work Date</label>
+                            <input readonly type="date" id="date" class="form-control" name="date" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="Date Opened">
+                        </div>
+                    </div>
+
+                </div>
+                <input type="hidden" id="TimeHoursId" name="TimeHoursId" value="" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="timesheetinput5">Start Time</label>
+                            <div class="position-relative has-icon-left">
+                                <input readonly type="time" id="starttime" class="form-control" name="starttime">
+                                <div class="form-control-position">
+                                    <i class="ft-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="timesheetinput6">End Time</label>
+                            <div class="position-relative has-icon-left">
+                                <input readonly type="time" id="endtime" class="form-control" name="endtime">
+                                <div class="form-control-position">
+                                    <i class="ft-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="issueinput3">Client - Project</label>
+                            @Html.Action("GetCboProjectUser", "System")
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="issueinput3">Work</label>
+                            <div id="CboActivityContent">
+
+                                @Html.Action("GetCboActivity", "System")
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="issueinput3">Work Performed / Activities completed</label>
+                            <input readonly type="text" id="description" class="form-control" name="description">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="issueinput3">Category</label>
+                            <div id="CboActivityContent">
+
+                                @Html.Action("GetCboCategory", "System")
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+
+                            <input readonly type="checkbox" id="Billable" name="Billable">
+                            <label for="issueinput3">Billable</label>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script src="~/Scripts/Timer/ApproveDays.js"></script>
+
+
