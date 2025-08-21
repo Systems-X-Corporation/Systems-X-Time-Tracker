@@ -42,6 +42,12 @@ namespace TimeTracker.Controllers.Security
 
                 Company company = db.Company.FirstOrDefault();
                 newUsers.Company = company;
+                int officeId = Convert.ToInt32(formCollection["OfficeId"]);
+                if (officeId > 0)
+                {
+                    var office = db.Office.FirstOrDefault(x => x.OfficeId == officeId);
+                    newUsers.Office = office;
+                }
                 string mail = formCollection["Email"];
                 newUsers.Email = mail;
                 newUsers.UserName = formCollection["UserName"];
@@ -60,6 +66,19 @@ namespace TimeTracker.Controllers.Security
 
                 model.Add(newUsers);
                 db.SaveChanges();
+
+                if (officeId > 0)
+                {
+                    var officeProjects = db.Project.Where(p => p.Customer.Office.OfficeId == officeId).ToList();
+                    foreach (var proj in officeProjects)
+                    {
+                        UsersProject up = new UsersProject();
+                        up.Project = proj;
+                        up.Users = newUsers;
+                        db.UsersProject.Add(up);
+                    }
+                    db.SaveChanges();
+                }
 
                 var Roles = formCollection["cboRole"].Split(',');
                 
@@ -114,6 +133,12 @@ namespace TimeTracker.Controllers.Security
 
                 Company company = db.Company.FirstOrDefault();
                 newUsers.Company = company;
+                int officeId = Convert.ToInt32(formCollection["eOfficeId"]);
+                if (officeId > 0)
+                {
+                    var office = db.Office.FirstOrDefault(x => x.OfficeId == officeId);
+                    newUsers.Office = office;
+                }
                 newUsers.Email = formCollection["eEmail"];
                 newUsers.UserName = formCollection["eUserName"];
                 newUsers.FirstName = formCollection["eFirstName"];
@@ -127,6 +152,24 @@ namespace TimeTracker.Controllers.Security
 
                 db.Entry(newUsers).State = System.Data.Entity.EntityState.Modified;
                 db.SaveChanges();
+
+                if (officeId > 0)
+                {
+                    var userProjects = db.UsersProject.Where(x => x.UserId == UsersId).ToList();
+                    db.UsersProject.RemoveRange(userProjects);
+                    db.SaveChanges();
+
+                    var officeProjects = db.Project.Where(p => p.Customer.Office.OfficeId == officeId).ToList();
+                    foreach (var proj in officeProjects)
+                    {
+                        UsersProject up = new UsersProject();
+                        up.Project = proj;
+                        up.Users = newUsers;
+                        db.UsersProject.Add(up);
+                    }
+                    db.SaveChanges();
+                }
+
                 var RoleModel = db.RolesUsers;
                 var _roles = db.RolesUsers.Where(x => x.Users.UserId == UsersId).ToList();
                 RoleModel.RemoveRange(_roles);
@@ -207,7 +250,7 @@ namespace TimeTracker.Controllers.Security
                 var data = db.Users.Where(x => x.UserId == id).FirstOrDefault();
                 var role = db.RolesUsers.Where(z => z.Users.UserId == id).Select(x=> x.Roles.RoleId).ToList();
                 
-                return Json(new { data.UserId, data.Email, data.Company.CompanyId, data.UserName, data.FirstName, data.Active, data.LastName, role }, JsonRequestBehavior.AllowGet);
+                return Json(new { data.UserId, data.Email, data.Company.CompanyId, data.UserName, data.FirstName, data.Active, data.LastName, role, data.OfficeId }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {

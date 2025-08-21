@@ -53,6 +53,23 @@ namespace TimeTracker.Controllers.Manteinance
                     db.SaveChanges();
                 }
 
+                var users = formCollection["cboUsers"];
+                if (!string.IsNullOrEmpty(users))
+                {
+                    var userModel = db.UsersProject;
+                    var selected = users.Split(',');
+                    foreach (var item in selected)
+                    {
+                        UsersProject up = new UsersProject();
+                        up.Project = newProject;
+                        int uId = Convert.ToInt32(item);
+                        var u = db.Users.Where(x => x.UserId == uId).FirstOrDefault();
+                        up.Users = u;
+                        userModel.Add(up);
+                    }
+                    db.SaveChanges();
+                }
+
 
             }
             catch (Exception ex)
@@ -104,6 +121,27 @@ namespace TimeTracker.Controllers.Manteinance
                         PmsModel.Add(projectManager);
                         db.SaveChanges();
                     }
+                }
+
+                var userModel = db.UsersProject;
+                var actualUsers = db.UsersProject.Where(x => x.Project.ProjectId == ProjectId).ToList();
+                userModel.RemoveRange(actualUsers);
+                db.SaveChanges();
+
+                var users = formCollection["cboEUsers"];
+                if (!string.IsNullOrEmpty(users))
+                {
+                    var selected = users.Split(',');
+                    foreach (var item in selected)
+                    {
+                        UsersProject up = new UsersProject();
+                        up.Project = newProject;
+                        int uId = Convert.ToInt32(item);
+                        var u = db.Users.Where(x => x.UserId == uId).FirstOrDefault();
+                        up.Users = u;
+                        userModel.Add(up);
+                    }
+                    db.SaveChanges();
                 }
 
 
@@ -167,13 +205,19 @@ namespace TimeTracker.Controllers.Manteinance
             {
                 int ProjectId = Convert.ToInt32(id);
                 var data = db.Project.Where(x => x.ProjectId == ProjectId).FirstOrDefault();
-                var PMs = db.ProjectManager.Where(x=> x.Project.ProjectId == ProjectId).ToList();
+                var PMs = db.ProjectManager.Where(x => x.Project.ProjectId == ProjectId).ToList();
                 List<int> pmsList = new List<int>();
                 foreach (var item in PMs)
                 {
                     pmsList.Add(item.Users.UserId);
                 }
-                return Json(new { data.ProjectId, data.ProjectName, data.CreateUser, data.CreateDate, data.Customer.CustomerId, data.color, pms = pmsList }, JsonRequestBehavior.AllowGet);
+                var UPs = db.UsersProject.Where(x => x.Project.ProjectId == ProjectId).ToList();
+                List<int> users = new List<int>();
+                foreach (var item in UPs)
+                {
+                    users.Add(item.Users.UserId);
+                }
+                return Json(new { data.ProjectId, data.ProjectName, data.CreateUser, data.CreateDate, data.Customer.CustomerId, data.color, pms = pmsList, users }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
