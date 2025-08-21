@@ -40,10 +40,9 @@ namespace TimeTracker.Models
         public bool IsSuperUser { get; set; }
         public byte[] ProfilePict { get; set; }
         public System.DateTime FactorEndDate { get; set; }
-        public Nullable<int> OfficeId { get; set; }
+        public int OfficeId { get; set; }
     
         public virtual Company Company { get; set; }
-        public virtual Office Office { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ProjectManager> ProjectManager { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -54,5 +53,6 @@ namespace TimeTracker.Models
         public virtual ICollection<Privilege_User> Privilege_User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UsersProject> UsersProject { get; set; }
+        public virtual Office Office { get; set; }
     }
 }

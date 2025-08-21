@@ -30,5 +30,7 @@ namespace TimeTracker.Models
         public bool IsSuperUser { get; set; }
         public Nullable<int> exits { get; set; }
         public Nullable<int> ProjectId { get; set; }
+        public byte[] ProfilePict { get; set; }
+        public System.DateTime FactorEndDate { get; set; }
     }
 }

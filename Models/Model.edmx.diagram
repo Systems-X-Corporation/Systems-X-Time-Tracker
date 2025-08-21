@@ -56,6 +56,8 @@
         <AssociationConnector Association="timetrackerDBModel.FK_TimerUsers" />
         <AssociationConnector Association="timetrackerDBModel.FK_Privilege_User" />
         <AssociationConnector Association="timetrackerDBModel.FK_UsersProject_User" />
+        <EntityTypeShape EntityType="timetrackerDBModel.sysdiagrams" Width="1.5" PointX="15.375" PointY="7.75" />
+        <AssociationConnector Association="timetrackerDBModel.Users_Office_FK" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

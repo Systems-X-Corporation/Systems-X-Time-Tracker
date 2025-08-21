@@ -54,5 +54,6 @@ namespace TimeTracker.Models
         public virtual DbSet<database_firewall_rules> database_firewall_rules { get; set; }
         public virtual DbSet<view_DaysUserStatus> view_DaysUserStatus { get; set; }
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
     }
 }
