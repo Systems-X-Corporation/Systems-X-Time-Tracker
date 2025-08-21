@@ -69,6 +69,7 @@ $("#users-list").on("click", ".btnEditUsers", function () {
             $("#eUsername").val(data.UserName);
             $("#eFirstName").val(data.FirstName);
             $("#eLastName").val(data.LastName);
+            $("#eOfficeId").val(data.OfficeId).trigger('change');
             if (data.Active) {
                 $("#customCheck").attr('checked');
             } else {

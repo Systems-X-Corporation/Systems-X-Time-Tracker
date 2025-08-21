@@ -4,8 +4,7 @@
     List<Users> users = Model;
 }
 
-<select class="custom-select2 form-control" id="cboUsers" name="cboUsers" style="width: 100%; height: 38px">
-    <option value=""> </option>
+<select class="custom-select2 form-control" id="cboUsers" name="cboUsers" multiple="multiple" style="width: 100%">
     @foreach (var item in users)
     {
         string fullname = item.FirstName + " " + item.LastName;

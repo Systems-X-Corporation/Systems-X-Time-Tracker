@@ -133,9 +133,10 @@ $("#projects").on("click", ".btnEditProject", function () {
             console.log(Project.pms);
             $("#EdProjectId").val(Project.ProjectId);
             $("#EdProjectName").val(Project.ProjectName);
-            $("#cboECustomer").val(Project.CustomerId); 
-            $("#ecolor").asColorPicker('val', Project.color); 
-            $("#cboEPM").val(Project.pms).trigger('change'); 
+            $("#cboECustomer").val(Project.CustomerId);
+            $("#ecolor").asColorPicker('val', Project.color);
+            $("#cboEPM").val(Project.pms).trigger('change');
+            $("#cboEUsers").val(Project.users).trigger('change');
         },
         timeout: 30 * 60 * 1000
     }).fail(function (xhr, status) {

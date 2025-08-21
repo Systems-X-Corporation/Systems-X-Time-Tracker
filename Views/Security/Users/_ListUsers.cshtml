@@ -103,6 +103,11 @@
                             @Html.Action("GetCboMultipleRoles", "System")
                         </div>
 
+                        <div class="modal-body">
+                            <label for="OfficeId">Office</label>
+                            @Html.Action("GetCboOffice", "System")
+                        </div>
+
 
 
                         <div class="modal-body">
@@ -171,6 +176,10 @@
                         <div class="modal-body">
                             <label for="Active">Roles </label>
                             @Html.Action("GetCboEMultipleRoles", "System")
+                        </div>
+                        <div class="modal-body">
+                            <label for="eOfficeId">Office</label>
+                            @Html.Action("GetECboOffice", "System")
                         </div>
                         <div class="modal-body">
 
