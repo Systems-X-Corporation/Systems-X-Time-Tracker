@@ -9,7 +9,7 @@
     <option value=""> </option>
     @foreach (var item in projects)
     {
-        string name = item.Customer.CustomerName + " - " + item.ProjectName;
+        string name = item.Customer.CustomerName + " (" + item.Customer.Office.OfficeDescription + ") - " + item.ProjectName;
         <option value="@item.ProjectId">@name</option>
     }
 

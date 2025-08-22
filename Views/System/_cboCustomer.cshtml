@@ -10,7 +10,7 @@
     <option value=""> </option>
     @foreach (var item in customers)
     {
-        <option value="@item.CustomerId">@item.CustomerName</option>
+        <option value="@item.CustomerId">@item.CustomerName (@item.Office.OfficeDescription)</option>
     }
 
 </select>
