@@ -132,29 +132,64 @@ namespace TimeTracker.Controllers.Timer
             }
         }
 
-        public ActionResult DaysList(int customer = 0, int project = 0, int user = 0, string from = "", string to = "", string records = "")
+        public ActionResult DaysList(int customer = 0, int project = 0, string user = "", string from = "", string to = "", string records = "", string filterType = "")
         {
             try
             {
                 var hours = db.TimeHours.ToList();
 
+                // Always show records that need approval by default if no specific filter is applied
+                if (string.IsNullOrEmpty(records) || records == "All")
+                {
+                    // Show all pending approval records (Sent, Under Review)
+                    hours = hours.Where(x => x.DayStatus == "Sent" || x.DayStatus == "Under Review" || x.DayStatus == "Approved").ToList();
+                }
+                else if (records != "All")
+                {
+                    hours = hours.Where(x => x.DayStatus == records).ToList();
+                }
+
+                // Apply optional filters
                 if (customer != 0)
                 {
-                    hours = hours.Where(x => x.CustomerId  == customer).ToList();
+                    hours = hours.Where(x => x.CustomerId == customer).ToList();
                 }
                 if (project != 0)
                 {
                     hours = hours.Where(x => x.Project.ProjectId == project).ToList();
                 }
-                if (!string.IsNullOrEmpty(records) && records != "All")
+                if (!string.IsNullOrEmpty(user))
                 {
-                    hours = hours.Where(x => x.DayStatus == records).ToList();
+                    // Handle multiple users or single user
+                    var userIds = user.Split(',').Where(u => !string.IsNullOrEmpty(u)).Select(u => int.Parse(u.Trim())).ToList();
+                    if (userIds.Any())
+                    {
+                        hours = hours.Where(x => userIds.Contains(x.Users.UserId)).ToList();
+                    }
                 }
-                if (user != 0)
+
+                // Date filtering with special handling for day and week filters
+                if (!string.IsNullOrEmpty(filterType))
                 {
-                    hours = hours.Where(x => x.Users.UserId == user).ToList();
+                    DateTime referenceDate = DateTime.Today;
+                    if (!string.IsNullOrEmpty(from))
+                    {
+                        referenceDate = Convert.ToDateTime(from);
+                    }
+
+                    switch (filterType.ToLower())
+                    {
+                        case "day":
+                            hours = hours.Where(x => x.THDate.Date == referenceDate.Date).ToList();
+                            break;
+                        case "week":
+                            var weekStart = referenceDate.AddDays(-(int)referenceDate.DayOfWeek);
+                            var weekEnd = weekStart.AddDays(6);
+                            hours = hours.Where(x => x.THDate >= weekStart && x.THDate <= weekEnd).ToList();
+                            break;
+                    }
                 }
-                if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+                else if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
                 {
                     DateTime _from = Convert.ToDateTime(from); DateTime _to = Convert.ToDateTime(to);
                     hours = hours.Where(x => x.THDate >= _from && x.THDate <= _to).ToList();
@@ -166,17 +201,17 @@ namespace TimeTracker.Controllers.Timer
                 ViewBag.from = from;
                 ViewBag.to = to;
                 ViewBag.records = records;
+                ViewBag.filterType = filterType;
 
                 return PartialView("~/Views/Timer/ApproveDays/_ApproveList.cshtml", hours);
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
         }
 
-        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<TimeHours, int> updateValues,int customer =0, int project = 0, int user = 0, string from = "", string to = "", string records = "")
+        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<TimeHours, int> updateValues,int customer =0, int project = 0, string user = "", string from = "", string to = "", string records = "")
         {
             try
             {
@@ -276,9 +311,13 @@ namespace TimeTracker.Controllers.Timer
                 {
                     hours = hours.Where(x => x.DayStatus == records).ToList();
                 }
-                if (user != 0)
+                if (!string.IsNullOrEmpty(user))
                 {
-                    hours = hours.Where(x => x.Users.UserId == user).ToList();
+                    var userIds = user.Split(',').Where(u => !string.IsNullOrEmpty(u)).Select(u => int.Parse(u.Trim())).ToList();
+                    if (userIds.Any())
+                    {
+                        hours = hours.Where(x => userIds.Contains(x.Users.UserId)).ToList();
+                    }
                 }
                 if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
                 {
@@ -343,6 +382,135 @@ namespace TimeTracker.Controllers.Timer
         {
             var hours = db.TimeHours.Where(x => x.DayStatus == "Sent").ToList();
             return Json(hours, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetPendingApprovalsReport()
+        {
+            try
+            {
+                var pendingRecords = db.TimeHours.Where(x => x.DayStatus == "Sent" || x.DayStatus == "Under Review").ToList();
+                
+                var oldestRecord = pendingRecords.OrderBy(x => x.THDate).FirstOrDefault();
+                
+                var report = new
+                {
+                    TotalPending = pendingRecords.Count,
+                    SentCount = pendingRecords.Count(x => x.DayStatus == "Sent"),
+                    UnderReviewCount = pendingRecords.Count(x => x.DayStatus == "Under Review"),
+                    OldestPending = oldestRecord?.THDate.ToString("yyyy-MM-dd"),
+                    UsersSummary = pendingRecords.GroupBy(x => new { x.UserId, x.Users.FirstName, x.Users.LastName })
+                                                .Select(g => new {
+                                                    UserId = g.Key.UserId,
+                                                    UserName = g.Key.FirstName + " " + g.Key.LastName,
+                                                    PendingCount = g.Count(),
+                                                    OldestDate = g.Min(x => x.THDate).ToString("yyyy-MM-dd")
+                                                }).ToList(),
+                    ProjectsSummary = pendingRecords.GroupBy(x => new { x.Project.ProjectId, x.Project.ProjectName, x.Customer.CustomerName })
+                                                   .Select(g => new {
+                                                       ProjectId = g.Key.ProjectId,
+                                                       ProjectName = g.Key.ProjectName,
+                                                       CustomerName = g.Key.CustomerName,
+                                                       PendingCount = g.Count()
+                                                   }).ToList()
+                };
+
+                return Json(report, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult GetAllPendingApprovals()
+        {
+            try
+            {
+                // Get all records that need approval without any filters
+                var hours = db.TimeHours.Where(x => x.DayStatus == "Sent" || x.DayStatus == "Under Review").ToList();
+
+                ViewBag.customer = 0;
+                ViewBag.project = 0;
+                ViewBag.user = 0;
+                ViewBag.from = "";
+                ViewBag.to = "";
+                ViewBag.records = "Pending";
+                ViewBag.filterType = "";
+
+                return PartialView("~/Views/Timer/ApproveDays/_ApproveList.cshtml", hours);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public JsonResult GetTodaysPendingApprovals()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var todaysPending = db.TimeHours.Where(x => x.THDate == today && 
+                                                          (x.DayStatus == "Sent" || x.DayStatus == "Under Review")).ToList();
+
+                var summary = new
+                {
+                    Date = today.ToString("yyyy-MM-dd"),
+                    Count = todaysPending.Count,
+                    Records = todaysPending.Select(x => new {
+                        TimeHoursId = x.TimeHoursId,
+                        UserName = x.Users.FirstName + " " + x.Users.LastName,
+                        ProjectName = x.Project.ProjectName,
+                        CustomerName = x.Customer.CustomerName,
+                        Hours = x.THours,
+                        Status = x.DayStatus,
+                        Description = x.ActDescription
+                    }).ToList()
+                };
+
+                return Json(summary, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult GetWeeksPendingApprovals(DateTime? startDate = null)
+        {
+            try
+            {
+                var referenceDate = startDate ?? DateTime.Today;
+                var weekStart = referenceDate.AddDays(-(int)referenceDate.DayOfWeek);
+                var weekEnd = weekStart.AddDays(6);
+
+                var weeksPending = db.TimeHours.Where(x => x.THDate >= weekStart && x.THDate <= weekEnd && 
+                                                         (x.DayStatus == "Sent" || x.DayStatus == "Under Review")).ToList();
+
+                var summary = new
+                {
+                    WeekStart = weekStart.ToString("yyyy-MM-dd"),
+                    WeekEnd = weekEnd.ToString("yyyy-MM-dd"),
+                    Count = weeksPending.Count,
+                    DailySummary = weeksPending.GroupBy(x => x.THDate)
+                                              .Select(g => new {
+                                                  Date = g.Key.ToString("yyyy-MM-dd"),
+                                                  Count = g.Count(),
+                                                  Records = g.Select(x => new {
+                                                      UserName = x.Users.FirstName + " " + x.Users.LastName,
+                                                      ProjectName = x.Project.ProjectName,
+                                                      Hours = x.THours,
+                                                      Status = x.DayStatus
+                                                  }).ToList()
+                                              }).OrderBy(x => x.Date).ToList()
+                };
+
+                return Json(summary, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
     }
