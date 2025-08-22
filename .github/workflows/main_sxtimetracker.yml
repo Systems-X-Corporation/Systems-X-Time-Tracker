@@ -12,8 +12,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
+
 
     steps:
       - uses: actions/checkout@v4
@@ -33,18 +32,20 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: ASP-app
+          name: ASP-app-${{ github.run_id }} # Nombre único para el artefacto
           path: '/published/**'
 
   deploy:
     runs-on: windows-latest
     needs: build
+    environment:
+      name: 'Production'
     
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: ASP-app
+          name: ASP-app-${{ github.run_id }} # Mismo nombre único que en la carga
       
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -53,4 +54,5 @@ jobs:
           app-name: 'sxtimetracker'
           slot-name: 'Production'
           package: .
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C7B5D3F0CD30492E879645E6B8B61C5A }}
