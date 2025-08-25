@@ -64,3 +64,5 @@ jobs:
           app-name: 'sxtimetracker'
           slot-name: 'Production'
           package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+
