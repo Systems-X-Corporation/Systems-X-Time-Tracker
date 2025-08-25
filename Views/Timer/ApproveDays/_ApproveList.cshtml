@@ -32,7 +32,7 @@
        settings.CommandColumn.Visible = true;
        settings.CommandColumn.ShowCancelButton = true;
        settings.CommandColumn.ShowDeleteButton = false;
-       settings.CommandColumn.ShowNewButtonInHeader = true;
+       settings.CommandColumn.ShowNewButtonInHeader = false;
        settings.CommandColumn.Width = Unit.Pixel(100);
 
        settings.Columns.Add(c =>
@@ -162,7 +162,7 @@
        {
            c.ColumnType = MVCxGridViewColumnType.ComboBox;
            c.FieldName = "DayStatus";
-           c.Caption = "Day Status";
+           c.Caption = "Approval Status";
            c.Visible = true;
            c.ReadOnly = false;
            c.EditorProperties().ComboBox(p =>

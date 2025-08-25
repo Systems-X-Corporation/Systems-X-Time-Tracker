@@ -8,8 +8,43 @@
 
 
 <div class="row">
-
-
+    <!-- Google Calendar Integration Section -->
+    <div class="col-lg-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="card-title mb-1">
+                            <i class="fa fa-google text-primary"></i> Google Calendar Integration
+                        </h6>
+                        <small class="text-muted">Sync your Google Calendar events with time entries</small>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <button id="btnSyncDay" class="btn btn-success btn-sm mr-2" style="display: none;">
+                            <i class="fa fa-calendar-day"></i> Sync Day
+                        </button>
+                        <button id="btnSyncWeek" class="btn btn-primary btn-sm mr-2" style="display: none;">
+                            <i class="fa fa-calendar-week"></i> Sync Week
+                        </button>
+                        <button id="btnConnectGoogleCalendar" class="btn btn-outline-secondary btn-sm mr-2" style="display: none;">
+                            <i class="fa fa-link"></i> Connect
+                        </button>
+                        <button id="btnTestConnection" class="btn btn-info btn-sm">
+                            <i class="fa fa-refresh"></i> Check Status
+                        </button>
+                        <button id="btnDebugHours" class="btn btn-warning btn-sm ml-2" hidden>
+                            <i class="fa fa-bug"></i> Debug Hours
+                        </button>
+                    </div>
+                </div>
+                <div id="syncStatus" class="mt-2" style="display: none;">
+                    <div class="alert alert-info alert-sm">
+                        <i class="fa fa-spinner fa-spin"></i> Syncing calendar events...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="col-lg-8">
         <div class="pd-20 card-box mb-30">
@@ -209,3 +244,320 @@
 
 
 <script src="~/Scripts/Timer/Calendar.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Google Calendar Sync functionality
+        $("#btnSyncDay").on('click', function() {
+            syncTodayEvents();
+        });
+    
+        $("#btnSyncWeek").on('click', function() {
+            syncWeekEvents();
+        });
+    
+        $("#btnConnectGoogleCalendar").on('click', function() {
+            connectGoogleCalendar();
+        });
+    
+        $("#btnTestConnection").on('click', function() {
+            checkGoogleCalendarConnection();
+        });
+        
+        $("#btnDebugHours").on('click', function() {
+            debugDayHours();
+        });
+    
+        // Check if user is connected on page load
+        checkGoogleCalendarConnection();
+        
+        // Make debug functions available globally
+        window.forceRefreshDailyStatus = function() {
+            if (typeof DailyViews === 'function' && typeof calendar !== 'undefined') {
+                var currentView = calendar.currentData.currentViewType;
+                var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                DailyViews(currentDate, currentView);
+                showAlert('info', 'Daily Status refreshed manually');
+            }
+        };
+        
+        window.debugTodayHours = function() {
+            $.ajax({
+                type: 'GET',
+                url: '/Time/DebugDayHours',
+                data: {
+                    date: new Date().toISOString().substring(0, 10)
+                },
+                success: function(response) {
+                    console.log('Debug Hours Response:', response);
+                    alert('Debug info logged to console. Check Developer Tools > Console');
+                },
+                error: function() {
+                    alert('Error getting debug information');
+                }
+            });
+        };
+    });
+
+    function syncTodayEvents() {
+        $("#syncStatus").show();
+        $("#btnSyncDay").prop('disabled', true);
+        showAlert('info', 'Syncing today\'s calendar events...');
+        
+        $.ajax({
+            type: 'POST',
+            url: '/OAuth/SyncTodayEvents',
+            success: function(response) {
+                $("#syncStatus").hide();
+                $("#btnSyncDay").prop('disabled', false);
+            
+                if (response.data.includes('successfully') || response.data.includes('Successfully')) {
+                    showAlert('success', 'Today\'s Google Calendar events synced successfully!');
+                    // Refresh the calendar events efficiently
+                    if (typeof refreshEvents === 'function') {
+                        refreshEvents(); // Use the optimized refresh function
+                    } else if (typeof calendar !== 'undefined' && calendar.refetchEvents) {
+                        calendar.refetchEvents();
+                    } else if (typeof loadData === 'function') {
+                        loadData(); // Fallback to full reload if needed
+                    }
+                    
+                    // Force multiple refreshes to ensure Daily Status updates
+                    function forceDailyStatusUpdate() {
+                        if (typeof DailyViews === 'function' && typeof calendar !== 'undefined') {
+                            var currentView = calendar.currentData.currentViewType;
+                            var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                            DailyViews(currentDate, currentView);
+                        }
+                    }
+                    
+                    // Multiple attempts with increasing delays
+                    setTimeout(forceDailyStatusUpdate, 500);
+                    setTimeout(forceDailyStatusUpdate, 1500);
+                    setTimeout(forceDailyStatusUpdate, 3000);
+                    
+                    // Also force a direct AJAX call to refresh Daily Status
+                    setTimeout(function() {
+                        $.ajax({
+                            type: 'GET',
+                            url: '/Time/GetDaysStatus',
+                            data: {
+                                "date": new Date().toISOString().substring(0, 10),
+                                "CalView": "timeGridWeek"
+                            },
+                            success: function (response) {
+                                $('#dailystatus').html(response);
+                            }
+                        });
+                    }, 2000);
+                } else if (response.data.includes('error') || response.data.includes('Error')) {
+                    showAlert('error', 'Sync failed: ' + response.data);
+                } else {
+                    showAlert('info', response.data);
+                }
+            },
+            error: function() {
+                $("#syncStatus").hide();
+                $("#btnSyncDay").prop('disabled', false);
+                showAlert('error', 'Failed to sync today\'s events. Please try again.');
+            }
+        });
+    }
+
+    function syncWeekEvents() {
+        $("#syncStatus").show();
+        $("#btnSyncWeek").prop('disabled', true);
+        showAlert('info', 'Syncing this week\'s calendar events...');
+        $.ajax({
+            type: 'POST',
+            url: '/OAuth/SyncWeekEvents',
+            success: function(response) {
+                $("#syncStatus").hide();
+                $("#btnSyncWeek").prop('disabled', false);
+            
+                if (response.data.includes('successfully') || response.data.includes('Successfully')) {
+                    showAlert('success', 'This week\'s Google Calendar events synced successfully!');
+                    // Refresh the calendar events efficiently
+                    if (typeof refreshEvents === 'function') {
+                        refreshEvents(); // Use the optimized refresh function
+                    } else if (typeof calendar !== 'undefined' && calendar.refetchEvents) {
+                        calendar.refetchEvents();
+                    } else if (typeof loadData === 'function') {
+                        loadData(); // Fallback to full reload if needed
+                    }
+                    
+                    // Force multiple refreshes to ensure Daily Status updates
+                    function forceDailyStatusUpdate() {
+                        if (typeof DailyViews === 'function' && typeof calendar !== 'undefined') {
+                            var currentView = calendar.currentData.currentViewType;
+                            var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                            DailyViews(currentDate, currentView);
+                        }
+                    }
+                    
+                    // Multiple attempts with increasing delays
+                    setTimeout(forceDailyStatusUpdate, 500);
+                    setTimeout(forceDailyStatusUpdate, 1500);
+                    setTimeout(forceDailyStatusUpdate, 3000);
+                    
+                    // Also force a direct AJAX call to refresh Daily Status
+                    setTimeout(function() {
+                        $.ajax({
+                            type: 'GET',
+                            url: '/Time/GetDaysStatus',
+                            data: {
+                                "date": new Date().toISOString().substring(0, 10),
+                                "CalView": "timeGridWeek"
+                            },
+                            success: function (response) {
+                                $('#dailystatus').html(response);
+                            }
+                        });
+                    }, 2000);
+
+                } else if (response.data.includes('error') || response.data.includes('Error')) {
+                    showAlert('error', 'Sync failed: ' + response.data);
+                } else {
+                    showAlert('info', response.data);
+                }
+            },
+            error: function() {
+                $("#syncStatus").hide();
+                $("#btnSyncWeek").prop('disabled', false);
+                showAlert('error', 'Failed to sync this week\'s events. Please try again.');
+            }
+        });
+    }
+
+    function connectGoogleCalendar() {
+        // Redirect to OAuth authorization
+        window.location.href = '/OAuth/OauthRedirect';
+    }
+
+    function checkGoogleCalendarConnection() {
+        $.ajax({
+            type: 'GET',
+            url: '/OAuth/IsConnected',
+            success: function(response) {
+                console.log('=== Google Calendar Connection Check ===');
+                console.log('Full response:', response);
+                console.log('Connected:', response.connected);
+                console.log('User ID:', response.userId);
+                console.log('Token exists:', response.tokenExists);
+                console.log('Has access token:', response.hasAccessToken);
+                if (response.debug) console.log('Debug info:', response.debug);
+                if (response.error) console.log('Error:', response.error);
+                console.log('==========================================');
+            
+                if (response.connected === true) {
+                    $("#btnSyncDay").show();
+                    $("#btnSyncWeek").show();
+                    $("#btnConnectGoogleCalendar").hide();
+                    showAlert('success', 'Google Calendar is connected and ready!');
+                } else {
+                    $("#btnSyncDay").hide();
+                    $("#btnSyncWeek").hide();
+                    $("#btnConnectGoogleCalendar").show();
+                
+                    // Mostrar información específica del error si existe
+                    if (response.error) {
+                        if (response.error.includes('not authenticated')) {
+                            showAlert('warning', 'Please log in to use Google Calendar sync.');
+                        } else if (response.error.includes('Invalid user ID')) {
+                            showAlert('error', 'Authentication issue. Please log out and log back in.');
+                        } else {
+                            showAlert('info', 'Google Calendar not connected. Click Connect to authorize. (Error: ' + response.error + ')');
+                        }
+                    } else if (response.userId && !response.tokenExists) {
+                        showAlert('info', 'Google Calendar not connected. Click Connect to authorize.');
+                    } else {
+                        showAlert('info', 'Google Calendar connection status unknown. Click Connect to authorize.');
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', status, error);
+                console.log('Response Text:', xhr.responseText);
+            
+                // On error, show connect button
+                $("#btnSyncDay").hide();
+                $("#btnSyncWeek").hide();
+                $("#btnConnectGoogleCalendar").show();
+            
+                // Mostrar error más específico
+                if (xhr.status === 404) {
+                    showAlert('error', 'Google Calendar service not found. Please check the URL.');
+                } else if (xhr.status === 500) {
+                    showAlert('error', 'Server error checking Google Calendar connection.');
+                } else {
+                    showAlert('error', 'Unable to check Google Calendar connection: ' + status);
+                }
+            }
+        });
+    }
+
+    function showAlert(type, message) {
+        var alertClass = 'alert-info';
+        var icon = 'fa-info-circle';
+    
+        switch(type) {
+            case 'success':
+                alertClass = 'alert-success';
+                icon = 'fa-check-circle';
+                break;
+            case 'error':
+                alertClass = 'alert-danger';
+                icon = 'fa-exclamation-circle';
+                break;
+            case 'warning':
+                alertClass = 'alert-warning';
+                icon = 'fa-exclamation-triangle';
+                break;
+        }
+    
+        var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                       '<i class="fa ' + icon + '"></i> ' + message +
+                       '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                       '<span aria-hidden="true">&times;</span>' +
+                       '</button></div>';
+    
+        $("#syncStatus").html(alertHtml).show();
+    
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            $("#syncStatus").fadeOut();
+        }, 5000);
+    }
+
+    function debugDayHours() {
+        var today = new Date();
+        var dateString = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        
+        $.ajax({
+            type: 'GET',
+            url: '/Time/DebugDayHours',
+            data: { date: dateString },
+            success: function(response) {
+                console.log('=== DEBUG DAY HOURS ===');
+                console.log('Date:', response.Date);
+                console.log('User ID:', response.UserId);
+                console.log('Direct TimeHours Records:', response.DirectTimeHours);
+                console.log('Total Hours from TimeHours table:', response.TotalHoursFromTimeHours);
+                console.log('View Data (what Daily Status shows):', response.ViewData);
+                console.log('========================');
+                
+                var message = `Debug Info for ${response.Date}:\n\n`;
+                message += `TimeHours Records: ${response.DirectTimeHours.length}\n`;
+                message += `Total Hours (Direct): ${response.TotalHoursFromTimeHours}\n`;
+                message += `View Shows: ${response.ViewData ? response.ViewData.Quantity : 'No data'}\n\n`;
+                message += `Check browser console for detailed information.`;
+                
+                alert(message);
+            },
+            error: function(xhr, status, error) {
+                console.log('Debug Error:', error);
+                alert('Error getting debug information: ' + error);
+            }
+        });
+    }
+</script>
