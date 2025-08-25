@@ -146,7 +146,7 @@
     <Reference Include="DevExpress.Web.ASPxTreeList.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxTreeList.v22.2.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Web.Mvc5.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Web.Mvc.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Web.Resources.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.Resources.v22.2.dll</HintPath>
     </Reference>
