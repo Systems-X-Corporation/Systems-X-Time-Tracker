@@ -55,15 +55,134 @@
     <Reference Include="Azure.Core, Version=1.30.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
       <HintPath>packages\Azure.Core.1.30.0\lib\net461\Azure.Core.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Data.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Printing.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Office.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.RichEdit.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.RichEdit.v22.2.Export, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Charts.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Charts.Core.22.2.15\lib\net452\DevExpress.Charts.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.CodeParser.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.CodeParser.22.2.15\lib\net452\DevExpress.CodeParser.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.Desktop.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Data.Desktop.22.2.15\lib\net452\DevExpress.Data.Desktop.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Data.22.2.15\lib\net452\DevExpress.Data.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.DataAccess.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.DataAccess.22.2.15\lib\net452\DevExpress.DataAccess.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.DataVisualization.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.DataVisualization.Core.22.2.15\lib\net452\DevExpress.DataVisualization.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Drawing.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Drawing.22.2.15\lib\net452\DevExpress.Drawing.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Images.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Images.22.2.15\lib\net452\DevExpress.Images.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Office.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Office.Core.22.2.15\lib\net452\DevExpress.Office.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Pdf.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Pdf.Core.22.2.15\lib\net452\DevExpress.Pdf.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Pdf.v22.2.Drawing, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Pdf.Drawing.22.2.15\lib\net452\DevExpress.Pdf.v22.2.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.PivotGrid.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.PivotGrid.Core.22.2.15\lib\net452\DevExpress.PivotGrid.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Printing.Core.22.2.15\lib\net452\DevExpress.Printing.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.RichEdit.Core.22.2.15\lib\net452\DevExpress.RichEdit.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v22.2.Export, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.RichEdit.Export.22.2.15\lib\net452\DevExpress.RichEdit.v22.2.Export.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Sparkline.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Sparkline.Core.22.2.15\lib\net452\DevExpress.Sparkline.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.SpellChecker.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.SpellChecker.Core.22.2.15\lib\net452\DevExpress.SpellChecker.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Spreadsheet.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Spreadsheet.Core.22.2.15\lib\net452\DevExpress.Spreadsheet.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.TreeMap.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.TreeMap.Core.22.2.15\lib\net452\DevExpress.TreeMap.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Utils.22.2.15\lib\net452\DevExpress.Utils.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxDiagram.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxDiagram.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxGantt.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxGantt.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxGauges.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Visualization.22.2.15\lib\net452\DevExpress.Web.ASPxGauges.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxHtmlEditor.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxHtmlEditor.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxPivotGrid.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxPivotGrid.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxRichEdit.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Office.22.2.15\lib\net452\DevExpress.Web.ASPxRichEdit.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxScheduler.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Scheduler.22.2.15\lib\net452\DevExpress.Web.ASPxScheduler.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxSpellChecker.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxSpellChecker.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.ASPxSpreadsheet.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Office.22.2.15\lib\net452\DevExpress.Web.ASPxSpreadsheet.v22.2.dll</HintPath>
+    </Reference>
     <Reference Include="DevExpress.Web.ASPxThemes.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Web.ASPxTreeList.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Web.ASPxTreeList.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.ASPxTreeList.v22.2.dll</HintPath>
+    </Reference>
     <Reference Include="DevExpress.Web.Mvc5.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Web.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Web.Resources.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.Resources.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.22.2.15\lib\net452\DevExpress.Web.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Xpo.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Xpo.22.2.15\lib\net452\DevExpress.Xpo.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Charts.22.2.15\lib\net452\DevExpress.XtraCharts.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraCharts.v22.2.Web, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Visualization.22.2.15\lib\net452\DevExpress.XtraCharts.v22.2.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGauges.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Gauges.Core.22.2.15\lib\net452\DevExpress.XtraGauges.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Reporting.Core.22.2.15\lib\net452\DevExpress.XtraReports.v22.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v22.2.Web, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Reporting.Common.22.2.15\lib\net452\DevExpress.XtraReports.v22.2.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v22.2.Web.WebForms, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Web.Reporting.22.2.15\lib\net452\DevExpress.XtraReports.v22.2.Web.WebForms.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraScheduler.v22.2.Core, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Scheduler.Core.22.2.15\lib\net452\DevExpress.XtraScheduler.v22.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraScheduler.v22.2.Core.Desktop, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.Scheduler.CoreDesktop.22.2.15\lib\net452\DevExpress.XtraScheduler.v22.2.Core.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeMap.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>packages\DevExpress.TreeMap.22.2.15\lib\net452\DevExpress.XtraTreeMap.v22.2.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -4849,8 +4968,10 @@
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
     <Error Condition="!Exists('packages\Microsoft.TypeScript.MSBuild.4.9.4\build\Microsoft.TypeScript.MSBuild.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.TypeScript.MSBuild.4.9.4\build\Microsoft.TypeScript.MSBuild.props'))" />
     <Error Condition="!Exists('packages\Microsoft.TypeScript.MSBuild.4.9.4\build\Microsoft.TypeScript.MSBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.TypeScript.MSBuild.4.9.4\build\Microsoft.TypeScript.MSBuild.targets'))" />
+    <Error Condition="!Exists('packages\DevExpress.Reporting.Core.22.2.15\build\DevExpress.Reporting.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\DevExpress.Reporting.Core.22.2.15\build\DevExpress.Reporting.Core.targets'))" />
   </Target>
   <Import Project="packages\Microsoft.TypeScript.MSBuild.4.9.4\build\Microsoft.TypeScript.MSBuild.targets" Condition="Exists('packages\Microsoft.TypeScript.MSBuild.4.9.4\build\Microsoft.TypeScript.MSBuild.targets')" />
+  <Import Project="packages\DevExpress.Reporting.Core.22.2.15\build\DevExpress.Reporting.Core.targets" Condition="Exists('packages\DevExpress.Reporting.Core.22.2.15\build\DevExpress.Reporting.Core.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
