@@ -1,6 +1,5 @@
 ﻿@using System.Web.Optimization
 
-
 @if (Request.IsAuthenticated)
 {
     <!DOCTYPE html>
@@ -9,8 +8,6 @@
         <!-- Basic Page Info -->
         <meta charset="utf-8" />
         <title>Time Tracker</title>
-
-
 
         <!-- Mobile Specific Metas -->
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
@@ -36,18 +33,12 @@
         <link href="~/Content/DualListbox/bootstrap-duallistbox.css" rel="stylesheet" />
         <link href="~/Content/plugins/jquery-ui/jquery-ui.css" rel="stylesheet" />
 
-
         @Html.DevExpress().GetStyleSheets(
-     new StyleSheet { ExtensionSuite = ExtensionSuite.TreeList },
-     new StyleSheet { ExtensionSuite = ExtensionSuite.GridView }
+     new StyleSheet { ExtensionSuite = ExtensionSuite.All }
 )
 
-
-
-
         @Html.DevExpress().GetScripts(
-               new Script { ExtensionSuite = ExtensionSuite.TreeList },
-                   new Script { ExtensionSuite = ExtensionSuite.GridView }
+               new Script { ExtensionSuite = ExtensionSuite.All }
        )
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
@@ -63,7 +54,6 @@
         </div>
         <div> @Html.Action("Sidebar", "System", new { userData = User.Identity.Name })  </div>
 
-
         <div class="main-container">
             <div class="pd-ltr-20 xs-pd-20-10">
                 <div class="min-height-200px">
@@ -72,9 +62,7 @@
                         @Html.Partial("~/Views/Shared/PageHeader.cshtml")
                     }
 
-
                     @RenderBody()
-
 
                     <div class="modal  text-left" id="default" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
                         <div class="modal-dialog" role="document">
@@ -82,8 +70,8 @@
                                 <div class="modal-header">
                                     <h4 class="modal-title" id="myModalLabel1">Change Password</h4>
                                     @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>*@
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>*@
                                 </div>
                                 <div class="modal-body">
                                     <h5>You need to change the password</h5>
@@ -139,19 +127,13 @@
                                             </div>
                                         </div>
                                     }
-
                                 </div>
-
                             </div>
                         </div>
                     </div>
 
-
                     @* @Html.Action("Footer", "System", User.Identity.Name)*@
-
                 </div>
-
-
             </div>
         </div>
 
@@ -164,11 +146,7 @@
     }
     ).GetHtml()
 
-
-
-
         @*  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>*@
-
 
         <script src="~/Content/vendors/scripts/core.js"></script>
         <script src="~/Content/vendors/scripts/script.min.js"></script>
@@ -182,10 +160,10 @@
         <script src="~/Content/src/scripts/setting.js"></script>
         <!-- buttons for Export datatable -->
         @*<script src="~/Content/src/plugins/datatables/js/dataTables.buttons.min.js"></script>
-        <script src="~/Content/src/plugins/datatables/js/buttons.bootstrap4.min.js"></script>
-        <script src="~/Content/src/plugins/datatables/js/buttons.print.min.js"></script>
-        <script src="~/Content/src/plugins/datatables/js/buttons.html5.min.js"></script>
-        <script src="~/Content/src/plugins/datatables/js/buttons.flash.min.js"></script>*@
+            <script src="~/Content/src/plugins/datatables/js/buttons.bootstrap4.min.js"></script>
+            <script src="~/Content/src/plugins/datatables/js/buttons.print.min.js"></script>
+            <script src="~/Content/src/plugins/datatables/js/buttons.html5.min.js"></script>
+            <script src="~/Content/src/plugins/datatables/js/buttons.flash.min.js"></script>*@
         @*<script src="~/Content/src/plugins/datatables/js/pdfmake.min.js"></script>*@
         <script src="~/Content/src/plugins/datatables/js/vfs_fonts.js"></script>
         <!-- Datatable Setting js -->
@@ -206,12 +184,9 @@
 
         @RenderSection("scripts", required: false)
 
-
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
-
     </body>
 </html>
-
 
 }
 else
@@ -223,6 +198,3 @@ if (!Response.IsRequestBeingRedirected)
     //Response.Redirect("~/Login.aspx");
 }
 }
-
-
-
