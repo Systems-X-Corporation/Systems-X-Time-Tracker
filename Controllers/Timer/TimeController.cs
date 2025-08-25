@@ -137,26 +137,48 @@ namespace TimeTracker.Controllers.Timer
             {
                 int userId = Convert.ToInt32(GetUser());
                 var model = db.TimeHours;
-                TimeHours timeHours = db.TimeHours.Where(x => x.THDate == date && x.THFrom == start && x.THTo == end && x.ActDescription == description && x.Users.UserId == userId).FirstOrDefault();
+                TimeHours timeHours = db.TimeHours.Where(x => x.TimeHoursId == id && x.UserId == userId).FirstOrDefault();
 
-                model.Remove(timeHours);
+                // If this is a Google Calendar event, mark it as manually deleted instead of removing it
+                if (timeHours != null && !string.IsNullOrEmpty(timeHours.GCalendarId))
+                {
+                    // Set Visible to false and add a note that it was manually deleted
+                    timeHours.Visible = false;
+                    timeHours.InternalNote = "MANUALLY_DELETED_" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                    db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
+                }
+                else if (timeHours != null)
+                {
+                    // For regular events, delete normally
+                    model.Remove(timeHours);
+                }
+                
                 db.SaveChanges();
 
-                return Json(new { data = "ok" }, JsonRequestBehavior.AllowGet);
+                if (timeHours != null && !string.IsNullOrEmpty(timeHours.GCalendarId))
+                {
+                    return Json(new { data = "ok", type = "google_calendar_hidden", visible = timeHours.Visible }, JsonRequestBehavior.AllowGet);
+                }
+                else if (timeHours != null)
+                {
+                    return Json(new { data = "ok", type = "regular_deleted" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { data = "ok", type = "not_found", warning = "Event not found or already deleted" }, JsonRequestBehavior.AllowGet);
+                }
 
             }
             catch (Exception ex)
             {
                 return Json(new { msg = ex.Message }, JsonRequestBehavior.AllowGet);
             }
-
-
         }
 
         public JsonResult GetHours()
         {
             int Userid = Convert.ToInt32(GetUser());
-            var hours = db.TimeHours.Where(x => x.UserId == Userid).ToList();
+            var hours = db.TimeHours.Where(x => x.UserId == Userid && x.Visible != false).ToList();
             List<Hours> _hours = new List<Hours>();
             foreach (var item in hours)
             {
@@ -218,28 +240,26 @@ namespace TimeTracker.Controllers.Timer
                 DateTime start;
                 DateTime end;
                 int UserId = Convert.ToInt32(GetUser());
+                
+                // Get date range based on calendar view
                 if (CalView == "timeGridDay")
                 {
-                    model = db.view_DaysUserStatus.Where(x => x.THDate == date && x.UserId == UserId).ToList();
-
+                    start = date;
+                    end = date;
                 }
-                if (CalView == "dayGridMonth")
+                else if (CalView == "dayGridMonth")
                 {
                     if (date.Day > 20)
                     {
                         date = date.AddDays(10);
                     }
-                    var dates = Enumerable.Range(1, DateTime.DaysInMonth(date.Year, date.Month))  // Days: 1, 2 ... 31 etc.
-                             .Select(day => new DateTime(date.Year, date.Month, day)) // Map each day to a date
-                             .ToList(); // Load dates into a list 
+                    var dates = Enumerable.Range(1, DateTime.DaysInMonth(date.Year, date.Month))
+                             .Select(day => new DateTime(date.Year, date.Month, day))
+                             .ToList();
                     start = Convert.ToDateTime(dates.First());
                     end = Convert.ToDateTime(dates.Last());
-                    model = db.view_DaysUserStatus.Where(x => x.THDate >= start && x.THDate <= end && x.UserId == UserId).ToList();
-
-                    
-
                 }
-                if (CalView == "timeGridWeek")
+                else if (CalView == "timeGridWeek")
                 {
                     Int32 firstDayOfWeek = (Int32)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
                     Int32 dayOfWeek = (Int32)date.DayOfWeek;
@@ -248,20 +268,55 @@ namespace TimeTracker.Controllers.Timer
                     var dates = valuesDaysOfWeek.Select(v => startOfWeek.AddDays(v)).ToList();
                     start = Convert.ToDateTime(dates.First());
                     end = Convert.ToDateTime(dates.Last());
-                    model = db.view_DaysUserStatus.Where(x => x.THDate >= start && x.THDate <= end && x.UserId == UserId).ToList();
-
+                }
+                else
+                {
+                    start = date;
+                    end = date;
                 }
 
+                // Get correct hours calculation directly from TimeHours table
+                var timeHoursGrouped = db.TimeHours
+                    .Where(x => x.THDate >= start && x.THDate <= end && x.UserId == UserId && x.Visible != false)
+                    .GroupBy(x => x.THDate)
+                    .Select(g => new {
+                        THDate = g.Key,
+                        TotalHours = g.Sum(x => x.THours ?? 0)
+                    })
+                    .ToList();
+
+                // Get DaysUser status information
+                var daysUserStatus = db.DaysUser
+                    .Where(x => x.DayDate >= start && x.DayDate <= end && x.UserId == UserId)
+                    .ToList();
+
+                // Create the model combining both data sources
+                var dateRange = new List<DateTime>();
+                for (var d = start; d <= end; d = d.AddDays(1))
+                {
+                    dateRange.Add(d);
+                }
+
+                model = dateRange.Select(d => {
+                    var hoursData = timeHoursGrouped.FirstOrDefault(x => x.THDate.Date == d.Date);
+                    var statusData = daysUserStatus.FirstOrDefault(x => x.DayDate.Date == d.Date);
+
+                    // Create a view_DaysUserStatus-like object
+                    return new view_DaysUserStatus
+                    {
+                        THDate = d,
+                        quantity = hoursData?.TotalHours ?? 0,
+                        DayStatus = statusData?.DayStatus,
+                        UserId = UserId
+                    };
+                }).Where(x => x.quantity > 0 || x.DayStatus != null).ToList();
 
                 return PartialView("~/Views/Home/_DaysStatus.cshtml", model);
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
-
-
         }
 
         public JsonResult SendDay(DateTime date)
@@ -312,6 +367,56 @@ namespace TimeTracker.Controllers.Timer
                 return Json(false, JsonRequestBehavior.AllowGet);
             }
            
+        }
+
+        // Método temporal para debugging de horas diarias
+        public JsonResult DebugDayHours(DateTime date)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(GetUser());
+                
+                // Obtener todos los TimeHours del día específico
+                var timeHours = db.TimeHours.Where(x => x.THDate == date && x.UserId == userId).ToList();
+                
+                var debugInfo = timeHours.Select(x => new {
+                    TimeHoursId = x.TimeHoursId,
+                    THDate = x.THDate,
+                    THFrom = x.THFrom,
+                    THTo = x.THTo,
+                    THours = x.THours,
+                    Description = x.ActDescription,
+                    GCalendarId = x.GCalendarId,
+                    Visible = x.Visible,
+                    InternalNote = x.InternalNote,
+                    ProjectName = x.Project?.ProjectName,
+                    CustomerName = x.Customer?.CustomerName
+                }).ToList();
+                
+                var totalHours = timeHours.Sum(x => x.THours ?? 0);
+                var visibleHours = timeHours.Where(x => x.Visible != false).Sum(x => x.THours ?? 0);
+                
+                // También obtener los datos de la vista
+                var viewData = db.view_DaysUserStatus.Where(x => x.THDate == date && x.UserId == userId).FirstOrDefault();
+                
+                return Json(new { 
+                    DirectTimeHours = debugInfo,
+                    TotalHoursFromTimeHours = totalHours,
+                    VisibleHoursFromTimeHours = visibleHours,
+                    ViewData = viewData != null ? new {
+                        THDate = viewData.THDate,
+                        Quantity = viewData.quantity,
+                        DayStatus = viewData.DayStatus,
+                        UserId = viewData.UserId
+                    } : null,
+                    Date = date.ToString("yyyy-MM-dd"),
+                    UserId = userId
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
         
 

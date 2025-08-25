@@ -116,7 +116,7 @@
                             <div class="form-body">
 
                                 Connect with Google Calendar:
-                                @if (oAuthController.IsConnected(@Model[0].UserId))
+                                @if (oAuthController.IsUserConnected(@Model[0].UserId))
                                 {
                                     <button onclick="location.href = '@Url.Action("OauthRedirect","OAuth")'" class="btn btn-secondary">
                                         Re-connect

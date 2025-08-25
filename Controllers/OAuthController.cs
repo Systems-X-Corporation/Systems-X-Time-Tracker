@@ -31,46 +31,54 @@ namespace TimeTracker.Controllers
 {
     public class OAuthController : SystemController
     {
-        public string _client_id = "995855232789-vdnfin1cs6dkvi6dappt4guv7f3m43be.apps.googleusercontent.com";
-        private string _client_secret = "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";
-        //private string idUser;
+        // Move to configuration instead of hardcoding
+        private string _client_id => System.Configuration.ConfigurationManager.AppSettings["GoogleClientId"] ?? "995855232789-vdnfin1cs6dkvi6dappt4guv7f3m43be.apps.googleusercontent.com";
+        private string _client_secret => System.Configuration.ConfigurationManager.AppSettings["GoogleClientSecret"] ?? "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";
+        private string _redirect_uri => System.Configuration.ConfigurationManager.AppSettings["GoogleRedirectUri"] ?? "https://localhost:44361/oauth/callback";
         // GET: OAuth
 
         public ActionResult OauthRedirect()
         {
-
-
-            var client_id = _client_id;
+            // Generate random state for CSRF protection
+            var state = System.Guid.NewGuid().ToString();
+            Session["oauth_state"] = state;
 
             var redirectUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
                          "scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/calendar.events&" +
                          "access_type=offline&" +
                          "include_granted_scopes=true&" +
                          "response_type=code&" +
-                         "state=hellothere&" +
-                         "redirect_uri=https://localhost:44361/oauth/callback&" +
-                         "client_id=" + client_id.ToString();
-
-            //var redirectUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
-            //            "scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/calendar.events&" +
-            //            "access_type=offline&" +
-            //            "include_granted_scopes=true&" +
-            //            "response_type=code&" +
-            //            "state=hellothere&" +
-            //            "redirect_uri=https://www.sx-timetracker.com/oauth/callback&" +
-            //            "client_id=" + client_id.ToString();
-
+                         "prompt=consent&" +
+                         "state=" + state + "&" +
+                         "redirect_uri=" + Uri.EscapeDataString(_redirect_uri) + "&" +
+                         "client_id=" + _client_id;
 
             return Redirect(redirectUrl);
-
         }
 
         public ActionResult Callback(string code, string error, string state)
         {
+            // Validate state for CSRF protection
+            var expectedState = Session["oauth_state"] as string;
+            if (string.IsNullOrEmpty(expectedState) || expectedState != state)
+            {
+                ViewBag.ErrorMessage = "Invalid state parameter. Possible CSRF attack.";
+                return View("Error");
+            }
+
+            // Clear the state from session
+            Session.Remove("oauth_state");
+
             if (string.IsNullOrWhiteSpace(error))
             {
                 this.GetTokens(code);
             }
+            else
+            {
+                ViewBag.ErrorMessage = "OAuth error: " + error;
+                return View("Error");
+            }
+            
             return Redirect("/UserProfile");
         }
 
@@ -78,15 +86,15 @@ namespace TimeTracker.Controllers
         {
             RestClient restClient = new RestClient("https://oauth2.googleapis.com/token");
             RestRequest request = new RestRequest();
+            
+            // Set content type for form data
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            request.AddParameter("client_id", _client_id);
-            request.AddParameter("client_secret", _client_secret);
-            request.AddParameter("code", code);
-            request.AddParameter("grant_type", "authorization_code");
-            request.AddParameter("redirect_uri", "https://localhost:44361/oauth/callback");
-            //request.AddParameter("redirect_uri", "https://www.sx-timetracker.com/oauth/callback");
-
-
+            request.AddParameter("client_id", _client_id, ParameterType.GetOrPost);
+            request.AddParameter("client_secret", _client_secret, ParameterType.GetOrPost);
+            request.AddParameter("code", code, ParameterType.GetOrPost);
+            request.AddParameter("grant_type", "authorization_code", ParameterType.GetOrPost);
+            request.AddParameter("redirect_uri", _redirect_uri, ParameterType.GetOrPost);
 
             var response = restClient.Post(request);
 
@@ -136,7 +144,18 @@ namespace TimeTracker.Controllers
                 var idUsuario = idUser;
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
-                request.AddQueryParameter("key", "AIzaSyA0B3OLn5GyjeOTHc5WAgu2QLj73iJyaW8");
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
+                {
+                    throw new UnauthorizedAccessException("No valid token found");
+                }
+
+                // Use proper Calendar API parameters - remove API key as we're using OAuth
+                request.AddQueryParameter("singleEvents", "true");
+                request.AddQueryParameter("orderBy", "startTime");
+                request.AddQueryParameter("timeMin", DateTime.Now.AddDays(-30).ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", DateTime.Now.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("maxResults", "2500");
+                
                 request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
                 request.AddHeader("Accept", "application/json");
 
@@ -172,63 +191,98 @@ namespace TimeTracker.Controllers
 
                     foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
                     {
-                        TimeSpan timeSpan = Convert.ToDateTime(item.End.DateTime) - Convert.ToDateTime(item.Start.DateTime);
+                        DateTime startTime, endTime;
+                        string timeFrom, timeTo;
+                        decimal hours;
 
+                        // Handle all-day events and timezone conversion
+                        if (!string.IsNullOrEmpty(item.Start.Date))
+                        {
+                            // All-day event
+                            startTime = DateTime.Parse(item.Start.Date);
+                            endTime = DateTime.Parse(item.End.Date).AddDays(-1); // Google returns next day for all-day events
+                            timeFrom = "00:00";
+                            timeTo = "23:59";
+                            hours = 8.0m; // Default 8 hours for all-day events
+                        }
+                        else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
+                        {
+                            // Timed event with timezone handling
+                            if (!string.IsNullOrEmpty(item.Start.TimeZone))
+                            {
+                                try
+                                {
+                                    string windowsTz = TZConvert.IanaToWindows(item.Start.TimeZone);
+                                    TimeZoneInfo tzInfo = TimeZoneInfo.FindSystemTimeZoneById(windowsTz);
+                                    startTime = TimeZoneInfo.ConvertTime(item.Start.DateTime.Value, tzInfo);
+                                    endTime = TimeZoneInfo.ConvertTime(item.End.DateTime.Value, tzInfo);
+                                }
+                                catch
+                                {
+                                    startTime = item.Start.DateTime.Value;
+                                    endTime = item.End.DateTime.Value;
+                                }
+                            }
+                            else
+                            {
+                                startTime = item.Start.DateTime.Value;
+                                endTime = item.End.DateTime.Value;
+                            }
+                            
+                            timeFrom = startTime.ToString("HH:mm");
+                            timeTo = endTime.ToString("HH:mm");
+                            TimeSpan duration = endTime - startTime;
+                            hours = Convert.ToDecimal(duration.TotalHours);
+                        }
+                        else
+                        {
+                            continue; // Skip events without proper start/end times
+                        }
 
                         var exist = db.TimeHours.Where(x => x.GCalendarId == item.Id).Any();
                         if (exist)
                         {
                             var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-
-                            timeHours.THDate = Convert.ToDateTime(item.Start.DateTime);
-                            timeHours.THFrom = Convert.ToDateTime(item.Start.DateTime).ToString("HH:mm");
-                            timeHours.THTo = Convert.ToDateTime(item.End.DateTime).ToString("HH:mm");
-                            timeHours.Duration = 0;
-                            timeHours.UserId = idUsuario;
-                            timeHours.Users = user;
-                            timeHours.Customer = work.Project.Customer;
-                            timeHours.Project = work.Project;
-                            //timeHours.Activity = work;
-                            timeHours.ActDescription = item.Summary;
-                            timeHours.Billable = true;
-
-                            //timeHours.Category = category;
-                            timeHours.InternalNote = "";
-                            db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
-                            updevents.Add(timeHours);
+                            if (timeHours != null)
+                            {
+                                timeHours.THDate = startTime.Date;
+                                timeHours.THFrom = timeFrom;
+                                timeHours.THTo = timeTo;
+                                timeHours.THours = hours;
+                                timeHours.ActDescription = item.Summary ?? "";
+                                timeHours.Billable = true;
+                                timeHours.InternalNote = "";
+                                
+                                db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
+                            }
                         }
                         else
                         {
                             TimeHours timeHours = new TimeHours();
-
-                            timeHours.THDate = Convert.ToDateTime(item.Start.DateTime);
-                            timeHours.THFrom = Convert.ToDateTime(item.Start.DateTime).ToString("HH:mm");
-                            timeHours.THTo = Convert.ToDateTime(item.End.DateTime).ToString("HH:mm");
+                            timeHours.THDate = startTime.Date;
+                            timeHours.THFrom = timeFrom;
+                            timeHours.THTo = timeTo;
+                            timeHours.THours = hours;
                             timeHours.Billable = true;
-                            timeHours.ActDescription = item.Summary;
-
-                            timeHours.UserId = users.UserId;
-
-                            timeHours.THours = Convert.ToDecimal(timeSpan.TotalHours);
+                            timeHours.ActDescription = item.Summary ?? "";
+                            timeHours.UserId = idUsuario;
                             timeHours.InternalNote = "";
                             timeHours.Visible = true;
                             timeHours.GCalendarId = item.Id;
-
                             timeHours.ActivityId = activity.ActivityId;
                             timeHours.CategoryId = category.CategoryId;
                             timeHours.CustomerId = customer.CustomerId;
                             timeHours.ProjectId = project.ProjectId;
 
-                            db.Entry(timeHours).State = System.Data.Entity.EntityState.Added;
-
-
-
+                            newevents.Add(timeHours);
                         }
-
                     }
 
-                    var modelTH = db.TimeHours;
-                    modelTH.AddRange(newevents);
+                    // Actually add new events to the database
+                    if (newevents.Any())
+                    {
+                        db.TimeHours.AddRange(newevents);
+                    }
                     db.SaveChanges();
 
 
@@ -263,10 +317,18 @@ namespace TimeTracker.Controllers
                 var idUsuario = idUser;
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
-                request.AddQueryParameter("client_id", _client_id);
-                request.AddQueryParameter("client_secret", _client_secret);
-                request.AddQueryParameter("grant_type", "refresh_token");
-                request.AddQueryParameter("refresh_token", DBtoken.refresh_token);
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.refresh_token))
+                {
+                    return RedirectToAction("OauthRedirect");
+                }
+
+                // Set content type for form data
+                request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                request.AddParameter("client_id", _client_id, ParameterType.GetOrPost);
+                request.AddParameter("client_secret", _client_secret, ParameterType.GetOrPost);
+                request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
+                request.AddParameter("refresh_token", DBtoken.refresh_token, ParameterType.GetOrPost);
 
                 var respose = restClient.Post(request);
 
@@ -428,14 +490,22 @@ namespace TimeTracker.Controllers
                             }
                         }
 
-                        var modelTH = db.TimeHours;
-                        modelTH.AddRange(newevents);
+                        // Actually add new events to the database
+                        if (newevents.Any())
+                        {
+                            db.TimeHours.AddRange(newevents);
+                        }
                         db.SaveChanges();
 
                     }
                     else
                     {
-                        restRequest.Parameters.RemoveParameter("pageToken");
+                        // Handle pagination properly
+                        var existingPageToken = restRequest.Parameters.FirstOrDefault(p => p.Name == "pageToken");
+                        if (existingPageToken != null)
+                        {
+                            restRequest.Parameters.RemoveParameter(existingPageToken);
+                        }
                         restRequest.AddQueryParameter("pageToken", calendarEvents["nextPageToken"].ToString());
                         GetLastEvents(restClient, restRequest);
                     }
@@ -456,28 +526,31 @@ namespace TimeTracker.Controllers
         {
             try
             {
-                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary/events");
-                RestRequest request = new RestRequest();
-
                 var idUsuario = Convert.ToInt32(GetUser());
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
-                request.AddQueryParameter("key", "AIzaSyA0B3OLn5GyjeOTHc5WAgu2QLj73iJyaW8");
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
+                {
+                    return Json(new { data = "No valid Google Calendar token found. Please reconnect." }, JsonRequestBehavior.AllowGet);
+                }
+
+                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+                RestRequest request = new RestRequest();
+
+                // Remove API key and use proper OAuth parameters
+                request.AddQueryParameter("singleEvents", "true");
+                request.AddQueryParameter("orderBy", "startTime");
+                request.AddQueryParameter("timeMin", DateTime.Now.AddDays(-30).ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", DateTime.Now.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ"));
                 request.AddQueryParameter("maxResults", "2500");
-                request.AddQueryParameter("orderBy", "updated");
-                request.AddQueryParameter("singleEvents", "True");
 
                 request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
                 request.AddHeader("Accept", "application/json");
 
                 GetLastEvents(restClient, request);
 
-
-
-                return Json(new { data = "All Events Sync Succesfully" }, JsonRequestBehavior.AllowGet);
-
+                return Json(new { data = "All Events Sync Successfully" }, JsonRequestBehavior.AllowGet);
             }
-
             catch (Exception ex)
             {
                 if (ex.Message.Contains("Unauthorized"))
@@ -488,9 +561,7 @@ namespace TimeTracker.Controllers
                 {
                     return Json(new { data = ex.Message }, JsonRequestBehavior.AllowGet);
                 }
-
             }
-
         }
 
 
@@ -502,13 +573,22 @@ namespace TimeTracker.Controllers
         {
             try
             {
-                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary/events");
-                RestRequest request = new RestRequest();
-
                 var idUsuario = Convert.ToInt32(GetUser());
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
-                request.AddQueryParameter("key", "AIzaSyA0B3OLn5GyjeOTHc5WAgu2QLj73iJyaW8");
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
+                {
+                    return Json(new { data = "No valid Google Calendar token found. Please reconnect." }, JsonRequestBehavior.AllowGet);
+                }
+
+                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+                RestRequest request = new RestRequest();
+
+                // Remove API key and use proper OAuth parameters
+                request.AddQueryParameter("singleEvents", "true");
+                request.AddQueryParameter("orderBy", "startTime");
+                request.AddQueryParameter("timeMin", DateTime.Now.AddDays(-30).ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", DateTime.Now.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ"));
                 request.AddQueryParameter("maxResults", "2500");
 
                 request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
@@ -554,64 +634,108 @@ namespace TimeTracker.Controllers
 
                         foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
                         {
-                            TimeSpan timeSpan = Convert.ToDateTime(item.End.DateTime) - Convert.ToDateTime(item.Start.DateTime);
+                            DateTime startTime, endTime;
+                            string timeFrom, timeTo;
+                            decimal hours;
 
-
-                            var exist = db.TimeHours.Where(x => x.GCalendarId == item.Id).Any();
-                            if (exist)
+                            // Handle all-day events and preserve original times (no timezone conversion)
+                            if (!string.IsNullOrEmpty(item.Start.Date))
                             {
-                                var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-
-                                timeHours.THDate = TimeZoneInfo.ConvertTime(item.Start.DateTime.Value, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone));
-                                timeHours.THFrom = TimeZoneInfo.ConvertTime(item.Start.DateTime.Value, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone)).ToString("HH:mm");
-                                timeHours.THTo = TimeZoneInfo.ConvertTime(item.End.DateTime.Value, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone)).ToString("HH:mm");
-                                timeHours.Duration = 0;
-                                timeHours.UserId = idUsuario;
-                                timeHours.Users = user;
-                                //timeHours.Customer = work.Project.Customer;
-                                //timeHours.Project = work.Project;
-                                //timeHours.Activity = work;
-                                //timeHours.ActDescription = item.Summary;
-                                //timeHours.Billable = true;
-
-                                //timeHours.Category = category;
-                                //timeHours.InternalNote = "";
-                                db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
-                                updevents.Add(timeHours);
+                                // All-day event
+                                startTime = DateTime.Parse(item.Start.Date);
+                                endTime = DateTime.Parse(item.End.Date).AddDays(-1);
+                                timeFrom = "00:00";
+                                timeTo = "23:59";
+                                hours = 8.0m;
+                            }
+                            else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
+                            {
+                                // Timed event - keep original times without timezone conversion
+                                startTime = item.Start.DateTime.Value;
+                                endTime = item.End.DateTime.Value;
+                                
+                                timeFrom = startTime.ToString("HH:mm");
+                                timeTo = endTime.ToString("HH:mm");
+                                TimeSpan duration = endTime - startTime;
+                                hours = Convert.ToDecimal(duration.TotalHours);
                             }
                             else
                             {
+                                continue;
+                            }
+
+                            var existingTimeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
+                            
+                            // If event was manually deleted but still exists in Google Calendar, 
+                            // re-enable it since user is syncing (wants current Google Calendar state)
+                            bool wasManuallyDeleted = existingTimeHours != null && 
+                                                    existingTimeHours.InternalNote != null && 
+                                                    existingTimeHours.InternalNote.StartsWith("MANUALLY_DELETED_");
+                            
+                            if (existingTimeHours != null)
+                            {
+                                // Update existing event (including re-enabling manually deleted ones)
+                                existingTimeHours.THDate = startTime.Date;
+                                existingTimeHours.THFrom = timeFrom;
+                                existingTimeHours.THTo = timeTo;
+                                existingTimeHours.THours = hours;
+                                existingTimeHours.ActDescription = item.Summary ?? "";
+                                existingTimeHours.Billable = true;
+                                existingTimeHours.Visible = true; // Re-enable if it was hidden
+                                
+                                // Clear manual deletion marker since event exists in Google Calendar
+                                if (wasManuallyDeleted)
+                                {
+                                    existingTimeHours.InternalNote = $"RE_SYNCED_{DateTime.Now.ToString("yyyyMMddHHmmss")}";
+                                }
+                                else if (string.IsNullOrEmpty(existingTimeHours.InternalNote) || 
+                                        !existingTimeHours.InternalNote.StartsWith("MANUALLY_DELETED_"))
+                                {
+                                    existingTimeHours.InternalNote = "";
+                                }
+                                
+                                db.Entry(existingTimeHours).State = System.Data.Entity.EntityState.Modified;
+                            }
+                            else
+                            {
+                                // Create new event
                                 TimeHours timeHours = new TimeHours();
-
-                                timeHours.THDate = TimeZoneInfo.ConvertTime(item.Start.DateTime.Value, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone));
-                                timeHours.THFrom = TimeZoneInfo.ConvertTime(item.Start.DateTime.Value, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone)).ToString("HH:mm");
-                                timeHours.THTo = TimeZoneInfo.ConvertTime(item.End.DateTime.Value, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone)).ToString("HH:mm");
+                                timeHours.THDate = startTime.Date;
+                                timeHours.THFrom = timeFrom;
+                                timeHours.THTo = timeTo;
+                                timeHours.THours = hours;
                                 timeHours.Billable = true;
-                                timeHours.ActDescription = item.Summary;
-
-                                timeHours.UserId = users.UserId;
-
-                                timeHours.THours = Convert.ToDecimal(timeSpan.TotalHours);
+                                timeHours.ActDescription = item.Summary ?? "";
+                                timeHours.UserId = idUsuario;
                                 timeHours.InternalNote = "";
                                 timeHours.Visible = true;
                                 timeHours.GCalendarId = item.Id;
-
                                 timeHours.ActivityId = activity.ActivityId;
                                 timeHours.CategoryId = category.CategoryId;
                                 timeHours.CustomerId = customer.CustomerId;
                                 timeHours.ProjectId = project.ProjectId;
 
-                                db.Entry(timeHours).State = System.Data.Entity.EntityState.Added;
+                                newevents.Add(timeHours);
                             }
                         }
 
-                        var modelTH = db.TimeHours;
-                        modelTH.AddRange(newevents);
+                        // Actually add new events to the database
+                        if (newevents.Any())
+                        {
+                            db.TimeHours.AddRange(newevents);
+                        }
                         db.SaveChanges();
 
-                        var nextPageToken = calendarEvents["nextPageToken"].ToString();
-
-                        request.Parameters.RemoveParameter("pageToken");
+                        // Handle pagination properly
+                        var nextPageToken = calendarEvents["nextPageToken"]?.ToString();
+                        
+                        // Remove existing pageToken parameter
+                        var existingPageToken = request.Parameters.FirstOrDefault(p => p.Name == "pageToken");
+                        if (existingPageToken != null)
+                        {
+                            request.Parameters.RemoveParameter(existingPageToken);
+                        }
+                        
                         if (!string.IsNullOrEmpty(nextPageToken))
                         {
                             request.AddQueryParameter("pageToken", nextPageToken);
@@ -626,7 +750,8 @@ namespace TimeTracker.Controllers
                         return Json(new { data = response.StatusCode }, JsonRequestBehavior.AllowGet);
                     }
 
-                } while (!string.IsNullOrEmpty(response.Content) && !string.IsNullOrEmpty(request.Parameters.TryFind("pageToken")?.Value.ToString()));
+                } while (response.StatusCode == System.Net.HttpStatusCode.OK && 
+                        JObject.Parse(response.Content)["nextPageToken"] != null);
 
 
                 return Json(new { data = "All Events Sync Succesfully" }, JsonRequestBehavior.AllowGet);
@@ -650,21 +775,385 @@ namespace TimeTracker.Controllers
 
         }
 
-        public bool IsConnected(int idUser)
+        public JsonResult SyncTodayEvents()
+        {
+            try
+            {
+                var idUsuario = Convert.ToInt32(GetUser());
+                var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
+
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
+                {
+                    return Json(new { data = "No valid Google Calendar token found. Please reconnect." }, JsonRequestBehavior.AllowGet);
+                }
+
+                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+                RestRequest request = new RestRequest();
+
+                // Get today's events only
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
+                request.AddQueryParameter("singleEvents", "true");
+                request.AddQueryParameter("orderBy", "startTime");
+                request.AddQueryParameter("timeMin", today.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", tomorrow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("maxResults", "2500");
+
+                request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
+                request.AddHeader("Accept", "application/json");
+
+                SyncEventsInRange(restClient, request, idUsuario);
+
+                return Json(new { data = "Today's Events Sync Successfully" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unauthorized"))
+                {
+                    return Json(new { data = "Google Calendar error, try re-connect" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { data = ex.Message }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        public JsonResult SyncWeekEvents()
+        {
+            try
+            {
+                var idUsuario = Convert.ToInt32(GetUser());
+                var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
+
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
+                {
+                    return Json(new { data = "No valid Google Calendar token found. Please reconnect." }, JsonRequestBehavior.AllowGet);
+                }
+
+                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+                RestRequest request = new RestRequest();
+
+                // Get current week's events (Monday to Sunday)
+                var today = DateTime.Today;
+                var startOfWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+                var endOfWeek = startOfWeek.AddDays(7);
+
+                request.AddQueryParameter("singleEvents", "true");
+                request.AddQueryParameter("orderBy", "startTime");
+                request.AddQueryParameter("timeMin", startOfWeek.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", endOfWeek.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("maxResults", "2500");
+
+                request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
+                request.AddHeader("Accept", "application/json");
+
+                SyncEventsInRange(restClient, request, idUsuario);
+
+                return Json(new { data = "This Week's Events Sync Successfully" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unauthorized"))
+                {
+                    return Json(new { data = "Google Calendar error, try re-connect" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { data = ex.Message }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        private bool SyncEventsInRange(RestClient restClient, RestRequest restRequest, int idUsuario)
+        {
+            try
+            {
+                
+                RestResponse restResponse;
+                do
+                {
+                    restResponse = restClient.Get(restRequest);
+
+                    if (restResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        JObject calendarEvents = JObject.Parse(restResponse.Content);
+                        var allEvents = calendarEvents["items"].ToObject<IEnumerable<Event>>();
+
+                        var work = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
+                        var user = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
+
+                        Project project = db.Project.Where(x => x.ProjectName == "Google Calendar Event").FirstOrDefault();
+                        Activity activity = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
+                        Customer customer = db.Customer.Where(x => x.CustomerName == "Google Calendar Event").FirstOrDefault();
+                        Category category = db.Category.Where(x => x.CategoryName == "Meetings / Reuniones").FirstOrDefault();
+                        Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
+
+                        // Validate that user exists
+                        if (users == null)
+                        {
+                            throw new Exception($"User with ID {idUsuario} not found in database.");
+                        }
+
+                        List<TimeHours> newevents = new List<TimeHours>();
+
+                        // Handle cancelled events
+                        foreach (var item in allEvents.Where(x => x.Status == "cancelled"))
+                        {
+                            var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
+                            if (timeHours != null)
+                            {
+                                db.TimeHours.Remove(timeHours);
+                                db.SaveChanges();
+                            }
+                        }
+
+                        // Create a list to track deleted Google Calendar events to avoid recreating them
+                        var deletedGCalendarIds = new List<string>();
+
+                        foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
+                        {
+                            DateTime startTime, endTime;
+                            string timeFrom, timeTo;
+                            decimal hours;
+
+                            // Handle all-day events and preserve original times (no timezone conversion)
+                            if (!string.IsNullOrEmpty(item.Start.Date))
+                            {
+                                // All-day event
+                                startTime = DateTime.Parse(item.Start.Date);
+                                endTime = DateTime.Parse(item.End.Date).AddDays(-1);
+                                timeFrom = "00:00";
+                                timeTo = "23:59";
+                                hours = 8.0m;
+                            }
+                            else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
+                            {
+                                // Timed event - keep original times without timezone conversion
+                                startTime = item.Start.DateTime.Value;
+                                endTime = item.End.DateTime.Value;
+                                
+                                timeFrom = startTime.ToString("HH:mm");
+                                timeTo = endTime.ToString("HH:mm");
+                                TimeSpan duration = endTime - startTime;
+                                hours = Convert.ToDecimal(duration.TotalHours);
+                            }
+                            else
+                            {
+                                continue;
+                            }
+
+                            var existingTimeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
+                            
+                            // If event was manually deleted but still exists in Google Calendar, 
+                            // re-enable it since user is syncing (wants current Google Calendar state)
+                            bool wasManuallyDeleted = existingTimeHours != null && 
+                                                    existingTimeHours.InternalNote != null && 
+                                                    existingTimeHours.InternalNote.StartsWith("MANUALLY_DELETED_");
+                            
+                            if (existingTimeHours != null)
+                            {
+                                // Update existing event (including re-enabling manually deleted ones)
+                                existingTimeHours.THDate = startTime.Date;
+                                existingTimeHours.THFrom = timeFrom;
+                                existingTimeHours.THTo = timeTo;
+                                existingTimeHours.THours = hours;
+                                existingTimeHours.ActDescription = item.Summary ?? "";
+                                existingTimeHours.Billable = true;
+                                existingTimeHours.Visible = true; // Re-enable if it was hidden
+                                existingTimeHours.InternalNote = "";
+                                
+                                db.Entry(existingTimeHours).State = System.Data.Entity.EntityState.Modified;
+                            }
+                            else
+                            {
+                                // Create new event
+                                TimeHours timeHours = new TimeHours();
+                                timeHours.THDate = startTime.Date;
+                                timeHours.THFrom = timeFrom;
+                                timeHours.THTo = timeTo;
+                                timeHours.THours = hours;
+                                timeHours.Billable = true;
+                                timeHours.ActDescription = item.Summary ?? "";
+                                timeHours.UserId = idUsuario;
+                                timeHours.InternalNote = "";
+                                timeHours.Visible = true;
+                                timeHours.GCalendarId = item.Id;
+                                timeHours.ActivityId = activity.ActivityId;
+                                timeHours.CategoryId = category.CategoryId;
+                                timeHours.CustomerId = customer.CustomerId;
+                                timeHours.ProjectId = project.ProjectId;
+
+                                newevents.Add(timeHours);
+                            }
+                        }
+
+                        // Actually add new events to the database
+                        if (newevents.Any())
+                        {
+                            db.TimeHours.AddRange(newevents);
+                        }
+                        db.SaveChanges();
+
+                        // Handle pagination
+                        var nextPageToken = calendarEvents["nextPageToken"]?.ToString();
+                        if (!string.IsNullOrEmpty(nextPageToken))
+                        {
+                            var existingPageToken = restRequest.Parameters.FirstOrDefault(p => p.Name == "pageToken");
+                            if (existingPageToken != null)
+                            {
+                                restRequest.Parameters.RemoveParameter(existingPageToken);
+                            }
+                            restRequest.AddQueryParameter("pageToken", nextPageToken);
+                        }
+                        else
+                        {
+                            break; // No more pages
+                        }
+                    }
+                    else
+                    {
+                        // Log error details for debugging
+                        string errorMessage = $"Google Calendar API error: {restResponse.StatusCode} - {restResponse.Content}";
+                        if (restResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        {
+                            throw new UnauthorizedAccessException("Google Calendar token expired or invalid");
+                        }
+                        throw new Exception(errorMessage);
+                    }
+                } while (true);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public ActionResult IsConnected()
+        {
+            try
+            {
+                // Verificar primero si el usuario está autenticado a nivel básico
+                if (User == null || User.Identity == null)
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "No user context available",
+                        debug = "User or User.Identity is null"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "User not authenticated",
+                        debug = "User.Identity.IsAuthenticated is false"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (string.IsNullOrEmpty(User.Identity.Name))
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "User identity name is empty",
+                        debug = "User.Identity.Name is null or empty"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Intentar obtener el ID del usuario
+                string userIdStr;
+                try
+                {
+                    userIdStr = GetUser();
+                }
+                catch (Exception getUserEx)
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "Failed to get user ID",
+                        debug = $"GetUser() threw exception: {getUserEx.Message}"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (string.IsNullOrEmpty(userIdStr))
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "User ID is empty",
+                        debug = "GetUser() returned null or empty string"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Convertir ID de usuario
+                int idUser;
+                if (!int.TryParse(userIdStr, out idUser))
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "Invalid user ID format",
+                        debug = $"Cannot parse '{userIdStr}' to integer"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Verificar conexión en base de datos
+                if (db == null)
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "Database connection error",
+                        debug = "Database context is null"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                var tokenExists = db.GCToken.Any(x => x.idUsuario == idUser);
+                
+                // Si existe token, verificar que no esté vacío
+                if (tokenExists)
+                {
+                    var token = db.GCToken.FirstOrDefault(x => x.idUsuario == idUser);
+                    var hasValidToken = token != null && !string.IsNullOrEmpty(token.access_token);
+                    
+                    return Json(new { 
+                        connected = hasValidToken,
+                        userId = idUser,
+                        tokenExists = true,
+                        hasAccessToken = token != null && !string.IsNullOrEmpty(token.access_token),
+                        debug = $"User ID: {idUser}, Token found, Access token valid: {hasValidToken}"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { 
+                    connected = false,
+                    userId = idUser,
+                    tokenExists = false,
+                    debug = $"User ID: {idUser}, No token found in database"
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    connected = false, 
+                    error = ex.Message,
+                    debug = ex.ToString()
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public bool IsUserConnected(int idUser)
         {
             try
             {
                 var user = db.GCToken.Any(x=> x.idUsuario ==  idUser);
-
-
                 return user;
             }
             catch (Exception)
             {
-
                 throw;
             }
-
         }
 
     }

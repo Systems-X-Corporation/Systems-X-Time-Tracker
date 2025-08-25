@@ -18,6 +18,7 @@ namespace TimeTracker.Models
         public Office()
         {
             this.Customer = new HashSet<Customer>();
+            this.Users = new HashSet<Users>();
         }
     
         public int OfficeId { get; set; }
@@ -26,5 +27,7 @@ namespace TimeTracker.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Customer> Customer { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Users> Users { get; set; }
     }
 }

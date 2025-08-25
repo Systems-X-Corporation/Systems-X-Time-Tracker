@@ -138,8 +138,14 @@
                 "billable": $('#Billable').is(":checked")
             },
             success: function (response) {
+                console.log('Delete response:', response);
+                
                 var event = calendar.getEventById(selectedEvent);
-                event.remove();
+                if (event) {
+                    event.remove();
+                } else {
+                    console.warn('Event not found in calendar for removal:', selectedEvent);
+                }
 
                 jQuery("#modal-view-event-add").modal('hide');
 
@@ -152,6 +158,14 @@
                 var view = calendar.currentData.currentViewType;
                 var date = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
                 DailyViews(date, view);
+                
+                // Show debug information
+                if (response.type) {
+                    console.log('Deletion type:', response.type);
+                    if (response.warning) {
+                        console.warn('Warning:', response.warning);
+                    }
+                }
             },
             timeout: 30 * 60 * 1000
         }).fail(function (xhr, status) {
@@ -193,6 +207,42 @@
         $('#endtime').val(end.toTimeString().substring(0, 8));
     });
 
+    // Separate function to refresh events only
+    function refreshEvents() {
+        $.ajax({
+            type: 'GET',
+            url: '../../Time/GetHours',
+            success: function (response) {
+                var buildingEvents = $.map(response, function (item) {
+                    return {
+                        id: item.id,
+                        title: item.title,
+                        start: item.start,
+                        end: item.end,
+                        allDay: false,
+                        color: item.color,
+                        daystatus: item.daystatus,
+                        approved: item.approved
+                    };
+                });
+
+                // Remove all existing events and add new ones
+                if (calendar) {
+                    calendar.removeAllEventSources();
+                    calendar.addEventSource(buildingEvents);
+                }
+            },
+            timeout: 30 * 60 * 1000
+        }).fail(function (xhr, status) {
+            if (status === "timeout") {
+                console.log('Tiempo de respuesta agotado');
+            }
+            if (status === "error") {
+                console.log('La cantidad de datos excede el limite por conexión');
+            }
+        });
+    }
+
     function loadData() {
         $.ajax({
             type: 'GET',
@@ -215,7 +265,9 @@
                 var currentdate;
                 var calendarEl = document.getElementById('calendar');
 
-                calendar = new FullCalendar.Calendar(calendarEl, {
+                // Only create calendar if it doesn't exist
+                if (!calendar) {
+                    calendar = new FullCalendar.Calendar(calendarEl, {
                     headerToolbar: {
                         left: 'prev,next today',
                         center: 'title',
@@ -488,7 +540,12 @@
                     ]
                 });
 
-                calendar.render();
+                    calendar.render();
+                } else {
+                    // Calendar already exists, just update events
+                    calendar.removeAllEventSources();
+                    calendar.addEventSource(buildingEvents);
+                }
             },
             timeout: 30 * 60 * 1000
         }).fail(function (xhr, status) {
@@ -503,6 +560,9 @@
 
     loadData();
     //select2settings();
+    
+    // Make refreshEvents available globally for WeekTime.cshtml
+    window.refreshEvents = refreshEvents;
     function DailyViews(currentdate, view) {
         $.ajax({
             type: 'GET',
@@ -577,7 +637,11 @@
                                                             }
                                                         });
 
-                                                        loadData();
+                                                        refreshEvents();
+                                                        // Update Daily Status after data refresh
+                                                        var currentView = calendar.currentData.currentViewType;
+                                                        var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                                                        DailyViews(currentDate, currentView);
                                                     }
                                                 }
                                             });
@@ -619,7 +683,11 @@
                                                             }
                                                         });
 
-                                                        loadData();
+                                                        refreshEvents();
+                                                        // Update Daily Status after data refresh
+                                                        var currentView = calendar.currentData.currentViewType;
+                                                        var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                                                        DailyViews(currentDate, currentView);
                                                     }
                                                 }
                                             });

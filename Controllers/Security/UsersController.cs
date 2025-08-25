@@ -42,6 +42,12 @@ namespace TimeTracker.Controllers.Security
 
                 Company company = db.Company.FirstOrDefault();
                 newUsers.Company = company;
+                int officeId = Convert.ToInt32(formCollection["OfficeId"]);
+                if (officeId > 0)
+                {
+                    var office = db.Office.FirstOrDefault(x => x.OfficeId == officeId);
+                    newUsers.Office = office;
+                }
                 string mail = formCollection["Email"];
                 newUsers.Email = mail;
                 newUsers.UserName = formCollection["UserName"];
@@ -50,6 +56,9 @@ namespace TimeTracker.Controllers.Security
                 newUsers.EmailConfirmed = false;
                 newUsers.LockoutEnable = "1";
                 newUsers.LockoutEndDate = System.DateTime.Now.AddMonths(6);
+                newUsers.FactorEndDate = System.DateTime.Now.AddMonths(6);
+                newUsers.AccessFailedCount = 0;
+                newUsers.IsSuperUser = false;
                 newUsers.PasswordCry = crypto.Encrypt(password);
                 bool active = false;
                 if (formCollection["customCheck"] == "on")
@@ -61,20 +70,49 @@ namespace TimeTracker.Controllers.Security
                 model.Add(newUsers);
                 db.SaveChanges();
 
-                var Roles = formCollection["cboRole"].Split(',');
-                
-                if(Roles.Length > 0)
+                if (officeId > 0)
                 {
-                    var RoleModel = db.RolesUsers;
-                    foreach (var Role in Roles)
+                    string selectedProjects = formCollection["SelectedProjects"];
+                    if (!string.IsNullOrEmpty(selectedProjects))
                     {
-                        RolesUsers rolesUsers = new RolesUsers();
-                        var RoleId = Convert.ToInt32(Role);
-                        var _role = db.Roles.Where(x=> x.RoleId == RoleId).FirstOrDefault();
-                        rolesUsers.Roles = _role;
-                        rolesUsers.Users = newUsers;
-                        RoleModel.Add(rolesUsers);
+                        var projectIds = selectedProjects.Split(',').Select(int.Parse).ToList();
+                        var projects = db.Project.Where(p => projectIds.Contains(p.ProjectId)).ToList();
+                        
+                        foreach (var proj in projects)
+                        {
+                            UsersProject up = new UsersProject();
+                            up.Project = proj;
+                            up.Users = newUsers;
+                            db.UsersProject.Add(up);
+                        }
                         db.SaveChanges();
+                    }
+                }
+
+                var rolesString = formCollection["cboRole"];
+                if (!string.IsNullOrEmpty(rolesString))
+                {
+                    var Roles = rolesString.Split(',');
+                    
+                    if(Roles.Length > 0)
+                    {
+                        var RoleModel = db.RolesUsers;
+                        foreach (var Role in Roles)
+                        {
+                            if (!string.IsNullOrEmpty(Role))
+                            {
+                                RolesUsers rolesUsers = new RolesUsers();
+                                var RoleId = Convert.ToInt32(Role);
+                                var _role = db.Roles.Where(x=> x.RoleId == RoleId).FirstOrDefault();
+                                if (_role != null)
+                                {
+                                    rolesUsers.Roles = _role;
+                                    rolesUsers.Users = newUsers;
+                                    RoleModel.Add(rolesUsers);
+                                    db.SaveChanges();
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -114,6 +152,12 @@ namespace TimeTracker.Controllers.Security
 
                 Company company = db.Company.FirstOrDefault();
                 newUsers.Company = company;
+                int officeId = Convert.ToInt32(formCollection["eOfficeId"]);
+                if (officeId > 0)
+                {
+                    var office = db.Office.FirstOrDefault(x => x.OfficeId == officeId);
+                    newUsers.Office = office;
+                }
                 newUsers.Email = formCollection["eEmail"];
                 newUsers.UserName = formCollection["eUserName"];
                 newUsers.FirstName = formCollection["eFirstName"];
@@ -127,24 +171,59 @@ namespace TimeTracker.Controllers.Security
 
                 db.Entry(newUsers).State = System.Data.Entity.EntityState.Modified;
                 db.SaveChanges();
+
+                if (officeId > 0)
+                {
+                    var userProjects = db.UsersProject.Where(x => x.UserId == UsersId).ToList();
+                    db.UsersProject.RemoveRange(userProjects);
+                    db.SaveChanges();
+
+                    string selectedProjects = formCollection["SelectedEditProjects"];
+                    if (!string.IsNullOrEmpty(selectedProjects))
+                    {
+                        var projectIds = selectedProjects.Split(',').Select(int.Parse).ToList();
+                        var projects = db.Project.Where(p => projectIds.Contains(p.ProjectId)).ToList();
+                        
+                        foreach (var proj in projects)
+                        {
+                            UsersProject up = new UsersProject();
+                            up.Project = proj;
+                            up.Users = newUsers;
+                            db.UsersProject.Add(up);
+                        }
+                        db.SaveChanges();
+                    }
+                }
+
                 var RoleModel = db.RolesUsers;
                 var _roles = db.RolesUsers.Where(x => x.Users.UserId == UsersId).ToList();
                 RoleModel.RemoveRange(_roles);
                 db.SaveChanges();
-                var Roles = formCollection["cboERole"].Split(',');
-
-                if (Roles.Length > 0)
+                
+                var rolesString = formCollection["cboERole"];
+                if (!string.IsNullOrEmpty(rolesString))
                 {
-                    
-                    foreach (var Role in Roles)
+                    var Roles = rolesString.Split(',');
+
+                    if (Roles.Length > 0)
                     {
-                        RolesUsers rolesUsers = new RolesUsers();
-                        var RoleId = Convert.ToInt32(Role);
-                        var _role = db.Roles.Where(x => x.RoleId == RoleId).FirstOrDefault();
-                        rolesUsers.Roles = _role;
-                        rolesUsers.Users = newUsers;
-                        RoleModel.Add(rolesUsers);
-                        db.SaveChanges();
+                        
+                        foreach (var Role in Roles)
+                        {
+                            if (!string.IsNullOrEmpty(Role))
+                            {
+                                RolesUsers rolesUsers = new RolesUsers();
+                                var RoleId = Convert.ToInt32(Role);
+                                var _role = db.Roles.Where(x => x.RoleId == RoleId).FirstOrDefault();
+                                if (_role != null)
+                                {
+                                    rolesUsers.Roles = _role;
+                                    rolesUsers.Users = newUsers;
+                                    RoleModel.Add(rolesUsers);
+                                    db.SaveChanges();
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -160,41 +239,65 @@ namespace TimeTracker.Controllers.Security
         }
 
 
-        public ActionResult DeleteUsers(string id)
+        public JsonResult DeleteUsers(string id)
         {
             try
             {
                 int UsersId = Convert.ToInt32(id);
 
-
-                using (var ctx = db)
+                // Delete TimeHours first (this was causing the constraint error)
+                var timeHours = db.TimeHours.Where(x => x.UserId == UsersId).ToList();
+                if (timeHours.Any())
                 {
-                    var u = (from y in ctx.RolesUsers
-                             where y.UserId == UsersId
-                             select y).FirstOrDefault();
-                    ctx.RolesUsers.Remove(u);
-                    ctx.SaveChanges();
+                    db.TimeHours.RemoveRange(timeHours);
+                    db.SaveChanges();
                 }
 
-
-
-
-                using (var ctx = db)
+                // Delete ProjectManager records
+                var projectManagers = db.ProjectManager.Where(x => x.UserId == UsersId).ToList();
+                if (projectManagers.Any())
                 {
-                    var x = (from y in ctx.Users
-                             where y.UserId == UsersId
-                             select y).FirstOrDefault();
-                    ctx.Users.Remove(x);
-                    ctx.SaveChanges();
+                    db.ProjectManager.RemoveRange(projectManagers);
+                    db.SaveChanges();
                 }
-                var model = db.Users;
-                return PartialView("~/Views/Security/Users/_ListUsers.cshtml", model.ToList());
+
+                // Delete Privilege_User records
+                var privilegeUsers = db.Privilege_User.Where(x => x.UserId == UsersId).ToList();
+                if (privilegeUsers.Any())
+                {
+                    db.Privilege_User.RemoveRange(privilegeUsers);
+                    db.SaveChanges();
+                }
+
+                // Delete user projects
+                var userProjects = db.UsersProject.Where(x => x.UserId == UsersId).ToList();
+                if (userProjects.Any())
+                {
+                    db.UsersProject.RemoveRange(userProjects);
+                    db.SaveChanges();
+                }
+
+                // Delete user roles
+                var userRoles = db.RolesUsers.Where(y => y.UserId == UsersId).ToList();
+                if (userRoles.Any())
+                {
+                    db.RolesUsers.RemoveRange(userRoles);
+                    db.SaveChanges();
+                }
+
+                // Finally, delete the user
+                var user = db.Users.Where(y => y.UserId == UsersId).FirstOrDefault();
+                if (user != null)
+                {
+                    db.Users.Remove(user);
+                    db.SaveChanges();
+                }
+
+                return Json(new { success = true, message = "User deleted successfully" }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
-                var model = db.Users;
-                ViewData["EditError"] = e.Message;
-                return PartialView("~/Views/Security/Users/_ListUsers.cshtml", model.ToList());
+                return Json(new { success = false, message = e.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -207,7 +310,9 @@ namespace TimeTracker.Controllers.Security
                 var data = db.Users.Where(x => x.UserId == id).FirstOrDefault();
                 var role = db.RolesUsers.Where(z => z.Users.UserId == id).Select(x=> x.Roles.RoleId).ToList();
                 
-                return Json(new { data.UserId, data.Email, data.Company.CompanyId, data.UserName, data.FirstName, data.Active, data.LastName, role }, JsonRequestBehavior.AllowGet);
+                int? officeId = data.OfficeId > 0 ? data.OfficeId : (int?)null;
+                
+                return Json(new { data.UserId, data.Email, data.Company.CompanyId, data.UserName, data.FirstName, data.Active, data.LastName, role, OfficeId = officeId }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -234,6 +339,46 @@ namespace TimeTracker.Controllers.Security
                 throw ex;
             }
 
+        }
+
+        public JsonResult GetProjectsByOffice(int officeId)
+        {
+            try
+            {
+                var projects = db.Project.Where(p => p.Customer.Office.OfficeId == officeId)
+                                       .Select(p => new { 
+                                           ProjectId = p.ProjectId, 
+                                           ProjectName = p.ProjectName,
+                                           CustomerOffice = p.Customer.Office.OfficeDescription,
+                                           CustomerName = p.Customer.CustomerName
+                                       }).ToList();
+                
+                return Json(projects, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public JsonResult GetUserProjects(int userId)
+        {
+            try
+            {
+                var userProjects = db.UsersProject.Where(up => up.UserId == userId)
+                                                .Select(up => new {
+                                                    ProjectId = up.Project.ProjectId,
+                                                    ProjectName = up.Project.ProjectName,
+                                                    CustomerOffice = up.Project.Customer.Office.OfficeDescription,
+                                                    CustomerName = up.Project.Customer.CustomerName
+                                                }).ToList();
+                
+                return Json(userProjects, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
     }

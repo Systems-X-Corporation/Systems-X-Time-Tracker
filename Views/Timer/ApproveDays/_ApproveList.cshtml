@@ -32,7 +32,7 @@
        settings.CommandColumn.Visible = true;
        settings.CommandColumn.ShowCancelButton = true;
        settings.CommandColumn.ShowDeleteButton = false;
-       settings.CommandColumn.ShowNewButtonInHeader = true;
+       settings.CommandColumn.ShowNewButtonInHeader = false;
        settings.CommandColumn.Width = Unit.Pixel(100);
 
        settings.Columns.Add(c =>
@@ -81,21 +81,21 @@
        });
 
        settings.Columns.Add(c =>
-       {
-           c.ColumnType = MVCxGridViewColumnType.ComboBox;
-           c.FieldName = "Activity.ActivityId";
-           c.Caption = "Work";
-           c.Visible = true;
-           //c.ReadOnly = true;
-           c.EditorProperties().ComboBox(p =>
-           {
-               p.TextField = "ActivityName";
-               p.ValueField = "ActivityId";
-               p.ValueType = typeof(int);
-               p.DataSource = systemController.getActivityList();
-           });
-           c.Width = 200;
-       });
+        {
+            c.ColumnType = MVCxGridViewColumnType.ComboBox;
+            c.FieldName = "Project.ProjectId";
+            c.Caption = "Project";
+            c.Visible = true;
+            //c.ReadOnly = true;
+            c.EditorProperties().ComboBox(p =>
+            {
+                p.TextField = "ProjectName";
+                p.ValueField = "ProjectId";
+                p.ValueType = typeof(int);
+                p.DataSource = systemController.getProjectList();
+            });
+            c.Width = 200;
+        });
 
        settings.Columns.Add(c =>
        {
@@ -116,10 +116,6 @@
            c.ReadOnly = false;
            c.Width = 200;
        });
-
-
-
-
 
        settings.Columns.Add(c =>
        {
@@ -166,7 +162,7 @@
        {
            c.ColumnType = MVCxGridViewColumnType.ComboBox;
            c.FieldName = "DayStatus";
-           c.Caption = "Day Status";
+           c.Caption = "Approval Status";
            c.Visible = true;
            c.ReadOnly = false;
            c.EditorProperties().ComboBox(p =>

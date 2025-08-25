@@ -96,18 +96,29 @@
                         </div>
                         <div class="modal-body">
                             <label for="email">Username</label>
-                            <input type="text" class="form-control" id="Username" name="Username" placeholder="">
+                            <input type="text" class="form-control" id="UserName" name="UserName" placeholder="">
                         </div>
                         <div class="modal-body">
                             <label for="Active">Roles </label>
                             @Html.Action("GetCboMultipleRoles", "System")
                         </div>
 
+                        <div class="modal-body">
+                            <label for="OfficeId">Office</label>
+                            @Html.Action("GetCboOffice", "System")
+                        </div>
 
+                        <div class="modal-body" id="projectsPreviewSection" style="display: none;">
+                            <label>Projects to be assigned:</label>
+                            <div id="projectsPreview" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                <div class="text-muted">Select an office to see available projects</div>
+                            </div>
+                            <input type="hidden" id="SelectedProjects" name="SelectedProjects" />
+                        </div>
 
                         <div class="modal-body">
-                            <input type="checkbox" name="Active" id="Active" checked>
-                            <label for="Active">Active </label>
+                            <input type="checkbox" name="customCheck" id="customCheck" checked>
+                            <label for="customCheck">Active </label>
                         </div>
 
 
@@ -133,7 +144,7 @@
                         </button>
                     </div>
                     @using (Ajax.BeginForm("UsersUpdate", "Users", null, new AjaxOptions()
-                    { UpdateTargetId = "container", HttpMethod = "Post", OnSuccess = "OnSuccessEdit" }, null))
+                    { UpdateTargetId = "container", HttpMethod = "Post", OnBegin = "onBeginFunction", OnSuccess = "OnSuccessEdit" }, null))
                     {
                         <div class="modal-body">
 
@@ -165,7 +176,7 @@
                         <div class="modal-body">
 
                             <label for="email">Username</label>
-                            <input type="text" class="form-control" id="eUsername" name="eUsername" placeholder="">
+                            <input type="text" class="form-control" id="eUserName" name="eUserName" placeholder="">
 
                         </div>
                         <div class="modal-body">
@@ -173,10 +184,21 @@
                             @Html.Action("GetCboEMultipleRoles", "System")
                         </div>
                         <div class="modal-body">
+                            <label for="eOfficeId">Office</label>
+                            @Html.Action("GetECboOffice", "System")
+                        </div>
 
+                        <div class="modal-body" id="editProjectsSection" style="display: none;">
+                            <label>Current Projects:</label>
+                            <div id="editProjectsList" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                <div class="text-muted">Loading projects...</div>
+                            </div>
+                            <input type="hidden" id="SelectedEditProjects" name="SelectedEditProjects" />
+                        </div>
+                        
+                        <div class="modal-body">
                             <input type="checkbox" name="EActive" id="EActive" checked>
                             <label for="EActive">Active </label>
-
                         </div>
 
                         <div class="modal-footer">
@@ -194,55 +216,3 @@
 
 
 </div>
-
-
-
-
-
-
-
-
-
-
-               
-
-
-<div class="modal fade text-left" id="modalEditUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="myModalLabel35"> Edit User</h3>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            @using (Ajax.BeginForm("UserUpdate", "Users", null, new AjaxOptions()
-            { UpdateTargetId = "container", HttpMethod = "Post", OnSuccess = "OnSuccessEdit" }, null))
-            {
-
-              
-
-                <div class="modal-footer">
-                    <input type="reset" class="btn btn-outline-secondary btn-lg" data-dismiss="modal" value="close">
-                    <input type="submit" class="btn btn-outline-primary btn-lg" value="Save">
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-            </section>
-
-

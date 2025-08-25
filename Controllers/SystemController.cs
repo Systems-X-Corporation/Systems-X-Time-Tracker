@@ -552,6 +552,12 @@ namespace TimeTracker.Controllers
             return model;
         }
 
+        public IEnumerable<Project> getProjectList()
+        {
+            var model = db.Project.ToList();
+            return model;
+        }
+
         public IEnumerable<Category> getCategoryList()
         {
             var model = db.Category.ToList();
@@ -577,7 +583,7 @@ namespace TimeTracker.Controllers
             list.Add("Approved");
             list.Add("Under Review");
             list.Add("Disregard");
-            list.Add("Dismiss");
+            list.Add("Not Billable");
 
             return list;
         }
