@@ -63,4 +63,6 @@ jobs:
           app-name: 'sxtimetracker'
           slot-name: 'Production'
           package: .
+
           
+
