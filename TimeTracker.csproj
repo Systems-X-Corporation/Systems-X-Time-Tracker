@@ -73,7 +73,6 @@
     </Reference>
     <Reference Include="DevExpress.Web.Mvc5.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.Web.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-    <PackageReference Include="DevExpress.Web.Mvc Version=22.2.15.0" />
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="DevExpress.Xpo.v22.2, Version=22.2.15.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
