@@ -24,6 +24,13 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
 
+      - name: Add DevExpress NuGet feed
+        shell: pwsh
+        run: |
+          nuget sources Remove -Name DevExpress -NonInteractive | Out-Null
+          nuget sources Add -Name DevExpress -Source "${{ secrets.DEVEXPRESS_NUGET }}" -NonInteractive
+          nuget sources List
+
       - name: Restore NuGet packages
         run: nuget restore
 
@@ -63,4 +70,5 @@ jobs:
           app-name: 'sxtimetracker'
           slot-name: 'Production'
           package: .
+
           
