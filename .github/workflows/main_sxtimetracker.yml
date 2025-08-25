@@ -1,54 +1,70 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP app to Azure Web App - sxtimetracker
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022     # 👈 fijamos imagen
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSBuild path
-        uses: microsoft/setup-msbuild@v1.0.2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.3.1
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.5
+        uses: NuGet/setup-nuget@v2
 
-      - name: Restore NuGet packages
-        run: nuget restore
+      # 🔐 SOLO si usas DevExpress por NuGet. Crea el secreto DEVEXPRESS_NUGET con tu URL /api
+      - name: Add DevExpress NuGet feed
+        if: ${{ secrets.DEVEXPRESS_NUGET != '' }}
+        shell: pwsh
+        run: |
+          nuget sources Remove -Name DevExpress -NonInteractive | Out-Null
+          nuget sources Add -Name DevExpress -Source "${{ secrets.DEVEXPRESS_NUGET }}" -NonInteractive
+          nuget sources List
 
-      - name: Publish to folder
-        run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
+      - name: Restore NuGet packages (solution)
+        run: nuget restore .\Systems-X-Time-Tracker.sln -NonInteractive
+
+      - name: Build solution (Release)
+        run: msbuild .\Systems-X-Time-Tracker.sln /m /p:Configuration=Release /p:Platform="Any CPU" /p:RestorePackages=false
+
+      - name: Publish to folder (explicit csproj + SolutionDir)
+        shell: pwsh
+        run: |
+          $pub = "$env:GITHUB_WORKSPACE\published"
+          New-Item -ItemType Directory -Path $pub -Force | Out-Null
+          msbuild .\Systems-X-Time-Tracker\Systems-X-Time-Tracker\TimeTracker.csproj `
+            /t:Build;PipelinePreDeployCopyAllFilesToOneFolder `
+            /p:_PackageTempDir="$pub" `
+            /p:Configuration=Release `
+            /p:SolutionDir="$env:GITHUB_WORKSPACE\"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: ASP-app
-          path: '/published/**'
+          path: published/**
 
   deploy:
-    runs-on: windows-latest
+    runs-on: windows-2022
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: ASP-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -57,12 +73,9 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B777F1B32C31410BAC5AD478E5BCF322 }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'sxtimetracker'
           slot-name: 'Production'
           package: .
-
-          
 
