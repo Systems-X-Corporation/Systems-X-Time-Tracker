@@ -133,7 +133,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="issueinput3">Client - Project</label>
+                                            <label for="issueinput3">Client - Project <span class="text-danger">*</span></label>
                                             @Html.Action("GetCboProjectUser", "System")
                                         </div>
                                     </div>
@@ -143,33 +143,31 @@
                                 @*<div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="issueinput3">Project</label>
+                                            <label for="issueinput3">Project <span class="text-danger">*</span></label>
                                             <div id="CboProjectContent">
                                                 @Html.Action("GetCboProject", "System")
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>*@
+                                
                                 @*<div class="row">
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="issueinput3">Work</label>
-                    <div id="CboActivityContent">
-
-                        @Html.Action("GetCboActivity", "System")
-                    </div>
-                </div>
-            </div>
-
-        </div>*@
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="issueinput3">Work/Activity <span class="text-danger">*</span></label>
+                                            <div id="CboActivityContent">
+                                                @Html.Action("GetCboActivity", "System")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
 
 
 
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="issueinput3">Work Performed / Activities completed</label>
+                                            <label for="issueinput3">Work Performed / Activities Completed <span class="text-danger">*</span></label>
                                             <input type="text" id="description" class="form-control" name="description" required>
                                         </div>
                                     </div>
@@ -178,7 +176,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="issueinput3">Category</label>
+                                            <label for="issueinput3">Category <span class="text-danger">*</span></label>
                                             <div id="CboCategoryContent">
 
                                                 @Html.Action("GetCboCategory", "System")
@@ -190,8 +188,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-
-                                            <input type="checkbox" id="Billable" name="Billable" checked>
+                                            <input type="checkbox" id="Billable" name="Billable">
                                             <label for="issueinput3">Billable</label>
                                         </div>
                                     </div>
@@ -294,6 +291,22 @@
                 },
                 error: function() {
                     alert('Error getting debug information');
+                }
+            });
+        };
+        
+        window.testDecimalPrecision = function() {
+            $.ajax({
+                type: 'GET',
+                url: '/Time/TestDecimalPrecision',
+                success: function(response) {
+                    console.log('Decimal Precision Test:', response);
+                    alert('Precision test completed. Check console for details.\n' +
+                          '20 min + 40 min = ' + response.SumFormatted + '\n' +
+                          'Formatted separately: ' + response.FormattedSum);
+                },
+                error: function() {
+                    alert('Error testing decimal precision');
                 }
             });
         };

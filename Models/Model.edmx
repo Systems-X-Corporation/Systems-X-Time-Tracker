@@ -294,13 +294,13 @@ warning 6002: The table/view 'timetrackerDB2.dbo.temppagetype' does not have a p
           <Property Name="Duration" Type="numeric" Precision="18" Scale="0" Nullable="false" />
           <Property Name="Rate" Type="numeric" Precision="18" Scale="0" />
           <Property Name="UserId" Type="int" Nullable="false" />
-          <Property Name="CustomerId" Type="int" Nullable="false" />
-          <Property Name="ProjectId" Type="int" Nullable="false" />
-          <Property Name="ActivityId" Type="int" Nullable="false" />
+          <Property Name="CustomerId" Type="int" />
+          <Property Name="ProjectId" Type="int" />
+          <Property Name="ActivityId" Type="int" />
           <Property Name="ActDescription" Type="varchar(max)" Nullable="false" />
           <Property Name="Exported" Type="bit" />
           <Property Name="Billable" Type="bit" Nullable="false" />
-          <Property Name="CategoryId" Type="int" Nullable="false" />
+          <Property Name="CategoryId" Type="int" />
           <Property Name="DayStatus" Type="varchar" MaxLength="20" />
           <Property Name="DayApproved" Type="bit" />
           <Property Name="InternalNote" Type="varchar(max)" />
@@ -625,7 +625,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_TimeCategory">
-          <End Role="Category" Type="Self.Category" Multiplicity="1" />
+          <End Role="Category" Type="Self.Category" Multiplicity="0..1" />
           <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Category">
@@ -637,7 +637,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_TimerCustomer">
-          <End Role="Customer" Type="Self.Customer" Multiplicity="1" />
+          <End Role="Customer" Type="Self.Customer" Multiplicity="0..1" />
           <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Customer">
@@ -649,7 +649,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_TimerProject">
-          <End Role="Project" Type="Self.Project" Multiplicity="1" />
+          <End Role="Project" Type="Self.Project" Multiplicity="0..1" />
           <End Role="TimeHours" Type="Self.TimeHours" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Project">
@@ -720,6 +720,37 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="fn_diagramobjects" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="int" />
+        <Function Name="sp_alterdiagram" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="diagramname" Type="nvarchar" Mode="In" />
+          <Parameter Name="owner_id" Type="int" Mode="In" />
+          <Parameter Name="version" Type="int" Mode="In" />
+          <Parameter Name="definition" Type="varbinary(max)" Mode="In" />
+        </Function>
+        <Function Name="sp_creatediagram" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="diagramname" Type="nvarchar" Mode="In" />
+          <Parameter Name="owner_id" Type="int" Mode="In" />
+          <Parameter Name="version" Type="int" Mode="In" />
+          <Parameter Name="definition" Type="varbinary(max)" Mode="In" />
+        </Function>
+        <Function Name="sp_dropdiagram" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="diagramname" Type="nvarchar" Mode="In" />
+          <Parameter Name="owner_id" Type="int" Mode="In" />
+        </Function>
+        <Function Name="sp_helpdiagramdefinition" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="diagramname" Type="nvarchar" Mode="In" />
+          <Parameter Name="owner_id" Type="int" Mode="In" />
+        </Function>
+        <Function Name="sp_helpdiagrams" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="diagramname" Type="nvarchar" Mode="In" />
+          <Parameter Name="owner_id" Type="int" Mode="In" />
+        </Function>
+        <Function Name="sp_renamediagram" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="diagramname" Type="nvarchar" Mode="In" />
+          <Parameter Name="owner_id" Type="int" Mode="In" />
+          <Parameter Name="new_diagramname" Type="nvarchar" Mode="In" />
+        </Function>
+        <Function Name="sp_upgraddiagrams" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <EntityContainer Name="timetrackerDBModelStoreContainer">
           <EntitySet Name="Activity" EntityType="Self.Activity" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Area" EntityType="Self.Area" Schema="dbo" store:Type="Tables" />
@@ -1050,6 +1081,36 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
             <End Role="Office" EntitySet="Office" />
             <End Role="Users" EntitySet="Users" />
           </AssociationSet>
+          <FunctionImport Name="sp_alterdiagram">
+            <Parameter Name="diagramname" Mode="In" Type="String" />
+            <Parameter Name="owner_id" Mode="In" Type="Int32" />
+            <Parameter Name="version" Mode="In" Type="Int32" />
+            <Parameter Name="definition" Mode="In" Type="Binary" />
+          </FunctionImport>
+          <FunctionImport Name="sp_creatediagram">
+            <Parameter Name="diagramname" Mode="In" Type="String" />
+            <Parameter Name="owner_id" Mode="In" Type="Int32" />
+            <Parameter Name="version" Mode="In" Type="Int32" />
+            <Parameter Name="definition" Mode="In" Type="Binary" />
+          </FunctionImport>
+          <FunctionImport Name="sp_dropdiagram">
+            <Parameter Name="diagramname" Mode="In" Type="String" />
+            <Parameter Name="owner_id" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="sp_helpdiagramdefinition" ReturnType="Collection(timetrackerDBModel.sp_helpdiagramdefinition_Result)">
+            <Parameter Name="diagramname" Mode="In" Type="String" />
+            <Parameter Name="owner_id" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="sp_helpdiagrams" ReturnType="Collection(timetrackerDBModel.sp_helpdiagrams_Result)">
+            <Parameter Name="diagramname" Mode="In" Type="String" />
+            <Parameter Name="owner_id" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="sp_renamediagram">
+            <Parameter Name="diagramname" Mode="In" Type="String" />
+            <Parameter Name="owner_id" Mode="In" Type="Int32" />
+            <Parameter Name="new_diagramname" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="sp_upgraddiagrams" />
           </EntityContainer>
         <EntityType Name="Activity">
           <Key>
@@ -1335,13 +1396,13 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           <Property Name="Duration" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
           <Property Name="Rate" Type="Decimal" Precision="18" Scale="0" />
           <Property Name="UserId" Type="Int32" Nullable="false" />
-          <Property Name="CustomerId" Type="Int32" Nullable="false" />
-          <Property Name="ProjectId" Type="Int32" Nullable="false" />
-          <Property Name="ActivityId" Type="Int32" Nullable="false" />
+          <Property Name="CustomerId" Type="Int32" />
+          <Property Name="ProjectId" Type="Int32" />
+          <Property Name="ActivityId" Type="Int32" />
           <Property Name="ActDescription" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="Exported" Type="Boolean" />
           <Property Name="Billable" Type="Boolean" Nullable="false" />
-          <Property Name="CategoryId" Type="Int32" Nullable="false" />
+          <Property Name="CategoryId" Type="Int32" />
           <Property Name="DayStatus" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="DayApproved" Type="Boolean" />
           <Property Name="InternalNote" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
@@ -1510,7 +1571,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_TimeCategory">
-          <End Type="timetrackerDBModel.Category" Role="Category" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Category" Role="Category" Multiplicity="0..1" />
           <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Category">
@@ -1546,7 +1607,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_TimerCustomer">
-          <End Type="timetrackerDBModel.Customer" Role="Customer" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Customer" Role="Customer" Multiplicity="0..1" />
           <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Customer">
@@ -1618,7 +1679,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_TimerProject">
-          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="1" />
+          <End Type="timetrackerDBModel.Project" Role="Project" Multiplicity="0..1" />
           <End Type="timetrackerDBModel.TimeHours" Role="TimeHours" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Project">
@@ -1800,6 +1861,17 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <ComplexType Name="sp_helpdiagramdefinition_Result">
+          <Property Type="Int32" Name="version" Nullable="true" />
+          <Property Type="Binary" Name="definition" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="sp_helpdiagrams_Result">
+          <Property Type="String" Name="Database" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="128" />
+          <Property Type="Int32" Name="ID" Nullable="false" />
+          <Property Type="String" Name="Owner" Nullable="true" MaxLength="128" />
+          <Property Type="Int32" Name="OwnerID" Nullable="false" />
+        </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2235,6 +2307,30 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_alterdiagram" FunctionName="timetrackerDBModel.Store.sp_alterdiagram" />
+          <FunctionImportMapping FunctionImportName="sp_creatediagram" FunctionName="timetrackerDBModel.Store.sp_creatediagram" />
+          <FunctionImportMapping FunctionImportName="sp_dropdiagram" FunctionName="timetrackerDBModel.Store.sp_dropdiagram" />
+          <FunctionImportMapping FunctionImportName="sp_helpdiagramdefinition" FunctionName="timetrackerDBModel.Store.sp_helpdiagramdefinition">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="timetrackerDBModel.sp_helpdiagramdefinition_Result">
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="definition" ColumnName="definition" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_helpdiagrams" FunctionName="timetrackerDBModel.Store.sp_helpdiagrams">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="timetrackerDBModel.sp_helpdiagrams_Result">
+                <ScalarProperty Name="Database" ColumnName="Database" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Owner" ColumnName="Owner" />
+                <ScalarProperty Name="OwnerID" ColumnName="OwnerID" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_renamediagram" FunctionName="timetrackerDBModel.Store.sp_renamediagram" />
+          <FunctionImportMapping FunctionImportName="sp_upgraddiagrams" FunctionName="timetrackerDBModel.Store.sp_upgraddiagrams" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
