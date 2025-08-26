@@ -70,7 +70,20 @@ namespace TimeTracker.Controllers.Timer
                     timeHours.ActDescription = description;
                     timeHours.Users = db.Users.Where(x => x.UserId == userId).FirstOrDefault();
                     timeHours.UserId = userId;
-                    timeHours.THours = Thours;
+                    
+                    // Calculate hours with high precision from start/end times to avoid rounding errors
+                    if (!string.IsNullOrEmpty(start) && !string.IsNullOrEmpty(end))
+                    {
+                        DateTime startTime = DateTime.Parse(start);
+                        DateTime endTime = DateTime.Parse(end);
+                        TimeSpan duration = endTime - startTime;
+                        decimal totalMinutes = (decimal)duration.TotalMinutes;
+                        timeHours.THours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                    }
+                    else
+                    {
+                        timeHours.THours = Thours;
+                    }
                     timeHours.InternalNote = InternalNotes;
                     timeHours.Visible = true;
 
@@ -100,7 +113,20 @@ namespace TimeTracker.Controllers.Timer
                     timeHours.ActDescription = description;
                     timeHours.Users = db.Users.Where(x => x.UserId == userId).FirstOrDefault();
                     timeHours.UserId = userId;
-                    timeHours.THours = Thours;
+                    
+                    // Calculate hours with high precision from start/end times to avoid rounding errors
+                    if (!string.IsNullOrEmpty(start) && !string.IsNullOrEmpty(end))
+                    {
+                        DateTime startTime = DateTime.Parse(start);
+                        DateTime endTime = DateTime.Parse(end);
+                        TimeSpan duration = endTime - startTime;
+                        decimal totalMinutes = (decimal)duration.TotalMinutes;
+                        timeHours.THours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                    }
+                    else
+                    {
+                        timeHours.THours = Thours;
+                    }
                     timeHours.InternalNote = InternalNotes;
 
                     var project = db.Project.Where(x => x.ProjectId == projectId).FirstOrDefault();
