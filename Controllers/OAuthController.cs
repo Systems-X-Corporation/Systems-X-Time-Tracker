@@ -6,6 +6,7 @@ using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using NodaTime;
 using RestSharp;
 using System;
@@ -108,12 +109,21 @@ namespace TimeTracker.Controllers
 
             if (string.IsNullOrWhiteSpace(error))
             {
-                this.GetTokens(code);
+                try
+                {
+                    var tokenResult = this.GetTokens(code);
+                    
+                    // Set success message - real validation will happen in UI
+                    TempData["GoogleCalendarConnected"] = true;
+                }
+                catch (Exception ex)
+                {
+                    TempData["GoogleCalendarError"] = "Google Calendar connection failed: " + ex.Message;
+                }
             }
             else
             {
-                ViewBag.ErrorMessage = "OAuth error: " + error;
-                return View("Error");
+                TempData["GoogleCalendarError"] = "OAuth authorization denied: " + error;
             }
             
             return Redirect("/UserProfile");
@@ -158,7 +168,13 @@ namespace TimeTracker.Controllers
                 gCToken.expires_in = resp["expires_in"].ToString();
                 gCToken.scope = resp["scope"].ToString();
                 gCToken.token_type = resp["token_type"].ToString();
-                gCToken.texto = response.Content.ToString();
+                // Store creation timestamp in texto field (JSON format for extensibility)
+                var tokenInfo = new {
+                    created_at = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    expires_at = DateTime.UtcNow.AddSeconds(double.Parse(resp["expires_in"].ToString())).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    raw_response = response.Content.ToString()
+                };
+                gCToken.texto = Newtonsoft.Json.JsonConvert.SerializeObject(tokenInfo);
 
                 model.Add(gCToken);
                 db.SaveChanges();
@@ -230,7 +246,7 @@ namespace TimeTracker.Controllers
                     {
                         DateTime startTime, endTime;
                         string timeFrom, timeTo;
-                        decimal hours;
+                        decimal hours = 0;
 
                         // Handle all-day events and timezone conversion
                         if (!string.IsNullOrEmpty(item.Start.Date))
@@ -257,7 +273,7 @@ namespace TimeTracker.Controllers
                             timeFrom = startTime.ToString("HH:mm");
                             timeTo = endTime.ToString("HH:mm");
                             TimeSpan duration = endTime - startTime;
-                            hours = Convert.ToDecimal(duration.TotalHours);
+                            // Calculate hours with high precision to avoid rounding errors\n                            decimal totalMinutes = (decimal)duration.TotalMinutes;\n                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                         }
                         else
                         {
@@ -490,7 +506,7 @@ namespace TimeTracker.Controllers
                                     }
                                     timeHours.UserId = users.UserId;
 
-                                    timeHours.THours = Convert.ToDecimal(timeSpan.TotalHours);
+                                    // Calculate hours with high precision to avoid rounding errors\n                                    decimal totalMinutes = (decimal)timeSpan.TotalMinutes;\n                                    timeHours.THours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                                     timeHours.InternalNote = "";
                                     timeHours.Visible = true;
                                     timeHours.GCalendarId = item.Id;
@@ -648,7 +664,7 @@ namespace TimeTracker.Controllers
                         {
                             DateTime startTime, endTime;
                             string timeFrom, timeTo;
-                            decimal hours;
+                            decimal hours = 0;
 
                             // Handle all-day events and preserve original times (no timezone conversion)
                             if (!string.IsNullOrEmpty(item.Start.Date))
@@ -675,7 +691,7 @@ namespace TimeTracker.Controllers
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
                                 TimeSpan duration = endTime - startTime;
-                                hours = Convert.ToDecimal(duration.TotalHours);
+                                // Calculate hours with high precision to avoid rounding errors\n                            decimal totalMinutes = (decimal)duration.TotalMinutes;\n                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                             }
                             else
                             {
@@ -935,7 +951,7 @@ namespace TimeTracker.Controllers
                         {
                             DateTime startTime, endTime;
                             string timeFrom, timeTo;
-                            decimal hours;
+                            decimal hours = 0;
 
                             // Handle all-day events and preserve original times (no timezone conversion)
                             if (!string.IsNullOrEmpty(item.Start.Date))
@@ -962,7 +978,7 @@ namespace TimeTracker.Controllers
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
                                 TimeSpan duration = endTime - startTime;
-                                hours = Convert.ToDecimal(duration.TotalHours);
+                                // Calculate hours with high precision to avoid rounding errors\n                            decimal totalMinutes = (decimal)duration.TotalMinutes;\n                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                             }
                             else
                             {
@@ -1185,6 +1201,90 @@ namespace TimeTracker.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public JsonResult TestGoogleCalendarConnection()
+        {
+            try
+            {
+                int idUser = Convert.ToInt32(GetUser());
+                var DBtoken = db.GCToken.Where(x => x.idUsuario == idUser).FirstOrDefault();
+
+                if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = "No valid Google Calendar token found. Please reconnect." 
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Test actual API connection with a minimal calendar list request
+                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/calendars/primary");
+                RestRequest request = new RestRequest();
+                
+                request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
+                request.AddHeader("Accept", "application/json");
+
+                RestResponse response = restClient.Get(request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return Json(new { 
+                        connected = true,
+                        message = "Google Calendar connection is working properly"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    // Token expired or invalid - try refresh
+                    try
+                    {
+                        RefreshToken(idUser);
+                        
+                        // Test again with refreshed token
+                        var refreshedToken = db.GCToken.Where(x => x.idUsuario == idUser).FirstOrDefault();
+                        if (refreshedToken != null && !string.IsNullOrEmpty(refreshedToken.access_token))
+                        {
+                            request = new RestRequest();
+                            request.AddHeader("Authorization", "Bearer " + refreshedToken.access_token);
+                            request.AddHeader("Accept", "application/json");
+                            
+                            response = restClient.Get(request);
+                            
+                            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                            {
+                                return Json(new { 
+                                    connected = true,
+                                    message = "Google Calendar connection restored after token refresh"
+                                }, JsonRequestBehavior.AllowGet);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Refresh failed
+                    }
+                    
+                    return Json(new { 
+                        connected = false, 
+                        error = "Google Calendar token expired and refresh failed. Please reconnect." 
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { 
+                        connected = false, 
+                        error = $"Google Calendar API error: {response.StatusCode} - {response.ErrorMessage}" 
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    connected = false, 
+                    error = "Google Calendar connection test failed: " + ex.Message 
+                }, JsonRequestBehavior.AllowGet);
             }
         }
 

@@ -365,6 +365,13 @@
                     }, 2000);
                 } else if (response.data.includes('error') || response.data.includes('Error')) {
                     showAlert('error', 'Sync failed: ' + response.data);
+                    // Show connect button and hide sync buttons when there's a connection error
+                    if (response.data.includes('Google Calendar error, try re-connect') || 
+                        response.data.includes('try re-connect') || 
+                        response.data.includes('reconnect')) {
+                        sessionStorage.setItem('gcal_connected', 'false');
+                        showConnectState();
+                    }
                 } else {
                     showAlert('info', response.data);
                 }
@@ -430,6 +437,13 @@
 
                 } else if (response.data.includes('error') || response.data.includes('Error')) {
                     showAlert('error', 'Sync failed: ' + response.data);
+                    // Show connect button and hide sync buttons when there's a connection error
+                    if (response.data.includes('Google Calendar error, try re-connect') || 
+                        response.data.includes('try re-connect') || 
+                        response.data.includes('reconnect')) {
+                        sessionStorage.setItem('gcal_connected', 'false');
+                        showConnectState();
+                    }
                 } else {
                     showAlert('info', response.data);
                 }
@@ -442,69 +456,65 @@
         });
     }
 
+    function showConnectState() {
+        // Hide sync buttons and show connect button when connection fails\n        sessionStorage.setItem('gcal_connected', 'false');
+        $("#btnSyncDay").hide();
+        $("#btnSyncWeek").hide();
+        $("#btnTestConnection").hide();
+        $("#btnConnectGoogleCalendar").show();
+    }
+
     function connectGoogleCalendar() {
         // Redirect to OAuth authorization
         window.location.href = '/OAuth/OauthRedirect';
     }
 
     function checkGoogleCalendarConnection() {
+        // Show loading state
+        showAlert('info', 'Checking Google Calendar connection...');
+        
+        // Test actual API connection by trying a sync operation
         $.ajax({
             type: 'GET',
-            url: '/OAuth/IsConnected',
+            url: '/OAuth/TestGoogleCalendarConnection',
             success: function(response) {
-                console.log('=== Google Calendar Connection Check ===');
+                console.log('=== Google Calendar Connection Test ===');
                 console.log('Full response:', response);
-                console.log('Connected:', response.connected);
-                console.log('User ID:', response.userId);
-                console.log('Token exists:', response.tokenExists);
-                console.log('Has access token:', response.hasAccessToken);
-                if (response.debug) console.log('Debug info:', response.debug);
-                if (response.error) console.log('Error:', response.error);
                 console.log('==========================================');
-            
+                
                 if (response.connected === true) {
+                    // Connection is working - store status\n                    sessionStorage.setItem('gcal_connected', 'true');\n                    sessionStorage.setItem('gcal_last_check', new Date().getTime().toString());
                     $("#btnSyncDay").show();
                     $("#btnSyncWeek").show();
+                    $("#btnTestConnection").show();
                     $("#btnConnectGoogleCalendar").hide();
-                    showAlert('success', 'Google Calendar is connected and ready!');
+                    showAlert('success', 'Google Calendar connection verified. You can now use sync functions.');
                 } else {
-                    $("#btnSyncDay").hide();
-                    $("#btnSyncWeek").hide();
-                    $("#btnConnectGoogleCalendar").show();
-                
-                    // Mostrar información específica del error si existe
+                    // Connection failed - store disconnected status\n                    sessionStorage.setItem('gcal_connected', 'false');\n                    sessionStorage.setItem('gcal_last_check', new Date().getTime().toString());
+                    showConnectState();
+                    
                     if (response.error) {
-                        if (response.error.includes('not authenticated')) {
+                        if (response.error.includes('Unauthorized') || 
+                            response.error.includes('try re-connect') ||
+                            response.error.includes('expired')) {
+                            showAlert('warning', 'Google Calendar token expired. Please reconnect.');
+                        } else if (response.error.includes('not authenticated')) {
                             showAlert('warning', 'Please log in to use Google Calendar sync.');
-                        } else if (response.error.includes('Invalid user ID')) {
-                            showAlert('error', 'Authentication issue. Please log out and log back in.');
                         } else {
-                            showAlert('info', 'Google Calendar not connected. Click Connect to authorize. (Error: ' + response.error + ')');
+                            showAlert('error', 'Google Calendar connection failed: ' + response.error);
                         }
-                    } else if (response.userId && !response.tokenExists) {
-                        showAlert('info', 'Google Calendar not connected. Click Connect to authorize.');
                     } else {
-                        showAlert('info', 'Google Calendar connection status unknown. Click Connect to authorize.');
+                        showAlert('warning', 'Google Calendar not connected. Click Connect to authorize.');
                     }
                 }
             },
             error: function(xhr, status, error) {
-                console.log('AJAX Error:', status, error);
+                console.log('Connection Test Error:', status, error);
                 console.log('Response Text:', xhr.responseText);
             
-                // On error, show connect button
-                $("#btnSyncDay").hide();
-                $("#btnSyncWeek").hide();
-                $("#btnConnectGoogleCalendar").show();
-            
-                // Mostrar error más específico
-                if (xhr.status === 404) {
-                    showAlert('error', 'Google Calendar service not found. Please check the URL.');
-                } else if (xhr.status === 500) {
-                    showAlert('error', 'Server error checking Google Calendar connection.');
-                } else {
-                    showAlert('error', 'Unable to check Google Calendar connection: ' + status);
-                }
+                // On error, show connect state and store disconnected status\n                sessionStorage.setItem('gcal_connected', 'false');\n                sessionStorage.setItem('gcal_last_check', new Date().getTime().toString());
+                showConnectState();
+                showAlert('error', 'Unable to test Google Calendar connection. Please reconnect.');
             }
         });
     }

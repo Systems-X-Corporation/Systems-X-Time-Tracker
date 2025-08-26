@@ -48,6 +48,21 @@ namespace TimeTracker.Controllers
         {
             int userId = Convert.ToInt32(GetUser());
             var model = db.Users.Where(x => x.UserId == userId).ToList();
+            
+            // Check if user just completed Google Calendar OAuth flow
+            if (TempData["GoogleCalendarConnected"] != null)
+            {
+                ViewBag.GoogleCalendarMessage = "Google Calendar has been successfully connected!";
+                ViewBag.GoogleCalendarMessageType = "success";
+                TempData.Remove("GoogleCalendarConnected");
+            }
+            else if (TempData["GoogleCalendarError"] != null)
+            {
+                ViewBag.GoogleCalendarMessage = TempData["GoogleCalendarError"].ToString();
+                ViewBag.GoogleCalendarMessageType = "error";
+                TempData.Remove("GoogleCalendarError");
+            }
+            
             return View("~/Views/UserAccount/UserProfile.cshtml", model);
         }
 
