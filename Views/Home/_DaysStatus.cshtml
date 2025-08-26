@@ -2,6 +2,11 @@
 
 @{ 
     decimal total = 0;
+    // Calculate total using full precision before any formatting
+    foreach (var sumItem in Model)
+    {
+        total += sumItem.quantity;
+    }
 }
 
 
@@ -24,11 +29,9 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    total = total + item.quantity;
-
                     <tr>
                         <td>@item.THDate.ToShortDateString() </td>
-                        <td>@item.quantity </td>
+                        <td>@item.quantity.ToString("F2") </td>
                         @if (item.DayStatus != null)
                         {
                             <td>@item.DayStatus</td>
@@ -61,7 +64,7 @@
             <tfoot>
                 <tr>
                     <td>Total Hours</td>
-                    <td>@total</td>
+                    <td>@total.ToString("F2")</td>
                     <td></td>
                 </tr>
             </tfoot>

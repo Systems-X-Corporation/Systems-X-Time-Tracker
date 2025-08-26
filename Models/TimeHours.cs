@@ -21,13 +21,13 @@ namespace TimeTracker.Models
         public decimal Duration { get; set; }
         public Nullable<decimal> Rate { get; set; }
         public int UserId { get; set; }
-        public int CustomerId { get; set; }
-        public int ProjectId { get; set; }
-        public int ActivityId { get; set; }
+        public Nullable<int> CustomerId { get; set; }
+        public Nullable<int> ProjectId { get; set; }
+        public Nullable<int> ActivityId { get; set; }
         public string ActDescription { get; set; }
         public Nullable<bool> Exported { get; set; }
         public bool Billable { get; set; }
-        public int CategoryId { get; set; }
+        public Nullable<int> CategoryId { get; set; }
         public string DayStatus { get; set; }
         public Nullable<bool> DayApproved { get; set; }
         public string InternalNote { get; set; }
@@ -41,5 +41,6 @@ namespace TimeTracker.Models
         public virtual Customer Customer { get; set; }
         public virtual Project Project { get; set; }
         public virtual Users Users { get; set; }
+        public Activity Activity { get; internal set; }
     }
 }

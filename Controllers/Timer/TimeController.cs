@@ -106,10 +106,12 @@ namespace TimeTracker.Controllers.Timer
                     var project = db.Project.Where(x => x.ProjectId == projectId).FirstOrDefault();
                     //var activity = db.Activity.Where(x => x.ActivityId == activityId).FirstOrDefault();
                     var customer = db.Customer.Where(x => x.CustomerId == project.Customer.CustomerId).FirstOrDefault();
+                    var category = db.Category.Where(x => x.CategoryId == categoryId).FirstOrDefault();
 
                     timeHours.Customer = customer;
                     timeHours.Project = project;
                     //timeHours.Activity = activity;
+                    timeHours.Category = category;
 
                     db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
@@ -131,7 +133,7 @@ namespace TimeTracker.Controllers.Timer
         }
 
 
-        public JsonResult DeleteHours(int id, DateTime date, string start, string end, int projectId, /*int activityId,*/ string description, bool billable)
+        public JsonResult DeleteHours(int id, DateTime date, string start, string end, int projectId = 0, /*int activityId,*/ string description = "", bool billable = false)
         {
             try
             {
@@ -184,7 +186,7 @@ namespace TimeTracker.Controllers.Timer
             {
                 Hours _hour = new Hours();
                 _hour.id = item.TimeHoursId;
-                _hour.title = item.Customer.CustomerName + " ~ " + item.ActDescription;
+                _hour.title = "Google Calendar ~ " + item.ActDescription;
                 _hour.start = item.THDate.ToString("yyyy-MM-dd") + "T" + item.THFrom;
                 _hour.end = item.THDate.ToString("yyyy-MM-dd") + "T" + item.THTo;
                 _hour.startTime = item.THFrom;
@@ -192,7 +194,7 @@ namespace TimeTracker.Controllers.Timer
                 _hour.daystatus = item.DayStatus;
                 _hour.approved = item.DayApproved;
 
-                _hour.color = item.Project.color;
+                _hour.color = "blue";
                 bool edit = true;
                 if (item.Exported != null)
                 {
@@ -217,18 +219,19 @@ namespace TimeTracker.Controllers.Timer
 
             return Json(new
             {
-                hours.Customer.CustomerId,
-                project = hours.Project.ProjectId,
-                //activity = hours.Activity.ActivityId,
+                CustomerId = hours.Customer?.CustomerId,
+                project = hours.Project?.ProjectId,
+                activity = hours.Activity?.ActivityId,
                 hours.TimeHoursId,
-                category = hours.Category.CategoryId,
-                hours.Project.color,
+                category = hours.Category?.CategoryId,
+                color = hours.Project?.color,
                 hours.THDate,
                 hours.THFrom,
                 hours.THTo,
                 hours.ActDescription,
                 hours.Billable,
-                hours.THours, hours.InternalNote
+                hours.THours, 
+                hours.InternalNote
             }, JsonRequestBehavior.AllowGet);
         }
 
@@ -319,6 +322,74 @@ namespace TimeTracker.Controllers.Timer
             }
         }
 
+        public JsonResult ValidateDayForApproval(DateTime date)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(GetUser());
+                
+                // Get all TimeHours for this date that are visible
+                var timeHours = db.TimeHours
+                    .Where(x => x.THDate.Date == date.Date && x.UserId == userId && x.Visible != false)
+                    .ToList();
+
+                var invalidEvents = new List<string>();
+
+                foreach (var timeHour in timeHours)
+                {
+                    bool hasIssues = false;
+                    var issues = new List<string>();
+
+                    // Check if required fields are missing
+                    if (timeHour.CustomerId == null)
+                    {
+                        issues.Add("missing Customer");
+                        hasIssues = true;
+                    }
+
+                    if (timeHour.ProjectId == null)
+                    {
+                        issues.Add("missing Project");
+                        hasIssues = true;
+                    }
+
+                    if (timeHour.ActivityId == null)
+                    {
+                        issues.Add("missing Activity");
+                        hasIssues = true;
+                    }
+
+                    if (timeHour.CategoryId == null)
+                    {
+                        issues.Add("missing Category");
+                        hasIssues = true;
+                    }
+
+                    if (hasIssues)
+                    {
+                        var eventDescription = $"• {timeHour.THFrom}-{timeHour.THTo}: {timeHour.ActDescription} ({string.Join(", ", issues)})";
+                        invalidEvents.Add(eventDescription);
+                    }
+                }
+
+                return Json(new
+                {
+                    isValid = invalidEvents.Count == 0,
+                    invalidEvents = invalidEvents,
+                    totalEvents = timeHours.Count,
+                    invalidCount = invalidEvents.Count
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isValid = false,
+                    error = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public JsonResult SendDay(DateTime date)
         {
             try
@@ -370,6 +441,32 @@ namespace TimeTracker.Controllers.Timer
         }
 
         // Método temporal para debugging de horas diarias
+        public JsonResult TestDecimalPrecision()
+        {
+            try
+            {
+                // Test the exact scenario described: 20min + 40min = 60min
+                decimal twentyMin = (20m / 60m); // 0.33333...
+                decimal fortyMin = (40m / 60m);   // 0.66666...
+                decimal sum = twentyMin + fortyMin; // Should be 1.00
+                
+                return Json(new {
+                    TwentyMinutes = twentyMin,
+                    FortyMinutes = fortyMin,
+                    Sum = sum,
+                    TwentyFormatted = twentyMin.ToString("F2"),
+                    FortyFormatted = fortyMin.ToString("F2"),
+                    SumFormatted = sum.ToString("F2"),
+                    FormattedSum = decimal.Parse(twentyMin.ToString("F2")) + decimal.Parse(fortyMin.ToString("F2")),
+                    Message = "Testing 20min + 40min precision"
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public JsonResult DebugDayHours(DateTime date)
         {
             try

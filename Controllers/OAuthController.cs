@@ -263,7 +263,7 @@ namespace TimeTracker.Controllers
                             timeHours.THFrom = timeFrom;
                             timeHours.THTo = timeTo;
                             timeHours.THours = hours;
-                            timeHours.Billable = true;
+                            timeHours.Billable = false;
                             timeHours.ActDescription = item.Summary ?? "";
                             timeHours.UserId = idUsuario;
                             timeHours.InternalNote = "";
@@ -369,13 +369,7 @@ namespace TimeTracker.Controllers
                     {
                         var idUsuario = Convert.ToInt32(GetUser());
                         var allEvents = calendarEvents["items"].ToObject<IEnumerable<Event>>();
-                        var work = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
-                        var user = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
-
-                        Project project = db.Project.Where(x => x.ProjectName == "Google Calendar Event").FirstOrDefault();
-                        Activity activity = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
-                        Customer customer = db.Customer.Where(x => x.CustomerName == "Google Calendar Event").FirstOrDefault();
-                        Category category = db.Category.Where(x => x.CategoryName == "Meetings / Reuniones").FirstOrDefault();
+                        // Only get User for validation
                         Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
 
                         List<TimeHours> newevents = new List<TimeHours>();
@@ -438,18 +432,17 @@ namespace TimeTracker.Controllers
                                     timeHours.THTo = THTo;
                                     timeHours.Duration = 0;
                                     timeHours.UserId = idUsuario;
-                                    timeHours.Users = user;
-                                    timeHours.Customer = work.Project.Customer;
-                                    timeHours.Project = work.Project;
-                                    //timeHours.Activity = work;
+                                    // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
+                                    timeHours.ActivityId = null;
+                                    timeHours.CategoryId = null;
+                                    timeHours.CustomerId = null;
+                                    timeHours.ProjectId = null;
                                     timeHours.ActDescription = item.Summary;
                                     if (string.IsNullOrEmpty(item.Summary))
                                     {
                                         timeHours.ActDescription = "";
                                     }
-                                    timeHours.Billable = true;
-
-                                    //timeHours.Category = category;
+                                    timeHours.Billable = false;
                                     timeHours.InternalNote = "";
                                     db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
                                     updevents.Add(timeHours);
@@ -465,7 +458,7 @@ namespace TimeTracker.Controllers
                                     timeHours.THDate = THDate;
                                     timeHours.THFrom = THFrom;
                                     timeHours.THTo = THTo; 
-                                    timeHours.Billable = true;
+                                    timeHours.Billable = false;
                                     timeHours.ActDescription = item.Summary;
                                     if (string.IsNullOrEmpty(item.Summary))
                                     {
@@ -478,10 +471,11 @@ namespace TimeTracker.Controllers
                                     timeHours.Visible = true;
                                     timeHours.GCalendarId = item.Id;
 
-                                    timeHours.ActivityId = activity.ActivityId;
-                                    timeHours.CategoryId = category.CategoryId;
-                                    timeHours.CustomerId = customer.CustomerId;
-                                    timeHours.ProjectId = project.ProjectId;
+                                    // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
+                                    timeHours.ActivityId = null;
+                                    timeHours.CategoryId = null;
+                                    timeHours.CustomerId = null;
+                                    timeHours.ProjectId = null;
 
                                     db.Entry(timeHours).State = System.Data.Entity.EntityState.Added;
 
@@ -608,13 +602,7 @@ namespace TimeTracker.Controllers
 
                         DateTime start = DateTime.Now.AddDays(-15);
 
-                        var work = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
-                        var user = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
-
-                        Project project = db.Project.Where(x => x.ProjectName == "Google Calendar Event").FirstOrDefault();
-                        Activity activity = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
-                        Customer customer = db.Customer.Where(x => x.CustomerName == "Google Calendar Event").FirstOrDefault();
-                        Category category = db.Category.Where(x => x.CategoryName == "Meetings / Reuniones").FirstOrDefault();
+                        // Only get User for validation
                         Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
 
                         List<TimeHours> newevents = new List<TimeHours>();
@@ -680,7 +668,7 @@ namespace TimeTracker.Controllers
                                 existingTimeHours.THTo = timeTo;
                                 existingTimeHours.THours = hours;
                                 existingTimeHours.ActDescription = item.Summary ?? "";
-                                existingTimeHours.Billable = true;
+                                existingTimeHours.Billable = false;
                                 existingTimeHours.Visible = true; // Re-enable if it was hidden
                                 
                                 // Clear manual deletion marker since event exists in Google Calendar
@@ -704,16 +692,17 @@ namespace TimeTracker.Controllers
                                 timeHours.THFrom = timeFrom;
                                 timeHours.THTo = timeTo;
                                 timeHours.THours = hours;
-                                timeHours.Billable = true;
+                                timeHours.Billable = false;
                                 timeHours.ActDescription = item.Summary ?? "";
                                 timeHours.UserId = idUsuario;
                                 timeHours.InternalNote = "";
                                 timeHours.Visible = true;
                                 timeHours.GCalendarId = item.Id;
-                                timeHours.ActivityId = activity.ActivityId;
-                                timeHours.CategoryId = category.CategoryId;
-                                timeHours.CustomerId = customer.CustomerId;
-                                timeHours.ProjectId = project.ProjectId;
+                                // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
+                                timeHours.ActivityId = null;
+                                timeHours.CategoryId = null;
+                                timeHours.CustomerId = null;
+                                timeHours.ProjectId = null;
 
                                 newevents.Add(timeHours);
                             }
@@ -881,13 +870,7 @@ namespace TimeTracker.Controllers
                         JObject calendarEvents = JObject.Parse(restResponse.Content);
                         var allEvents = calendarEvents["items"].ToObject<IEnumerable<Event>>();
 
-                        var work = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
-                        var user = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
-
-                        Project project = db.Project.Where(x => x.ProjectName == "Google Calendar Event").FirstOrDefault();
-                        Activity activity = db.Activity.Where(x => x.ActivityName == "Google Calendar Event").FirstOrDefault();
-                        Customer customer = db.Customer.Where(x => x.CustomerName == "Google Calendar Event").FirstOrDefault();
-                        Category category = db.Category.Where(x => x.CategoryName == "Meetings / Reuniones").FirstOrDefault();
+                        // Only get User for validation
                         Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
 
                         // Validate that user exists
@@ -960,7 +943,7 @@ namespace TimeTracker.Controllers
                                 existingTimeHours.THTo = timeTo;
                                 existingTimeHours.THours = hours;
                                 existingTimeHours.ActDescription = item.Summary ?? "";
-                                existingTimeHours.Billable = true;
+                                existingTimeHours.Billable = false;
                                 existingTimeHours.Visible = true; // Re-enable if it was hidden
                                 existingTimeHours.InternalNote = "";
                                 
@@ -974,16 +957,17 @@ namespace TimeTracker.Controllers
                                 timeHours.THFrom = timeFrom;
                                 timeHours.THTo = timeTo;
                                 timeHours.THours = hours;
-                                timeHours.Billable = true;
+                                timeHours.Billable = false;
                                 timeHours.ActDescription = item.Summary ?? "";
                                 timeHours.UserId = idUsuario;
                                 timeHours.InternalNote = "";
                                 timeHours.Visible = true;
                                 timeHours.GCalendarId = item.Id;
-                                timeHours.ActivityId = activity.ActivityId;
-                                timeHours.CategoryId = category.CategoryId;
-                                timeHours.CustomerId = customer.CustomerId;
-                                timeHours.ProjectId = project.ProjectId;
+                                // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
+                                timeHours.ActivityId = null;
+                                timeHours.CategoryId = null;
+                                timeHours.CustomerId = null;
+                                timeHours.ProjectId = null;
 
                                 newevents.Add(timeHours);
                             }

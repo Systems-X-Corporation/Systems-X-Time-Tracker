@@ -60,6 +60,28 @@
     //select2settings();
 
     $('#btnSave').on('click', function () {
+        // Validate required fields for Google Calendar events or events without proper assignments
+        var projectVal = $('#cboProject').val();
+        var workVal = $('#description').val();
+        var categoryVal = $('#cboCategory').val();
+        
+        // Check if any required field is empty
+       
+        if (!projectVal || projectVal === '' || projectVal === '0') {
+            alert('Please select a Project before saving.');
+            return;
+        }
+        
+        if (!workVal || workVal === '' || workVal === '0') {
+            alert('Please select a Work Performed / Activities Completed before saving.');
+            return;
+        }
+        
+        if (!categoryVal || categoryVal === '' || categoryVal === '0') {
+            alert('Please select a Category before saving.');
+            return;
+        }
+        
         $.ajax({
             type: 'GET',
             url: '../../Time/SaveHours',
@@ -123,6 +145,18 @@
     });
 
     $('#btnDelete').on('click', function () {
+        // Get values with defaults for nullable fields
+        var projectId = $('#cboProject').val();
+        var description = $('#description').val();
+        
+        // Set default values for empty fields to avoid server-side issues
+        if (!projectId || projectId === '' || projectId === '0') {
+            projectId = 0; // Use 0 as default for nullable int
+        }
+        if (!description || description === '') {
+            description = ''; // Use empty string as default
+        }
+        
         $.ajax({
             type: 'GET',
             url: '../../Time/DeleteHours',
@@ -132,9 +166,8 @@
                 "date": $('#date').val(),
                 "start": $('#starttime').val(),
                 "end": $('#endtime').val(),
-                "projectId": $('#cboProject').val(),
-                //"activityId": $('#cboActivity').val(),
-                "description": $('#description').val(),
+                "projectId": projectId,
+                "description": description,
                 "billable": $('#Billable').is(":checked")
             },
             success: function (response) {
@@ -401,55 +434,61 @@
 
                                 var project = response.project;
                                 var customer = response.CustomerId;
+                                var activity = response.activity;
 
-                                //$.ajax({
-                                //    type: 'GET',
-                                //    url: '../../System/GetCboProject',
-                                //    data:
-                                //    {
-                                //        "CustomerId": customer
-                                //    },
-                                //    success: function (response) {
-                                //        console.log(response.project);
-                                //        $("#CboProjectContent").html(response);
-                                //        $("#cboProject").select2();
-                                //        $("#cboProject").val(project);
-                                //        $('#cboProject').trigger('change.select2');
-
-                                //    },
-                                //    timeout: 30 * 60 * 1000
-                                //}).fail(function (xhr, status) {
-                                //    if (status === "timeout") {
-                                //        console.log('Tiempo de respuesta agotado');
-                                //    }
-                                //    if (status === "error") {
-                                //        console.log('La cantidad de datos excede el limite por conexión');
-                                //    }
-                                //});
-
-                                //$.ajax({
-                                //    type: 'GET',
-                                //    url: '../../System/GetCboActivity',
-                                //    data:
-                                //    {
-                                //        "ProjectId": $("#cboProject").val()
-                                //    },
-                                //    success: function (response2) {
-                                //        $("#CboActivityContent").html(response2);
-                                //        $("#cboActivity").select2();
-                                //        $("#cboActivity").val(response.activity);
-                                //        $('#cboActivity').trigger('change.select2');
-                                //    },
-                                //    timeout: 30 * 60 * 1000
-                                //}).fail(function (xhr, status) {
-                                //    if (status === "timeout") {
-                                //        console.log('Tiempo de respuesta agotado');
-                                //    }
-                                //    if (status === "error") {
-                                //        console.log('La cantidad de datos excede el limite por conexión');
-                                //    }
-                                //});
-                                //.then($("#cboActivity").val(response.activity).change())
+                                // Load projects if customer is available
+                                if (customer) {
+                                    $.ajax({
+                                        type: 'GET',
+                                        url: '../../System/GetCboProject',
+                                        data: {
+                                            "CustomerId": customer
+                                        },
+                                        success: function (projectResponse) {
+                                            $("#CboProjectContent").html(projectResponse);
+                                            $("#cboProject").select2();
+                                            if (project) {
+                                                $("#cboProject").val(project);
+                                                $('#cboProject').trigger('change.select2');
+                                            }
+                                            
+                                            // Load activities if project is available
+                                            if (project) {
+                                                $.ajax({
+                                                    type: 'GET',
+                                                    url: '../../System/GetCboActivity',
+                                                    data: {
+                                                        "ProjectId": project
+                                                    },
+                                                    success: function (activityResponse) {
+                                                        $("#CboActivityContent").html(activityResponse);
+                                                        $("#cboActivity").select2();
+                                                        if (activity) {
+                                                            $("#cboActivity").val(activity);
+                                                            $('#cboActivity').trigger('change.select2');
+                                                        }
+                                                    },
+                                                    timeout: 30 * 60 * 1000
+                                                }).fail(function (xhr, status) {
+                                                    if (status === "timeout") {
+                                                        console.log('Tiempo de respuesta agotado loading activities');
+                                                    }
+                                                    if (status === "error") {
+                                                        console.log('Error loading activities');
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        timeout: 30 * 60 * 1000
+                                    }).fail(function (xhr, status) {
+                                        if (status === "timeout") {
+                                            console.log('Tiempo de respuesta agotado loading projects');
+                                        }
+                                        if (status === "error") {
+                                            console.log('Error loading projects');
+                                        }
+                                    });
+                                }
 
                                 if (response.Billable) {
                                     $("#Billable").prop('checked', true);
@@ -578,9 +617,20 @@
                 $('#tblDaysStatus').on('click', '.btnSendApproval', function () {
                     var DayDate = $(this).attr("DayDate");
 
-                    $.confirm({
-                        title: 'Send for Approve',
-                        content: 'Do you want to send for approve: ' + DayDate + '?',
+                    // First, validate that all events for this day have required fields
+                    $.ajax({
+                        type: 'GET',
+                        url: '../../Time/ValidateDayForApproval',
+                        dataType: 'json',
+                        data: {
+                            "date": DayDate
+                        },
+                        success: function (validationResponse) {
+                            if (validationResponse.isValid) {
+                                // All events are valid, show confirmation dialog
+                                $.confirm({
+                                    title: 'Send for Approve',
+                                    content: 'Do you want to send for approve: ' + DayDate + '?',
                         type: 'orange',
                         theme: 'material',
                         closeIcon: true,
@@ -706,6 +756,38 @@
                             Cancel: function () {
                                 loadData();
                             }
+                        }
+                    });
+                            } else {
+                                // Validation failed, show error message
+                                var invalidEventsList = '';
+                                if (validationResponse.invalidEvents && Array.isArray(validationResponse.invalidEvents)) {
+                                    invalidEventsList = validationResponse.invalidEvents.join('<br>');
+                                } else {
+                                    invalidEventsList = 'Events are missing required information. Please check all events have Project, and Category assigned.';
+                                }
+                                
+                                $.alert({
+                                    title: 'Cannot Send for Approval',
+                                    content: 'Some events are missing required information (Project or Category).<br><br>' +
+                                            'Please complete the following events before sending for approval:<br><br>' +
+                                            invalidEventsList,
+                                    type: 'red',
+                                    theme: 'material',
+                                    closeIcon: true,
+                                    animateFromElement: false,
+                                    animation: 'left',
+                                    closeAnimation: 'right',
+                                    buttons: {
+                                        Ok: function () {
+                                            // User can edit the events now
+                                        }
+                                    }
+                                });
+                            }
+                        },
+                        error: function() {
+                            alert('Error validating day for approval. Please try again.');
                         }
                     });
                 });
