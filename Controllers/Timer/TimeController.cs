@@ -186,7 +186,10 @@ namespace TimeTracker.Controllers.Timer
             {
                 Hours _hour = new Hours();
                 _hour.id = item.TimeHoursId;
-                _hour.title = "Google Calendar ~ " + item.ActDescription;
+                var customerName = item?.Customer?.CustomerName;
+                _hour.title = (string.IsNullOrWhiteSpace(customerName) ? "Google Calendar" : customerName)
+                              + " ~ " + (item?.ActDescription ?? "");
+
                 _hour.start = item.THDate.ToString("yyyy-MM-dd") + "T" + item.THFrom;
                 _hour.end = item.THDate.ToString("yyyy-MM-dd") + "T" + item.THTo;
                 _hour.startTime = item.THFrom;
@@ -194,7 +197,9 @@ namespace TimeTracker.Controllers.Timer
                 _hour.daystatus = item.DayStatus;
                 _hour.approved = item.DayApproved;
 
-                _hour.color = "blue";
+                var color = item?.Project?.color;
+                _hour.color = string.IsNullOrWhiteSpace(color) ? "blue" : color;
+
                 bool edit = true;
                 if (item.Exported != null)
                 {
