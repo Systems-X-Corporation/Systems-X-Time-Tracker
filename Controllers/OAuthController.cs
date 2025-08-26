@@ -198,12 +198,18 @@ namespace TimeTracker.Controllers
                         // Handle all-day events and timezone conversion
                         if (!string.IsNullOrEmpty(item.Start.Date))
                         {
-                            // All-day event
+                            // All-day event - check if it's exactly 12:00 AM to 11:59 PM
                             startTime = DateTime.Parse(item.Start.Date);
                             endTime = DateTime.Parse(item.End.Date).AddDays(-1); // Google returns next day for all-day events
                             timeFrom = "00:00";
                             timeTo = "23:59";
                             hours = 8.0m; // Default 8 hours for all-day events
+                            
+                            // Skip events that are exactly 12:00 AM to 11:59 PM (00:00 to 23:59)
+                            if (timeFrom == "00:00" && timeTo == "23:59")
+                            {
+                                continue;
+                            }
                         }
                         else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                         {
@@ -237,6 +243,12 @@ namespace TimeTracker.Controllers
                         else
                         {
                             continue; // Skip events without proper start/end times
+                        }
+
+                        // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
+                        if (timeFrom == "00:00" && timeTo == "23:59")
+                        {
+                            continue;
                         }
 
                         var exist = db.TimeHours.Where(x => x.GCalendarId == item.Id).Any();
@@ -414,9 +426,11 @@ namespace TimeTracker.Controllers
 
                             }
 
-                           
-                           
-                           
+                            // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
+                            if (THFrom == "00:00" && THTo == "23:59")
+                            {
+                                continue;
+                            }
 
                             TimeSpan timeSpan = end - start;
 
@@ -426,24 +440,32 @@ namespace TimeTracker.Controllers
                                 if (item.Start.DateTime != null)
                                 {
                                     var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-                                    //TimeZoneInfo.ConvertTime(item.Start.DateTime, TimeZoneInfo.FindSystemTimeZoneById(item.Start.TimeZone));
+                                    
+                                    // Only update time-related fields, preserve user-assigned fields
                                     timeHours.THDate = THDate;
                                     timeHours.THFrom = THFrom;
                                     timeHours.THTo = THTo;
                                     timeHours.Duration = 0;
-                                    timeHours.UserId = idUsuario;
-                                    // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
-                                    timeHours.ActivityId = null;
-                                    timeHours.CategoryId = null;
-                                    timeHours.CustomerId = null;
-                                    timeHours.ProjectId = null;
                                     timeHours.ActDescription = item.Summary;
                                     if (string.IsNullOrEmpty(item.Summary))
                                     {
                                         timeHours.ActDescription = "";
                                     }
-                                    timeHours.Billable = false;
-                                    timeHours.InternalNote = "";
+                                    
+                                    // DO NOT overwrite user-assigned values (CustomerId, ProjectId, ActivityId, CategoryId)
+                                    // Only set them to null if they are currently null (first time sync)
+                                    if (timeHours.ActivityId == null) timeHours.ActivityId = null;
+                                    if (timeHours.CategoryId == null) timeHours.CategoryId = null;  
+                                    if (timeHours.CustomerId == null) timeHours.CustomerId = null;
+                                    if (timeHours.ProjectId == null) timeHours.ProjectId = null;
+                                    
+                                    // Preserve visibility and other user settings
+                                    if (timeHours.InternalNote != null && timeHours.InternalNote.Contains("MANUALLY_DELETED"))
+                                    {
+                                        // Don't update manually deleted events
+                                        continue;
+                                    }
+                                    
                                     db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
                                     updevents.Add(timeHours);
                                 }
@@ -629,12 +651,18 @@ namespace TimeTracker.Controllers
                             // Handle all-day events and preserve original times (no timezone conversion)
                             if (!string.IsNullOrEmpty(item.Start.Date))
                             {
-                                // All-day event
+                                // All-day event - check if it's exactly 12:00 AM to 11:59 PM
                                 startTime = DateTime.Parse(item.Start.Date);
                                 endTime = DateTime.Parse(item.End.Date).AddDays(-1);
                                 timeFrom = "00:00";
                                 timeTo = "23:59";
                                 hours = 8.0m;
+                                
+                                // Skip events that are exactly 12:00 AM to 11:59 PM (00:00 to 23:59)
+                                if (timeFrom == "00:00" && timeTo == "23:59")
+                                {
+                                    continue;
+                                }
                             }
                             else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                             {
@@ -648,6 +676,12 @@ namespace TimeTracker.Controllers
                                 hours = Convert.ToDecimal(duration.TotalHours);
                             }
                             else
+                            {
+                                continue;
+                            }
+
+                            // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
+                            if (timeFrom == "00:00" && timeTo == "23:59")
                             {
                                 continue;
                             }
@@ -904,12 +938,18 @@ namespace TimeTracker.Controllers
                             // Handle all-day events and preserve original times (no timezone conversion)
                             if (!string.IsNullOrEmpty(item.Start.Date))
                             {
-                                // All-day event
+                                // All-day event - check if it's exactly 12:00 AM to 11:59 PM
                                 startTime = DateTime.Parse(item.Start.Date);
                                 endTime = DateTime.Parse(item.End.Date).AddDays(-1);
                                 timeFrom = "00:00";
                                 timeTo = "23:59";
                                 hours = 8.0m;
+                                
+                                // Skip events that are exactly 12:00 AM to 11:59 PM (00:00 to 23:59)
+                                if (timeFrom == "00:00" && timeTo == "23:59")
+                                {
+                                    continue;
+                                }
                             }
                             else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                             {
@@ -923,6 +963,12 @@ namespace TimeTracker.Controllers
                                 hours = Convert.ToDecimal(duration.TotalHours);
                             }
                             else
+                            {
+                                continue;
+                            }
+
+                            // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
+                            if (timeFrom == "00:00" && timeTo == "23:59")
                             {
                                 continue;
                             }
