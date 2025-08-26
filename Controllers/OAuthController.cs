@@ -213,27 +213,10 @@ namespace TimeTracker.Controllers
                         }
                         else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                         {
-                            // Timed event with timezone handling
-                            if (!string.IsNullOrEmpty(item.Start.TimeZone))
-                            {
-                                try
-                                {
-                                    string windowsTz = TZConvert.IanaToWindows(item.Start.TimeZone);
-                                    TimeZoneInfo tzInfo = TimeZoneInfo.FindSystemTimeZoneById(windowsTz);
-                                    startTime = TimeZoneInfo.ConvertTime(item.Start.DateTime.Value, tzInfo);
-                                    endTime = TimeZoneInfo.ConvertTime(item.End.DateTime.Value, tzInfo);
-                                }
-                                catch
-                                {
-                                    startTime = item.Start.DateTime.Value;
-                                    endTime = item.End.DateTime.Value;
-                                }
-                            }
-                            else
-                            {
-                                startTime = item.Start.DateTime.Value;
-                                endTime = item.End.DateTime.Value;
-                            }
+                            // Timed event - preserve original times without timezone conversion
+                            // Use the original DateTime values to maintain consistency across timezones
+                            startTime = item.Start.DateTime.Value;
+                            endTime = item.End.DateTime.Value;
                             
                             timeFrom = startTime.ToString("HH:mm");
                             timeTo = endTime.ToString("HH:mm");
@@ -409,22 +392,10 @@ namespace TimeTracker.Controllers
                             string THTo;
 
 
-                            if (!string.IsNullOrEmpty(item.Start.TimeZone))
-                            {
-                                string tz = TZConvert.IanaToWindows(item.Start.TimeZone);
-
-                                THDate = TimeZoneInfo.ConvertTime(start, TimeZoneInfo.FindSystemTimeZoneById(tz));
-                                THFrom = TimeZoneInfo.ConvertTime(start, TimeZoneInfo.FindSystemTimeZoneById(tz)).ToString("HH:mm");
-                                THTo = TimeZoneInfo.ConvertTime(end, TimeZoneInfo.FindSystemTimeZoneById(tz)).ToString("HH:mm");
-
-                            }
-                            else
-                            {
-                                THDate = start;
-                                THFrom = start.ToString("HH:mm");
-                                THTo = end.ToString("HH:mm");
-
-                            }
+                            // Preserve original times without timezone conversion to maintain consistency across timezones
+                            THDate = start;
+                            THFrom = start.ToString("HH:mm");
+                            THTo = end.ToString("HH:mm");
 
                             // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
                             if (THFrom == "00:00" && THTo == "23:59")
