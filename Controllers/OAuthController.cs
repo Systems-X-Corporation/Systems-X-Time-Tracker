@@ -35,6 +35,43 @@ namespace TimeTracker.Controllers
         private string _client_id => System.Configuration.ConfigurationManager.AppSettings["GoogleClientId"] ?? "995855232789-vdnfin1cs6dkvi6dappt4guv7f3m43be.apps.googleusercontent.com";
         private string _client_secret => System.Configuration.ConfigurationManager.AppSettings["GoogleClientSecret"] ?? "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";
         private string _redirect_uri => System.Configuration.ConfigurationManager.AppSettings["GoogleRedirectUri"] ?? "https://localhost:44361/oauth/callback";
+
+        /// <summary>
+        /// Converts UTC time to the specified IANA timezone safely
+        /// </summary>
+        /// <param name="utcTime">UTC DateTime to convert</param>
+        /// <param name="ianaTimeZone">IANA timezone identifier (e.g., "America/Costa_Rica")</param>
+        /// <returns>DateTime converted to the specified timezone, or UTC if conversion fails</returns>
+        private DateTime ConvertToTimeZone(DateTime utcTime, string ianaTimeZone)
+        {
+            try
+            {
+                // If no timezone specified, return UTC time as-is
+                if (string.IsNullOrEmpty(ianaTimeZone))
+                {
+                    return utcTime;
+                }
+
+                // Convert IANA timezone to Windows timezone
+                string windowsTimeZone = TZConvert.IanaToWindows(ianaTimeZone);
+                
+                // Get the TimeZoneInfo for the target timezone
+                TimeZoneInfo targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(windowsTimeZone);
+
+                // Convert from UTC to target timezone
+                var utcDate = DateTime.SpecifyKind(utcTime, DateTimeKind.Utc);
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDate, targetTimeZone);
+
+            }
+            catch (Exception ex)
+            {
+                // Log the error if logging is available
+                System.Diagnostics.Debug.WriteLine($"Timezone conversion error: {ex.Message}. Using UTC time.");
+                
+                // Fallback to UTC time
+                return utcTime;
+            }
+        }
         // GET: OAuth
 
         public ActionResult OauthRedirect()
@@ -213,8 +250,7 @@ namespace TimeTracker.Controllers
                         }
                         else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                         {
-                            // Timed event - preserve original times without timezone conversion
-                            // Use the original DateTime values to maintain consistency across timezones
+                            // Timed event - use values directly as they come in correct timezone
                             startTime = item.Start.DateTime.Value;
                             endTime = item.End.DateTime.Value;
                             
@@ -384,18 +420,13 @@ namespace TimeTracker.Controllers
 
                         foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
                         {
-                            DateTime end = Convert.ToDateTime(item.End.DateTimeRaw);
+                            // Use DateTime values directly as they come in correct timezone
                             DateTime start = Convert.ToDateTime(item.Start.DateTimeRaw);
+                            DateTime end = Convert.ToDateTime(item.End.DateTimeRaw);
 
-                            DateTime THDate = Convert.ToDateTime(item.Start.DateTimeRaw);
-                            string THFrom;
-                            string THTo;
-
-
-                            // Preserve original times without timezone conversion to maintain consistency across timezones
-                            THDate = start;
-                            THFrom = start.ToString("HH:mm");
-                            THTo = end.ToString("HH:mm");
+                            DateTime THDate = start;
+                            string THFrom = start.ToString("HH:mm");
+                            string THTo = end.ToString("HH:mm");
 
                             // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
                             if (THFrom == "00:00" && THTo == "23:59")
@@ -637,7 +668,7 @@ namespace TimeTracker.Controllers
                             }
                             else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                             {
-                                // Timed event - keep original times without timezone conversion
+                                // Timed event - use values directly as they come in correct timezone
                                 startTime = item.Start.DateTime.Value;
                                 endTime = item.End.DateTime.Value;
                                 
@@ -924,7 +955,7 @@ namespace TimeTracker.Controllers
                             }
                             else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
                             {
-                                // Timed event - keep original times without timezone conversion
+                                // Timed event - use values directly as they come in correct timezone
                                 startTime = item.Start.DateTime.Value;
                                 endTime = item.End.DateTime.Value;
                                 
