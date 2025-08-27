@@ -41,6 +41,5 @@ namespace TimeTracker.Models
         public virtual Customer Customer { get; set; }
         public virtual Project Project { get; set; }
         public virtual Users Users { get; set; }
-        public Activity Activity { get; internal set; }
     }
 }

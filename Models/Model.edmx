@@ -331,6 +331,7 @@ warning 6002: The table/view 'timetrackerDB2.dbo.temppagetype' does not have a p
           <Property Name="ProfilePict" Type="varbinary(max)" />
           <Property Name="FactorEndDate" Type="datetime" Nullable="false" />
           <Property Name="OfficeId" Type="int" Nullable="false" />
+          <Property Name="TimeZone" Type="varchar" MaxLength="100" />
         </EntityType>
         <EntityType Name="UsersProject">
           <Key>
@@ -1766,6 +1767,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           <NavigationProperty Name="UsersProject" Relationship="timetrackerDBModel.FK_UsersProject_User" FromRole="Users" ToRole="UsersProject" />
           <Property Name="OfficeId" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Office" Relationship="timetrackerDBModel.Users_Office_FK" FromRole="Users" ToRole="Office" />
+          <Property Name="TimeZone" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
         </EntityType>
         <Association Name="FK_Users_Company">
           <End Type="timetrackerDBModel.Company" Role="Company" Multiplicity="1" />
@@ -2276,6 +2278,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="timetrackerDBModel.Users">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="TimeZone" ColumnName="TimeZone" />
                 <ScalarProperty Name="OfficeId" ColumnName="OfficeId" />
                 <ScalarProperty Name="FactorEndDate" ColumnName="FactorEndDate" />
                 <ScalarProperty Name="ProfilePict" ColumnName="ProfilePict" />
