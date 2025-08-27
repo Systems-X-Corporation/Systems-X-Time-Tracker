@@ -358,11 +358,18 @@ namespace TimeTracker.Controllers.Timer
             try
             {
                 int userId = Convert.ToInt32(GetUser());
-                
+
                 // Get all TimeHours for this date that are visible
+                var dayStart = date.Date;
+                var dayEnd = dayStart.AddDays(1);
+
                 var timeHours = db.TimeHours
-                    .Where(x => x.THDate.Date == date.Date && x.UserId == userId && x.Visible != false)
+                    .Where(x => x.UserId == userId
+                        && x.Visible == true            // o (x.Visible ?? true) si es nullable
+                        && x.THDate >= dayStart
+                        && x.THDate < dayEnd)
                     .ToList();
+
 
                 var invalidEvents = new List<string>();
 
@@ -374,7 +381,7 @@ namespace TimeTracker.Controllers.Timer
                     // Check if required fields are missing
                     if (timeHour.CustomerId == null)
                     {
-                        issues.Add("missing Customer");
+                        issues.Add("missing Client");
                         hasIssues = true;
                     }
 
@@ -384,9 +391,9 @@ namespace TimeTracker.Controllers.Timer
                         hasIssues = true;
                     }
 
-                    if (timeHour.ActivityId == null)
+                    if (string.IsNullOrWhiteSpace(timeHour.ActDescription))
                     {
-                        issues.Add("missing Activity");
+                        issues.Add("missing Work Performed/Activities Completed");
                         hasIssues = true;
                     }
 
