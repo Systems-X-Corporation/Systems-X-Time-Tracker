@@ -142,7 +142,7 @@ namespace TimeTracker.Controllers.Timer
                     db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
 
-                    return Json(new { data = "ok", color = project.color, id = timeHours.TimeHoursId, project = timeHours.Project.ProjectName }, JsonRequestBehavior.AllowGet);
+                    return Json(new { data = "ok", color = project.color, id = timeHours.TimeHoursId, project = timeHours.Project.ProjectName, customer = timeHours.Customer.CustomerName }, JsonRequestBehavior.AllowGet);
                 }
 
 

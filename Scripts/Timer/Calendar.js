@@ -108,7 +108,7 @@
 
                 calendar.addEvent({
                     id: response.id,
-                    title: response.project + ' ~ ' + $('#description').val(),
+                    title: response.customer + ' ~ ' + $('#description').val(),
                     description: response.project + ' ~ ' + $('#description').val(),
                     start: $('#date').val() + ' ' + $('#starttime').val(),
                     end: $('#date').val() + ' ' + $('#endtime').val(),
@@ -246,7 +246,18 @@
             type: 'GET',
             url: '../../Time/GetHours',
             success: function (response) {
-                var buildingEvents = $.map(response, function (item) {
+                // Remove duplicates based on ID to prevent duplicate events
+                var uniqueEvents = [];
+                var seenIds = {};
+                
+                response.forEach(function(item) {
+                    if (!seenIds[item.id]) {
+                        seenIds[item.id] = true;
+                        uniqueEvents.push(item);
+                    }
+                });
+                
+                var buildingEvents = $.map(uniqueEvents, function (item) {
                     return {
                         id: item.id,
                         title: item.title,
@@ -282,7 +293,18 @@
             url: '../../Time/GetHours',
 
             success: function (response) {
-                var buildingEvents = $.map(response, function (item) {
+                // Remove duplicates based on ID to prevent duplicate events
+                var uniqueEvents = [];
+                var seenIds = {};
+                
+                response.forEach(function(item) {
+                    if (!seenIds[item.id]) {
+                        seenIds[item.id] = true;
+                        uniqueEvents.push(item);
+                    }
+                });
+                
+                var buildingEvents = $.map(uniqueEvents, function (item) {
                     return {
                         id: item.id,
                         title: item.title,
@@ -754,7 +776,7 @@
                                 });
                             },
                             Cancel: function () {
-                                loadData();
+                                refreshEvents();
                             }
                         }
                     });
