@@ -23,7 +23,6 @@ namespace TimeTracker.Controllers
 {
     public class UserAccountController : SystemController
     {
-      
         // GET: Account
         public ActionResult Login()
         {
@@ -101,6 +100,10 @@ namespace TimeTracker.Controllers
 
                         ViewData["user"] = _user.UserId;
                         ViewData["factorEndDate"] = formCollection["cboHO2Factor"];
+
+                        string urlCompleta = Request.Url.AbsoluteUri;
+                        SystemController.baseURL = Request.Url.GetLeftPart(UriPartial.Authority);
+
                         if (pass == "987654321")
                         {
                             SetLogin(_user);
