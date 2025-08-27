@@ -41,6 +41,7 @@ namespace TimeTracker.Models
         public byte[] ProfilePict { get; set; }
         public System.DateTime FactorEndDate { get; set; }
         public int OfficeId { get; set; }
+        public string TimeZone { get; set; }
     
         public virtual Company Company { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
