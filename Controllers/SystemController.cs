@@ -18,7 +18,7 @@ namespace TimeTracker.Controllers
         public string mail_pass = "Fc@9ii375";
         public string mail_account = "no-reply@smarttechcr.com";
         public string mail_server = "174.138.177.202";
-        public static string baseURL = "";
+        public static string baseURL = "https://sx-timetracker.com";
 
         public string mail_connectionString = "endpoint=https://time-tracker-communication.communication.azure.com/;accesskey=8hBm5RXt6p7s7A5kX8o8fI5KO2GSqyBJ9+79LUBcUdxTfGIDj0nqA7FELcQZbAGr/Rf8Z5uhsgZ++Ptnz59Q3g==";
         public string mail_SenderDontReply = "dontreply@sx-timetracker.com";
