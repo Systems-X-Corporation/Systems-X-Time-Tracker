@@ -106,15 +106,7 @@
                     event.remove();
                 }
 
-                calendar.addEvent({
-                    id: response.id,
-                    title: response.customer + ' ~ ' + $('#description').val(),
-                    description: response.project + ' ~ ' + $('#description').val(),
-                    start: $('#date').val() + ' ' + $('#starttime').val(),
-                    end: $('#date').val() + ' ' + $('#endtime').val(),
-                    allDay: false,
-                    color: response.color
-                })
+                refreshEvents();
 
                 jQuery("#modal-view-event-add").modal('hide');
 
@@ -272,7 +264,7 @@
 
                 // Remove all existing events and add new ones
                 if (calendar) {
-                    calendar.removeAllEventSources();
+                    calendar.removeAllEvents();      // ← quita TODO, incluidos manuales
                     calendar.addEventSource(buildingEvents);
                 }
             },
@@ -604,7 +596,7 @@
                     calendar.render();
                 } else {
                     // Calendar already exists, just update events
-                    calendar.removeAllEventSources();
+                    calendar.removeAllEvents();        // ← igual aquí
                     calendar.addEventSource(buildingEvents);
                 }
             },
@@ -776,7 +768,7 @@
                                 });
                             },
                             Cancel: function () {
-                                refreshEvents();
+                                //refreshEvents();
                             }
                         }
                     });
