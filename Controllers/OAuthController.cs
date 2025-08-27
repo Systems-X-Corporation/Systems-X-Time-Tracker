@@ -179,12 +179,66 @@ namespace TimeTracker.Controllers
                 model.Add(gCToken);
                 db.SaveChanges();
 
+                // Get and save user's timezone automatically
+                try
+                {
+                    GetAndSaveUserTimezone(idUser, gCToken.access_token);
+                }
+                catch (Exception tzEx)
+                {
+                    // Don't fail the whole process if timezone detection fails
+                    // Log the error but continue (user can still use the system)
+                    System.Diagnostics.Debug.WriteLine($"Failed to get user timezone: {tzEx.Message}");
+                }
+
                 return Redirect("/Home");
 
             }
 
             return View("Error");
 
+        }
+
+        private void GetAndSaveUserTimezone(int userId, string accessToken)
+        {
+            try
+            {
+                RestClient restClient = new RestClient("https://www.googleapis.com/calendar/v3/users/me/settings/timezone");
+                RestRequest request = new RestRequest();
+                
+                request.AddHeader("Authorization", "Bearer " + accessToken);
+                request.AddHeader("Accept", "application/json");
+
+                var response = restClient.Get(request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    JObject timezoneResponse = JObject.Parse(response.Content);
+                    string userTimezone = timezoneResponse["value"]?.ToString();
+
+                    if (!string.IsNullOrEmpty(userTimezone))
+                    {
+                        // Update user timezone in database
+                        var user = db.Users.FirstOrDefault(x => x.UserId == userId);
+                        if (user != null)
+                        {
+                            user.TimeZone = userTimezone;
+                            db.Entry(user).State = System.Data.Entity.EntityState.Modified;
+                            db.SaveChanges();
+                            
+                            System.Diagnostics.Debug.WriteLine($"User {userId} timezone updated to: {userTimezone}");
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Google Calendar API returned {response.StatusCode}: {response.Content}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to get user timezone from Google Calendar: {ex.Message}", ex);
+            }
         }
 
         public void AllEvents(int idUser)
@@ -264,7 +318,7 @@ namespace TimeTracker.Controllers
                                 continue;
                             }
                         }
-                        else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
+                        else if (!string.IsNullOrEmpty(item.Start.DateTimeRaw) && !string.IsNullOrEmpty(item.End.DateTimeRaw))
                         {
                             // Timed event - use values directly as they come in correct timezone
                             startTime = item.Start.DateTime.Value;
@@ -642,8 +696,9 @@ namespace TimeTracker.Controllers
 
                         DateTime start = DateTime.Now.AddDays(-15);
 
-                        // Only get User for validation
+                        // Get User info including timezone
                         Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
+                        string userTimeZone = users?.TimeZone ?? "America/Costa_Rica"; // Fallback to Costa Rica timezone
 
                         List<TimeHours> newevents = new List<TimeHours>();
                         List<TimeHours> updevents = new List<TimeHours>();
@@ -682,12 +737,20 @@ namespace TimeTracker.Controllers
                                     continue;
                                 }
                             }
-                            else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
+                            else if (!string.IsNullOrEmpty(item.Start.DateTimeRaw) && !string.IsNullOrEmpty(item.End.DateTimeRaw))
                             {
-                                // Timed event - use values directly as they come in correct timezone
-                                startTime = item.Start.DateTime.Value;
-                                endTime = item.End.DateTime.Value;
-                                
+                                // Timed event - convert to user's local timezone
+                                var startDto = DateTimeOffset.Parse(item.Start.DateTimeRaw);
+                                var endDto = DateTimeOffset.Parse(item.End.DateTimeRaw);
+
+                                // 2) Normalizar a UTC
+                                var startUtc = startDto.UtcDateTime;
+                                var endUtc = endDto.UtcDateTime;
+
+                                // 3) Convertir a la zona del usuario (tu función asume UTC)
+                                startTime = ConvertToTimeZone(startUtc, userTimeZone);
+                                endTime = ConvertToTimeZone(endUtc, userTimeZone);
+
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
                                 TimeSpan duration = endTime - startTime;
@@ -922,7 +985,7 @@ namespace TimeTracker.Controllers
                         JObject calendarEvents = JObject.Parse(restResponse.Content);
                         var allEvents = calendarEvents["items"].ToObject<IEnumerable<Event>>();
 
-                        // Only get User for validation
+                        // Get User info including timezone
                         Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
 
                         // Validate that user exists
@@ -930,6 +993,8 @@ namespace TimeTracker.Controllers
                         {
                             throw new Exception($"User with ID {idUsuario} not found in database.");
                         }
+
+                        string userTimeZone = users.TimeZone ?? "America/Costa_Rica"; // Fallback to Costa Rica timezone
 
                         List<TimeHours> newevents = new List<TimeHours>();
 
@@ -969,12 +1034,20 @@ namespace TimeTracker.Controllers
                                     continue;
                                 }
                             }
-                            else if (item.Start.DateTime.HasValue && item.End.DateTime.HasValue)
+                            else if (!string.IsNullOrEmpty(item.Start.DateTimeRaw) && !string.IsNullOrEmpty(item.End.DateTimeRaw))
                             {
-                                // Timed event - use values directly as they come in correct timezone
-                                startTime = item.Start.DateTime.Value;
-                                endTime = item.End.DateTime.Value;
-                                
+                                // Timed event - convert to user's local timezone
+                                var startDto = DateTimeOffset.Parse(item.Start.DateTimeRaw);
+                                var endDto = DateTimeOffset.Parse(item.End.DateTimeRaw);
+
+                                // 2) Normalizar a UTC
+                                var startUtc = startDto.UtcDateTime;
+                                var endUtc = endDto.UtcDateTime;
+
+                                // 3) Convertir a la zona del usuario (tu función asume UTC)
+                                startTime = ConvertToTimeZone(startUtc, userTimeZone);
+                                endTime = ConvertToTimeZone(endUtc, userTimeZone);
+
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
                                 TimeSpan duration = endTime - startTime;
