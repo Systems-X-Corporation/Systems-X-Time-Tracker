@@ -206,7 +206,7 @@ namespace TimeTracker.Controllers.Timer
         public JsonResult GetHours()
         {
             int Userid = Convert.ToInt32(GetUser());
-            var hours = db.TimeHours.Where(x => x.UserId == Userid && x.Visible != false).ToList();
+            var hours = db.TimeHours.Where(x => x.UserId == Userid && (x.Visible == true || x.Visible == null)).ToList();
             List<Hours> _hours = new List<Hours>();
             foreach (var item in hours)
             {
@@ -311,7 +311,7 @@ namespace TimeTracker.Controllers.Timer
 
                 // Get correct hours calculation directly from TimeHours table
                 var timeHoursGrouped = db.TimeHours
-                    .Where(x => x.THDate >= start && x.THDate <= end && x.UserId == UserId && x.Visible != false)
+                    .Where(x => x.THDate >= start && x.THDate <= end && x.UserId == UserId && (x.Visible == true || x.Visible == null))
                     .GroupBy(x => x.THDate)
                     .Select(g => new {
                         THDate = g.Key,
@@ -529,7 +529,7 @@ namespace TimeTracker.Controllers.Timer
                 }).ToList();
                 
                 var totalHours = timeHours.Sum(x => x.THours ?? 0);
-                var visibleHours = timeHours.Where(x => x.Visible != false).Sum(x => x.THours ?? 0);
+                var visibleHours = timeHours.Where(x => x.Visible == true || x.Visible == null).Sum(x => x.THours ?? 0);
                 
                 // También obtener los datos de la vista
                 var viewData = db.view_DaysUserStatus.Where(x => x.THDate == date && x.UserId == userId).FirstOrDefault();
