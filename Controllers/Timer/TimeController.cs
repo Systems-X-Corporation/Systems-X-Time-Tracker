@@ -100,7 +100,7 @@ namespace TimeTracker.Controllers.Timer
                     model.Add(timeHours);
                     db.SaveChanges();
 
-                    return Json(new { data = "ok", color = project.color, id = timeHours.TimeHoursId, project = timeHours.Project.ProjectName }, JsonRequestBehavior.AllowGet);
+                    return Json(new { data = "ok", color = project.color, id = timeHours.TimeHoursId, project = timeHours.Project.ProjectName, customer = timeHours.Customer.CustomerName }, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {

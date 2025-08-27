@@ -28,13 +28,11 @@ using TimeTracker.Helpers;
 using TimeTracker.Models;
 using TimeZoneConverter;
 
-
 namespace TimeTracker.Controllers
 {
     public class OAuthController : SystemController
     {
         // Move to configuration instead of hardcoding
-
         private string _client_id => System.Configuration.ConfigurationManager.AppSettings["GoogleClientId"] ?? "995855232789-vdnfin1cs6dkvi6dappt4guv7f3m43be.apps.googleusercontent.com";
         private string _client_secret => System.Configuration.ConfigurationManager.AppSettings["GoogleClientSecret"] ?? "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";
         private string _redirect_uri => System.Configuration.ConfigurationManager.AppSettings["GoogleRedirectUri"] ?? SystemController.baseURL + "/oauth/callback";
