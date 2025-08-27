@@ -34,11 +34,13 @@
         <link href="~/Content/plugins/jquery-ui/jquery-ui.css" rel="stylesheet" />
 
         @Html.DevExpress().GetStyleSheets(
-     new StyleSheet { ExtensionSuite = ExtensionSuite.All }
+     new StyleSheet { ExtensionSuite = ExtensionSuite.TreeList },
+     new StyleSheet { ExtensionSuite = ExtensionSuite.GridView }
 )
 
         @Html.DevExpress().GetScripts(
-               new Script { ExtensionSuite = ExtensionSuite.All }
+               new Script { ExtensionSuite = ExtensionSuite.TreeList },
+                   new Script { ExtensionSuite = ExtensionSuite.GridView }
        )
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
@@ -181,8 +183,6 @@
         @*<script src="~/Content/src/plugins/fullcalendar/fullcalendar.min.js"></script>*@
         @*<script src="~/Content/vendors/scripts/calendar-setting.js"></script>*@
         <script src="~/Scripts/Shared/global.js"></script>
-
-        @RenderSection("scripts", required: false)
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
     </body>
