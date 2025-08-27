@@ -283,6 +283,7 @@ namespace TimeTracker.Controllers
                     Customer customer = db.Customer.Where(x => x.CustomerName == "Google Calendar Event").FirstOrDefault();
                     Category category = db.Category.Where(x => x.CategoryName == "Meetings / Reuniones").FirstOrDefault();
                     Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
+                    string userTimeZone = users?.TimeZone ?? "America/Costa_Rica"; // Fallback to Costa Rica timezone
 
                     List<TimeHours> newevents = new List<TimeHours>();
                     List<TimeHours> updevents = new List<TimeHours>();
@@ -320,14 +321,24 @@ namespace TimeTracker.Controllers
                         }
                         else if (!string.IsNullOrEmpty(item.Start.DateTimeRaw) && !string.IsNullOrEmpty(item.End.DateTimeRaw))
                         {
-                            // Timed event - use values directly as they come in correct timezone
-                            startTime = item.Start.DateTime.Value;
-                            endTime = item.End.DateTime.Value;
+                            // Timed event - convert to user's local timezone
+                            var startDto = DateTimeOffset.Parse(item.Start.DateTimeRaw);
+                            var endDto = DateTimeOffset.Parse(item.End.DateTimeRaw);
+
+                            // Normalizar a UTC
+                            var startUtc = startDto.UtcDateTime;
+                            var endUtc = endDto.UtcDateTime;
+
+                            // Convertir a la zona del usuario (tu función asume UTC)
+                            startTime = ConvertToTimeZone(startUtc, userTimeZone);
+                            endTime = ConvertToTimeZone(endUtc, userTimeZone);
                             
                             timeFrom = startTime.ToString("HH:mm");
                             timeTo = endTime.ToString("HH:mm");
                             TimeSpan duration = endTime - startTime;
-                            // Calculate hours with high precision to avoid rounding errors\n                            decimal totalMinutes = (decimal)duration.TotalMinutes;\n                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                            // Calculate hours with high precision to avoid rounding errors
+                            decimal totalMinutes = (decimal)duration.TotalMinutes;
+                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                         }
                         else
                         {
@@ -509,7 +520,7 @@ namespace TimeTracker.Controllers
                             var exist = db.TimeHours.Where(x => x.GCalendarId == item.Id).Any();
                             if (exist)
                             {
-                                if (item.Start.DateTime != null)
+                                if (!string.IsNullOrEmpty(item.Start.DateTimeRaw))
                                 {
                                     var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
                                     
@@ -545,7 +556,7 @@ namespace TimeTracker.Controllers
                             }
                             else
                             {
-                                if (item.Start.DateTime != null)
+                                if (!string.IsNullOrEmpty(item.Start.DateTimeRaw))
                                 {
                                     TimeHours timeHours = new TimeHours();
 
@@ -560,7 +571,9 @@ namespace TimeTracker.Controllers
                                     }
                                     timeHours.UserId = users.UserId;
 
-                                    // Calculate hours with high precision to avoid rounding errors\n                                    decimal totalMinutes = (decimal)timeSpan.TotalMinutes;\n                                    timeHours.THours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                                    // Calculate hours with high precision to avoid rounding errors
+                                    decimal totalMinutes = (decimal)timeSpan.TotalMinutes;
+                                    timeHours.THours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                                     timeHours.InternalNote = "";
                                     timeHours.Visible = true;
                                     timeHours.GCalendarId = item.Id;
@@ -754,7 +767,9 @@ namespace TimeTracker.Controllers
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
                                 TimeSpan duration = endTime - startTime;
-                                // Calculate hours with high precision to avoid rounding errors\n                            decimal totalMinutes = (decimal)duration.TotalMinutes;\n                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                                // Calculate hours with high precision to avoid rounding errors
+                            decimal totalMinutes = (decimal)duration.TotalMinutes;
+                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                             }
                             else
                             {
@@ -1051,7 +1066,9 @@ namespace TimeTracker.Controllers
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
                                 TimeSpan duration = endTime - startTime;
-                                // Calculate hours with high precision to avoid rounding errors\n                            decimal totalMinutes = (decimal)duration.TotalMinutes;\n                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                                // Calculate hours with high precision to avoid rounding errors
+                            decimal totalMinutes = (decimal)duration.TotalMinutes;
+                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                             }
                             else
                             {
