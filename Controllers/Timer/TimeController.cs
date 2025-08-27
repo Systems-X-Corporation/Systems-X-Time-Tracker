@@ -252,7 +252,7 @@ namespace TimeTracker.Controllers.Timer
             {
                 CustomerId = hours.Customer?.CustomerId,
                 project = hours.Project?.ProjectId,
-                activity = hours.Activity?.ActivityId,
+                activity = hours.ActivityId,
                 hours.TimeHoursId,
                 category = hours.Category?.CategoryId,
                 color = hours.Project?.color,
