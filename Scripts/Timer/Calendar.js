@@ -1,4 +1,6 @@
 ﻿$(document).ready(function () {
+    $("#btnDelete").hide();
+
     $("#data_form").submit(function (e) {
         e.preventDefault();
     });
@@ -432,9 +434,9 @@
                                         var Thours = ((enddate - date) / msIn1Hour);
                                         document.getElementById('time').value = Thours;
                                         jQuery("#date").val(currentDate);
-                                        $('#TimeHoursId').val(arg.id);
-                                        $("#btnDelete").show();
-                                        $('#btnSave').show();
+                                        $('#TimeHoursId').val('');       // ← sin id: es un evento NUEVO
+                                        $("#btnDelete").hide();          // ← ocultar Delete en creación
+                                        $('#btnSave').show();  
                                         $("#date").prop("readonly", false);
                                         $('#cboCategory').select2({
                                             disabled: false
