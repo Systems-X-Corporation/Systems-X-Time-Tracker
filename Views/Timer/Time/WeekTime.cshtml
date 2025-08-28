@@ -238,7 +238,18 @@
     </div>
 </div>
 
+<style>
+    .locked-day {
+        opacity: .7;
+        position: relative;
+    }
 
+        .locked-day .fc-daygrid-day-number::after {
+            content: ' 🔒';
+            font-size: .9em;
+        }
+
+</style>
 
 <script src="~/Scripts/Timer/Calendar.js"></script>
 
@@ -382,6 +393,7 @@
                 showAlert('error', 'Failed to sync today\'s events. Please try again.');
             }
         });
+        refreshEvents(); 
     }
 
     function syncWeekEvents() {
@@ -454,6 +466,7 @@
                 showAlert('error', 'Failed to sync this week\'s events. Please try again.');
             }
         });
+        refreshEvents(); 
     }
 
     function showConnectState() {
