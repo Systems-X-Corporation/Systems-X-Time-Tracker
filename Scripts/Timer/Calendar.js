@@ -628,7 +628,9 @@
             success: function (response) {
                 $('#dailystatus').html(response);
 
-                $('#tblDaysStatus').on('click', '.btnSendApproval', function () {
+                /*$('#tblDaysStatus').on('click', '.btnSendApproval', function () {*/
+                $('#dailystatus').off('click.sendApproval');
+                $('#dailystatus').on('click.sendApproval', '.btnSendApproval', function () {
                     var DayDate = $(this).attr("DayDate");
 
                     // First, validate that all events for this day have required fields

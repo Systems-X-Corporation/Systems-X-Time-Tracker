@@ -382,6 +382,7 @@
                 showAlert('error', 'Failed to sync today\'s events. Please try again.');
             }
         });
+        refreshEvents(); 
     }
 
     function syncWeekEvents() {
@@ -454,6 +455,7 @@
                 showAlert('error', 'Failed to sync this week\'s events. Please try again.');
             }
         });
+        refreshEvents(); 
     }
 
     function showConnectState() {

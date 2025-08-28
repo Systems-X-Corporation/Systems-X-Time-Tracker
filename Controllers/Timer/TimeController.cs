@@ -224,7 +224,7 @@ namespace TimeTracker.Controllers.Timer
                 _hour.approved = item.DayApproved;
 
                 var color = item?.Project?.color;
-                _hour.color = string.IsNullOrWhiteSpace(color) ? "blue" : color;
+                _hour.color = string.IsNullOrWhiteSpace(color) ? "#e26262" : color;
 
                 bool edit = true;
                 if (item.Exported != null)
