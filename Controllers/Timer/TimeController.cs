@@ -553,9 +553,29 @@ namespace TimeTracker.Controllers.Timer
                 return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
-        
+
+        [HttpGet]
+        public JsonResult GetLockedDays()
+        {
+            // Obtén el id del usuario logueado como ya haces en otros endpoints
+            // (ajusta esta línea a tu método real de obtener usuario actual)
+            int idUsuario = Convert.ToInt32(GetUser());
+
+            var locked = db.DaysUser
+                    .Where(d => d.UserId == idUsuario && d.DayStatus == "Sent")
+                    .Select(d => d.DayDate)
+                    .ToList();
+
+                // Normaliza a yyyy-MM-dd para comparar fácil en JS
+            var result = locked.Select(d => d.ToString("yyyy-MM-dd")).ToList();
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+
 
     }
+
+
 
     public class Hours
     {

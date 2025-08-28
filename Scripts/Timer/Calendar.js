@@ -6,6 +6,47 @@
     var calendar;
     var selectedEvent;
 
+    // ====== BLOQUEO DE DÍAS ENVIADOS (scope global del archivo) ======
+    // Fechas bloqueadas (formato 'yyyy-MM-dd')
+    var lockedDays = new Set();
+
+    // Date -> 'yyyy-MM-dd'
+    function fmtYmd(date) {
+        var y = date.getFullYear();
+        var m = String(date.getMonth() + 1).padStart(2, '0');
+        var d = String(date.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + d;
+    }
+
+    // ¿La fecha (o rango) cae en un día bloqueado?
+    function isLockedDate(date) { return lockedDays.has(fmtYmd(date)); }
+
+    function isLockedRange(start, end) {
+        var cur = new Date(start);
+        var _end = end || start;
+        while (cur < _end) {
+            if (isLockedDate(cur)) return true;
+            cur.setDate(cur.getDate() + 1);
+        }
+        if (start.getTime() === _end.getTime()) return isLockedDate(start);
+        return false;
+    }
+
+    // Cargar días bloqueados desde backend (disponible globalmente)
+    function loadLockedDays() {
+        return $.ajax({
+            type: 'GET',
+            url: '../../Time/GetLockedDays',
+            dataType: 'json',
+            timeout: 30 * 60 * 1000
+        }).then(function (dates) {
+            lockedDays = new Set(dates || []);
+        }).fail(function (xhr, status) {
+            console.log('GetLockedDays error:', status, xhr);
+        });
+    }
+
+
     $("#cboProject").val('').change();
     //$("#cboCustomer").val('').change();
 
@@ -64,24 +105,24 @@
         var projectVal = $('#cboProject').val();
         var workVal = $('#description').val();
         var categoryVal = $('#cboCategory').val();
-        
+
         // Check if any required field is empty
-       
+
         if (!projectVal || projectVal === '' || projectVal === '0') {
             alert('Please select a Project before saving.');
             return;
         }
-        
+
         if (!workVal || workVal === '' || workVal === '0') {
             alert('Please select a Work Performed / Activities Completed before saving.');
             return;
         }
-        
+
         if (!categoryVal || categoryVal === '' || categoryVal === '0') {
             alert('Please select a Category before saving.');
             return;
         }
-        
+
         $.ajax({
             type: 'GET',
             url: '../../Time/SaveHours',
@@ -140,7 +181,7 @@
         // Get values with defaults for nullable fields
         var projectId = $('#cboProject').val();
         var description = $('#description').val();
-        
+
         // Set default values for empty fields to avoid server-side issues
         if (!projectId || projectId === '' || projectId === '0') {
             projectId = 0; // Use 0 as default for nullable int
@@ -148,7 +189,7 @@
         if (!description || description === '') {
             description = ''; // Use empty string as default
         }
-        
+
         $.ajax({
             type: 'GET',
             url: '../../Time/DeleteHours',
@@ -164,7 +205,7 @@
             },
             success: function (response) {
                 console.log('Delete response:', response);
-                
+
                 var event = calendar.getEventById(selectedEvent);
                 if (event) {
                     event.remove();
@@ -183,7 +224,7 @@
                 var view = calendar.currentData.currentViewType;
                 var date = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
                 DailyViews(date, view);
-                
+
                 // Show debug information
                 if (response.type) {
                     console.log('Deletion type:', response.type);
@@ -241,15 +282,16 @@
                 // Remove duplicates based on ID to prevent duplicate events
                 var uniqueEvents = [];
                 var seenIds = {};
-                
-                response.forEach(function(item) {
+
+                response.forEach(function (item) {
                     if (!seenIds[item.id]) {
                         seenIds[item.id] = true;
                         uniqueEvents.push(item);
                     }
                 });
-                
+
                 var buildingEvents = $.map(uniqueEvents, function (item) {
+                    var locked = (item.daystatus === "Sent" || item.daystatus === "Approved");
                     return {
                         id: item.id,
                         title: item.title,
@@ -258,7 +300,11 @@
                         allDay: false,
                         color: item.color,
                         daystatus: item.daystatus,
-                        approved: item.approved
+                        approved: item.approved,
+                        // 👇 evita iniciar drag/resize desde el origen
+                        editable: !locked,
+                        startEditable: !locked,
+                        durationEditable: !locked
                     };
                 });
 
@@ -288,15 +334,16 @@
                 // Remove duplicates based on ID to prevent duplicate events
                 var uniqueEvents = [];
                 var seenIds = {};
-                
-                response.forEach(function(item) {
+
+                response.forEach(function (item) {
                     if (!seenIds[item.id]) {
                         seenIds[item.id] = true;
                         uniqueEvents.push(item);
                     }
                 });
-                
+
                 var buildingEvents = $.map(uniqueEvents, function (item) {
+                    var locked = (item.daystatus === "Sent" || item.daystatus === "Approved");
                     return {
                         id: item.id,
                         title: item.title,
@@ -305,9 +352,14 @@
                         allDay: false,
                         color: item.color,
                         daystatus: item.daystatus,
-                        approved: item.approved
+                        approved: item.approved,
+                        // 👇 evita iniciar drag/resize desde el origen
+                        editable: !locked,
+                        startEditable: !locked,
+                        durationEditable: !locked
                     };
                 });
+
 
                 var currentdate;
                 var calendarEl = document.getElementById('calendar');
@@ -315,285 +367,316 @@
                 // Only create calendar if it doesn't exist
                 if (!calendar) {
                     calendar = new FullCalendar.Calendar(calendarEl, {
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    },
-                    /*initialDate: '2023-01-12',*/
-                    slotMinTime: "06:00:00",
-                    slotMaxTime: "20:00:00",
-                    slotDuration: '00:15:00',
-                    slotLabelInterval: "01:00",
-                    showNonCurrentDates: true,
-                    businessHours: true,
-                    businessHours:
-                    {
-                        daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        },
+                        /*initialDate: '2023-01-12',*/
+                        slotMinTime: "06:00:00",
+                        slotMaxTime: "20:00:00",
+                        slotDuration: '00:15:00',
+                        slotLabelInterval: "01:00",
+                        showNonCurrentDates: true,
+                        businessHours: true,
+                        businessHours:
+                        {
+                            daysOfWeek: [1, 2, 3, 4, 5], // Monday - Thursday
 
-                        startTime: '07:00', // a start time (10am in this example)
-                        endTime: '19:00',
-                    },
+                            startTime: '07:00', // a start time (10am in this example)
+                            endTime: '19:00',
+                        },
 
-                    allDaySlot: false,
-                    initialView: 'timeGridWeek',
-                    nowIndicator: true,
+                        allDaySlot: false,
+                        initialView: 'timeGridWeek',
+                        nowIndicator: true,
 
-                    datesSet: function (dateInfo) {
-                        currentdate = dateInfo.startStr;
-                        var view = calendar.view.type;
+                        datesSet: function (dateInfo) {
+                            // 1) sigue cargando Daily Status
+                            currentdate = dateInfo.startStr;
+                            var view = calendar.view.type;
+                            DailyViews(currentdate, view);
 
-                        DailyViews(currentdate, view)
-                    },
+                            // 2) y re-renderiza estilos/badges de días bloqueados
+                            calendar.rerenderDates?.();
+                        },
 
-                    navLinks: true, // can click day/week names to navigate views
-                    selectable: true,
-                    selectMirror: true,
-                    //selectAllow: function (arg) {
-                    //},
-                    select: function (arg) {
-                        var msIn1Hour = 3600 * 1000;
+                        navLinks: true, // can click day/week names to navigate views
+                        selectable: true,
+                        selectMirror: true,
+                        //selectAllow: function (arg) {
+                        //},
 
-                        var date = arg.start;
-                        var currentDate = date.toISOString().substring(0, 10);
-                        var currentTime = date.toTimeString().substring(0, 8);
-                        var enddate = arg.end;
-                        var currentEndTime = enddate.toTimeString().substring(0, 8);
+                        select: function (arg) {
+                            var msIn1Hour = 3600 * 1000;
 
-                        $.ajax({
-                            type: 'GET',
-                            url: '../../Time/IsDaySent',
-                            data:
-                            {
-                                "date": currentDate
-                            },
-                            success: function (data) {
-                                if (!data) {
+                            var date = arg.start;
+                            var currentDate = date.toISOString().substring(0, 10);
+                            var currentTime = date.toTimeString().substring(0, 8);
+                            var enddate = arg.end;
+                            var currentEndTime = enddate.toTimeString().substring(0, 8);
+
+                            $.ajax({
+                                type: 'GET',
+                                url: '../../Time/IsDaySent',
+                                data:
+                                {
+                                    "date": currentDate
+                                },
+                                success: function (data) {
+                                    if (!data) {
+                                        jQuery("#modal-view-event-add").modal();
+                                        $("#Billable").prop('checked', true);
+                                        document.getElementById('starttime').value = currentTime;
+                                        document.getElementById('endtime').value = currentEndTime;
+                                        var Thours = ((enddate - date) / msIn1Hour);
+                                        document.getElementById('time').value = Thours;
+                                        jQuery("#date").val(currentDate);
+                                        $('#TimeHoursId').val(arg.id);
+                                        $("#btnDelete").show();
+                                        $('#btnSave').show();
+                                        $("#date").prop("readonly", false);
+                                        $('#cboCategory').select2({
+                                            disabled: false
+                                        });
+                                        $('#cboProject').select2({
+                                            disabled: false
+                                        });
+                                        $('#cboCustomer').select2({
+                                            disabled: false
+                                        });
+                                        //$('#cboActivity').select2({
+                                        //    disabled: false
+                                        //});
+                                        $("#cboCategory").val('').change();
+                                        $("#cboProject").val('').change();
+                                        $("#cboCustomer").val('').change();
+                                        //$("#cboActivity").val('').change();
+                                        $('#starttime').prop("readonly", false);
+                                        $('#endtime').prop("readonly", false);
+                                        $('#description').prop("readonly", false);
+                                        $('#description').val("");
+                                        $("#InternalNotes").val("");
+                                        $('#TimeHoursId').prop("readonly", false);
+                                        $('#time').prop("readonly", false);
+                                        $("#Billable").prop("readonly", false);
+                                        $("#InternalNotes").prop("readonly", false);
+                                    }
+                                },
+                                timeout: 30 * 60 * 1000
+                            }).fail(function (xhr, status) {
+                                if (status === "timeout") {
+                                    console.log('Tiempo de respuesta agotado');
+                                }
+                                if (status === "error") {
+                                    console.log('La cantidad de datos excede el limite por conexión');
+                                }
+                            });
+                            calendar.unselect()
+                        },
+                        eventAllow: function (dropInfo, draggedEvent) {
+                            // Bloquea mover/soltar/redimensionar si cae en día bloqueado
+                            // dropInfo.start / dropInfo.end (end puede ser null para all-day)
+                            const start = dropInfo.start;
+                            const end = dropInfo.end || dropInfo.start;
+                            return !isLockedRange(start, end);
+                        },
+                        selectAllow: function (selectInfo) {
+                            // Bloquea crear eventos por selección en días bloqueados
+                            return !isLockedRange(selectInfo.start, selectInfo.end);
+                        },
+                        dayCellDidMount: function (arg) {
+                            if (isLockedDate(arg.date)) {
+                                arg.el.classList.add('locked-day');
+                                // podrías añadir un candado:
+                                //const badge = document.createElement('div');
+                                //badge.textContent = '🔒';
+                                //badge.className = 'locked-badge';
+                                //arg.el.appendChild(badge);
+                            }
+                        },
+                        eventClick: function (arg) {
+                            var date = arg.event.start;
+                            var currentDate = date.toISOString().substring(0, 10);
+                            var currentTime = date.toTimeString().substring(0, 8);
+                            var enddate = arg.event.end;
+                            var currentEndTime = enddate.toTimeString().substring(0, 8);
+                            selectedEvent = arg.event.id;
+
+
+
+                            $.ajax({
+                                type: 'GET',
+                                url: '../../Time/GetHourData',
+                                data:
+                                {
+                                    "id": arg.event.id,
+                                    "title": arg.event.title,
+                                    "start": currentTime,
+                                    "end": currentEndTime,
+                                    "date": currentDate
+                                },
+                                success: function (response) {
                                     jQuery("#modal-view-event-add").modal();
-                                    $("#Billable").prop('checked', true);
+
+                                    $("#cboCategory").val(response.category);
+                                    $('#cboCategory').trigger('change.select2');
+
+                                    $("#cboProject").val(response.project);
+                                    $('#cboProject').trigger('change.select2');
+
+                                    var project = response.project;
+                                    var customer = response.CustomerId;
+                                    var activity = response.activity;
+
+                                    // Load projects if customer is available
+                                    if (customer) {
+                                        $.ajax({
+                                            type: 'GET',
+                                            url: '../../System/GetCboProject',
+                                            data: {
+                                                "CustomerId": customer
+                                            },
+                                            success: function (projectResponse) {
+                                                $("#CboProjectContent").html(projectResponse);
+                                                $("#cboProject").select2();
+                                                if (project) {
+                                                    $("#cboProject").val(project);
+                                                    $('#cboProject').trigger('change.select2');
+                                                }
+
+                                                // Load activities if project is available
+                                                if (project) {
+                                                    $.ajax({
+                                                        type: 'GET',
+                                                        url: '../../System/GetCboActivity',
+                                                        data: {
+                                                            "ProjectId": project
+                                                        },
+                                                        success: function (activityResponse) {
+                                                            $("#CboActivityContent").html(activityResponse);
+                                                            $("#cboActivity").select2();
+                                                            if (activity) {
+                                                                $("#cboActivity").val(activity);
+                                                                $('#cboActivity').trigger('change.select2');
+                                                            }
+                                                        },
+                                                        timeout: 30 * 60 * 1000
+                                                    }).fail(function (xhr, status) {
+                                                        if (status === "timeout") {
+                                                            console.log('Tiempo de respuesta agotado loading activities');
+                                                        }
+                                                        if (status === "error") {
+                                                            console.log('Error loading activities');
+                                                        }
+                                                    });
+                                                }
+                                            },
+                                            timeout: 30 * 60 * 1000
+                                        }).fail(function (xhr, status) {
+                                            if (status === "timeout") {
+                                                console.log('Tiempo de respuesta agotado loading projects');
+                                            }
+                                            if (status === "error") {
+                                                console.log('Error loading projects');
+                                            }
+                                        });
+                                    }
+
+                                    if (response.Billable) {
+                                        $("#Billable").prop('checked', true);
+                                    } else {
+                                        $("#Billable").prop('checked', false);
+                                    }
                                     document.getElementById('starttime').value = currentTime;
                                     document.getElementById('endtime').value = currentEndTime;
-                                    var Thours = ((enddate - date) / msIn1Hour);
-                                    document.getElementById('time').value = Thours;
+                                    document.getElementById('description').value = response.ActDescription;
+                                    document.getElementById('InternalNotes').value = response.InternalNote;
+                                    document.getElementById('time').value = response.THours;
+                                    document.getElementById('TimeHoursId').value = selectedEvent;
+
                                     jQuery("#date").val(currentDate);
-                                    $('#TimeHoursId').val(arg.id);
-                                    $("#btnDelete").show();
-                                    $('#btnSave').show();
-                                    $("#date").prop("readonly", false);
-                                    $('#cboCategory').select2({
-                                        disabled: false
-                                    });
-                                    $('#cboProject').select2({
-                                        disabled: false
-                                    });
-                                    $('#cboCustomer').select2({
-                                        disabled: false
-                                    });
-                                    //$('#cboActivity').select2({
-                                    //    disabled: false
-                                    //});
-                                    $("#cboCategory").val('').change();
-                                    $("#cboProject").val('').change();
-                                    $("#cboCustomer").val('').change();
-                                    //$("#cboActivity").val('').change();
-                                    $('#starttime').prop("readonly", false);
-                                    $('#endtime').prop("readonly", false);
-                                    $('#description').prop("readonly", false);
-                                    $('#description').val("");
-                                    $("#InternalNotes").val("");
-                                    $('#TimeHoursId').prop("readonly", false);
-                                    $('#time').prop("readonly", false);
-                                    $("#Billable").prop("readonly", false);
-                                    $("#InternalNotes").prop("readonly", false);
+
+                                    calendar.unselect()
+
+                                    if (arg.event.extendedProps.daystatus == "Sent" || arg.event.extendedProps.daystatus == "Approved") {
+                                        //$("#cboActivity").prop("disabled", true);
+                                        //console.log($("#cboActivity"));
+                                        $("#btnDelete").hide();
+                                        $('#btnSave').hide();
+                                        $("#date").prop("readonly", true);
+
+                                        //$('#cboActivity').select2({
+                                        //    disabled: true
+                                        //});
+                                        $('#cboCategory').select2({
+                                            disabled: true
+                                        });
+                                        $('#cboProject').select2({
+                                            disabled: true
+                                        });
+                                        $('#cboCustomer').select2({
+                                            disabled: true
+                                        });
+                                        //$('#cboActivity').prop("readonly", true);
+                                        $('#time').prop("readonly", true);
+                                        $('#starttime').prop("readonly", true);
+                                        $('#endtime').prop("readonly", true);
+                                        $('#description').prop("readonly", true);
+                                        $('#InternalNotes').prop("readonly", true);
+                                        $('#TimeHoursId').prop("readonly", true);
+                                        $("#Billable").prop("readonly", true);
+
+                                        //console.log($("#cboActivity"));
+                                    } else {
+                                        $("#btnDelete").show();
+                                        $('#btnSave').show();
+                                        $("#date").prop("readonly", false);
+
+                                        $('#cboCategory').select2({
+                                            disabled: false
+                                        });
+                                        $('#cboProject').select2({
+                                            disabled: false
+                                        });
+                                        $('#cboCustomer').select2({
+                                            disabled: false
+                                        });
+                                        //$('#cboActivity').select2({
+                                        //    disabled: false
+
+                                        //});
+                                        $('#time').prop("readonly", false);
+                                        $('#starttime').prop("readonly", false);
+                                        $('#endtime').prop("readonly", false);
+                                        $('#description').prop("readonly", false);
+                                        $('#TimeHoursId').prop("readonly", false);
+                                        $("#Billable").prop("readonly", false);
+                                        $('#InternalNotes').prop("readonly", false);
+                                    }
+                                },
+                                timeout: 30 * 60 * 1000
+                            }).fail(function (xhr, status) {
+                                if (status === "timeout") {
+                                    console.log('Tiempo de respuesta agotado');
                                 }
-                            },
-                            timeout: 30 * 60 * 1000
-                        }).fail(function (xhr, status) {
-                            if (status === "timeout") {
-                                console.log('Tiempo de respuesta agotado');
-                            }
-                            if (status === "error") {
-                                console.log('La cantidad de datos excede el limite por conexión');
-                            }
-                        });
-                        calendar.unselect()
-                    },
-                    eventClick: function (arg) {
-                        var date = arg.event.start;
-                        var currentDate = date.toISOString().substring(0, 10);
-                        var currentTime = date.toTimeString().substring(0, 8);
-                        var enddate = arg.event.end;
-                        var currentEndTime = enddate.toTimeString().substring(0, 8);
-                        selectedEvent = arg.event.id;
-
-                        $.ajax({
-                            type: 'GET',
-                            url: '../../Time/GetHourData',
-                            data:
-                            {
-                                "id": arg.event.id,
-                                "title": arg.event.title,
-                                "start": currentTime,
-                                "end": currentEndTime,
-                                "date": currentDate
-                            },
-                            success: function (response) {
-                                jQuery("#modal-view-event-add").modal();
-
-                                $("#cboCategory").val(response.category);
-                                $('#cboCategory').trigger('change.select2');
-
-                                $("#cboProject").val(response.project);
-                                $('#cboProject').trigger('change.select2');
-
-                                var project = response.project;
-                                var customer = response.CustomerId;
-                                var activity = response.activity;
-
-                                // Load projects if customer is available
-                                if (customer) {
-                                    $.ajax({
-                                        type: 'GET',
-                                        url: '../../System/GetCboProject',
-                                        data: {
-                                            "CustomerId": customer
-                                        },
-                                        success: function (projectResponse) {
-                                            $("#CboProjectContent").html(projectResponse);
-                                            $("#cboProject").select2();
-                                            if (project) {
-                                                $("#cboProject").val(project);
-                                                $('#cboProject').trigger('change.select2');
-                                            }
-                                            
-                                            // Load activities if project is available
-                                            if (project) {
-                                                $.ajax({
-                                                    type: 'GET',
-                                                    url: '../../System/GetCboActivity',
-                                                    data: {
-                                                        "ProjectId": project
-                                                    },
-                                                    success: function (activityResponse) {
-                                                        $("#CboActivityContent").html(activityResponse);
-                                                        $("#cboActivity").select2();
-                                                        if (activity) {
-                                                            $("#cboActivity").val(activity);
-                                                            $('#cboActivity').trigger('change.select2');
-                                                        }
-                                                    },
-                                                    timeout: 30 * 60 * 1000
-                                                }).fail(function (xhr, status) {
-                                                    if (status === "timeout") {
-                                                        console.log('Tiempo de respuesta agotado loading activities');
-                                                    }
-                                                    if (status === "error") {
-                                                        console.log('Error loading activities');
-                                                    }
-                                                });
-                                            }
-                                        },
-                                        timeout: 30 * 60 * 1000
-                                    }).fail(function (xhr, status) {
-                                        if (status === "timeout") {
-                                            console.log('Tiempo de respuesta agotado loading projects');
-                                        }
-                                        if (status === "error") {
-                                            console.log('Error loading projects');
-                                        }
-                                    });
+                                if (status === "error") {
+                                    console.log('La cantidad de datos excede el limite por conexión');
                                 }
-
-                                if (response.Billable) {
-                                    $("#Billable").prop('checked', true);
-                                } else {
-                                    $("#Billable").prop('checked', false);
-                                }
-                                document.getElementById('starttime').value = currentTime;
-                                document.getElementById('endtime').value = currentEndTime;
-                                document.getElementById('description').value = response.ActDescription;
-                                document.getElementById('InternalNotes').value = response.InternalNote;
-                                document.getElementById('time').value = response.THours;
-                                document.getElementById('TimeHoursId').value = selectedEvent;
-
-                                jQuery("#date").val(currentDate);
-
-                                calendar.unselect()
-
-                                if (arg.event.extendedProps.daystatus == "Sent" || arg.event.extendedProps.daystatus == "Approved") {
-                                    //$("#cboActivity").prop("disabled", true);
-                                    //console.log($("#cboActivity"));
-                                    $("#btnDelete").hide();
-                                    $('#btnSave').hide();
-                                    $("#date").prop("readonly", true);
-
-                                    //$('#cboActivity').select2({
-                                    //    disabled: true
-                                    //});
-                                    $('#cboCategory').select2({
-                                        disabled: true
-                                    });
-                                    $('#cboProject').select2({
-                                        disabled: true
-                                    });
-                                    $('#cboCustomer').select2({
-                                        disabled: true
-                                    });
-                                    //$('#cboActivity').prop("readonly", true);
-                                    $('#time').prop("readonly", true);
-                                    $('#starttime').prop("readonly", true);
-                                    $('#endtime').prop("readonly", true);
-                                    $('#description').prop("readonly", true);
-                                    $('#InternalNotes').prop("readonly", true);
-                                    $('#TimeHoursId').prop("readonly", true);
-                                    $("#Billable").prop("readonly", true);
-
-                                    //console.log($("#cboActivity"));
-                                } else {
-                                    $("#btnDelete").show();
-                                    $('#btnSave').show();
-                                    $("#date").prop("readonly", false);
-
-                                    $('#cboCategory').select2({
-                                        disabled: false
-                                    });
-                                    $('#cboProject').select2({
-                                        disabled: false
-                                    });
-                                    $('#cboCustomer').select2({
-                                        disabled: false
-                                    });
-                                    //$('#cboActivity').select2({
-                                    //    disabled: false
-
-                                    //});
-                                    $('#time').prop("readonly", false);
-                                    $('#starttime').prop("readonly", false);
-                                    $('#endtime').prop("readonly", false);
-                                    $('#description').prop("readonly", false);
-                                    $('#TimeHoursId').prop("readonly", false);
-                                    $("#Billable").prop("readonly", false);
-                                    $('#InternalNotes').prop("readonly", false);
-                                }
-                            },
-                            timeout: 30 * 60 * 1000
-                        }).fail(function (xhr, status) {
-                            if (status === "timeout") {
-                                console.log('Tiempo de respuesta agotado');
-                            }
-                            if (status === "error") {
-                                console.log('La cantidad de datos excede el limite por conexión');
-                            }
-                        });
-                    },
-                    editable: true,
-                    eventSources: [{
-                        events: buildingEvents,
-                    }
-                    ]
-                });
-
+                            });
+                        },
+                        editable: true,
+                        eventSources: [{
+                            events: buildingEvents,
+                        }
+                        ]
+                    });
                     calendar.render();
+
+                    // Luego carga los días bloqueados y solo repinta estilos de celdas
+                    loadLockedDays().then(function () {
+                        if (calendar.rerenderDates) calendar.rerenderDates();
+                    });
                 } else {
                     // Calendar already exists, just update events
                     calendar.removeAllEvents();        // ← igual aquí
@@ -613,7 +696,7 @@
 
     loadData();
     //select2settings();
-    
+
     // Make refreshEvents available globally for WeekTime.cshtml
     window.refreshEvents = refreshEvents;
     function DailyViews(currentdate, view) {
@@ -647,133 +730,145 @@
                                 $.confirm({
                                     title: 'Send for Approve',
                                     content: 'Do you want to send for approve: ' + DayDate + '?',
-                        type: 'orange',
-                        theme: 'material',
-                        closeIcon: true,
-                        icon: 'fa fa-warning',
-                        animateFromElement: false,
-                        animation: 'left',
-                        closeAnimation: 'right',
-                        buttons: {
-                            Send: function () {
-                                $.ajax({
-                                    type: 'GET',
-                                    url: '../../Time/SendDay',
-                                    dataType: 'json',
-                                    data:
-                                    {
-                                        "date": DayDate
-                                    },
-                                    success: function (response) {
-                                        if (response.msg == "Ok") {
-                                            $.confirm({
-                                                title: 'Day send',
-                                                content: 'Day send succesfully for approval',
-                                                type: 'blue',
-                                                theme: 'material',
-                                                closeIcon: true,
-                                                animateFromElement: false,
-                                                animation: 'left',
-                                                closeAnimation: 'right',
-                                                buttons: {
-                                                    Ok: function () {
-                                                        var view = calendar.view.type;
+                                    type: 'orange',
+                                    theme: 'material',
+                                    closeIcon: true,
+                                    icon: 'fa fa-warning',
+                                    animateFromElement: false,
+                                    animation: 'left',
+                                    closeAnimation: 'right',
+                                    buttons: {
+                                        Send: function () {
+                                            $.ajax({
+                                                type: 'GET',
+                                                url: '../../Time/SendDay',
+                                                dataType: 'json',
+                                                data:
+                                                {
+                                                    "date": DayDate
+                                                },
+                                                success: function (response) {
+                                                    if (response.msg == "Ok") {
+                                                        $.confirm({
+                                                            title: 'Day send',
+                                                            content: 'Day send succesfully for approval',
+                                                            type: 'blue',
+                                                            theme: 'material',
+                                                            closeIcon: true,
+                                                            animateFromElement: false,
+                                                            animation: 'left',
+                                                            closeAnimation: 'right',
+                                                            buttons: {
+                                                                Ok: function () {
+                                                                    var view = calendar.view.type;
 
-                                                        $.ajax({
-                                                            type: 'GET',
-                                                            url: '../../Time/GetDaysStatus',
-                                                            data:
-                                                            {
-                                                                "date": currentdate,
-                                                                "CalView": view
-                                                            },
-                                                            success: function (response) {
-                                                                $('#dailystatus').html(response);
-                                                            },
-                                                            timeout: 30 * 60 * 1000
-                                                        }).fail(function (xhr, status) {
-                                                            console.log(xhr);
-                                                            console.log(status);
+                                                                    $.ajax({
+                                                                        type: 'GET',
+                                                                        url: '../../Time/GetDaysStatus',
+                                                                        data:
+                                                                        {
+                                                                            "date": currentdate,
+                                                                            "CalView": view
+                                                                        },
+                                                                        success: function (response) {
+                                                                            $('#dailystatus').html(response);
+                                                                        },
+                                                                        timeout: 30 * 60 * 1000
+                                                                    }).fail(function (xhr, status) {
+                                                                        console.log(xhr);
+                                                                        console.log(status);
 
-                                                            if (status === "timeout") {
-                                                                console.log('Tiempo de respuesta agotado');
-                                                            }
-                                                            if (status === "error") {
-                                                                console.log('La cantidad de datos excede el limite por conexión');
-                                                            }
-                                                        });
+                                                                        if (status === "timeout") {
+                                                                            console.log('Tiempo de respuesta agotado');
+                                                                        }
+                                                                        if (status === "error") {
+                                                                            console.log('La cantidad de datos excede el limite por conexión');
+                                                                        }
+                                                                    });
 
-                                                        refreshEvents();
-                                                        // Update Daily Status after data refresh
-                                                        var currentView = calendar.currentData.currentViewType;
-                                                        var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
-                                                        DailyViews(currentDate, currentView);
-                                                    }
-                                                }
-                                            });
-                                        } else {
-                                            $.confirm({
-                                                title: 'Day Send',
-                                                content: response.msg,
-                                                type: 'orange',
-                                                theme: 'material',
-                                                closeIcon: true,
-                                                animateFromElement: false,
-                                                animation: 'left',
-                                                closeAnimation: 'right',
-                                                buttons: {
-                                                    Ok: function () {
-                                                        var view = calendar.view.type;
+                                                                    refreshEvents();
+                                                                    // Update Daily Status after data refresh
+                                                                    var currentView = calendar.currentData.currentViewType;
+                                                                    var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                                                                    DailyViews(currentDate, currentView);
 
-                                                        $.ajax({
-                                                            type: 'GET',
-                                                            url: '../../Time/GetDaysStatus',
-                                                            data:
-                                                            {
-                                                                "date": currentdate,
-                                                                "CalView": view
-                                                            },
-                                                            success: function (response) {
-                                                                $('#dailystatus').html(response);
-                                                            },
-                                                            timeout: 30 * 60 * 1000
-                                                        }).fail(function (xhr, status) {
-                                                            console.log(xhr);
-                                                            console.log(status);
+                                                                    loadLockedDays().then(function () {
+                                                                        // Opcional: resaltar visualmente
+                                                                        calendar.rerenderDates?.();
+                                                                    });
 
-                                                            if (status === "timeout") {
-                                                                console.log('Tiempo de respuesta agotado');
-                                                            }
-                                                            if (status === "error") {
-                                                                console.log('La cantidad de datos excede el limite por conexión');
+                                                                }
                                                             }
                                                         });
+                                                    } else {
+                                                        $.confirm({
+                                                            title: 'Day Send',
+                                                            content: response.msg,
+                                                            type: 'orange',
+                                                            theme: 'material',
+                                                            closeIcon: true,
+                                                            animateFromElement: false,
+                                                            animation: 'left',
+                                                            closeAnimation: 'right',
+                                                            buttons: {
+                                                                Ok: function () {
+                                                                    var view = calendar.view.type;
 
-                                                        refreshEvents();
-                                                        // Update Daily Status after data refresh
-                                                        var currentView = calendar.currentData.currentViewType;
-                                                        var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
-                                                        DailyViews(currentDate, currentView);
+                                                                    $.ajax({
+                                                                        type: 'GET',
+                                                                        url: '../../Time/GetDaysStatus',
+                                                                        data:
+                                                                        {
+                                                                            "date": currentdate,
+                                                                            "CalView": view
+                                                                        },
+                                                                        success: function (response) {
+                                                                            $('#dailystatus').html(response);
+                                                                        },
+                                                                        timeout: 30 * 60 * 1000
+                                                                    }).fail(function (xhr, status) {
+                                                                        console.log(xhr);
+                                                                        console.log(status);
+
+                                                                        if (status === "timeout") {
+                                                                            console.log('Tiempo de respuesta agotado');
+                                                                        }
+                                                                        if (status === "error") {
+                                                                            console.log('La cantidad de datos excede el limite por conexión');
+                                                                        }
+                                                                    });
+
+                                                                    refreshEvents();
+                                                                    // Update Daily Status after data refresh
+                                                                    var currentView = calendar.currentData.currentViewType;
+                                                                    var currentDate = calendar.currentData.dateProfile.currentDate.toISOString().substring(0, 10);
+                                                                    DailyViews(currentDate, currentView);
+
+                                                                    loadLockedDays().then(function () {
+                                                                        // Opcional: resaltar visualmente
+                                                                        calendar.rerenderDates?.();
+                                                                    });
+
+                                                                }
+                                                            }
+                                                        });
                                                     }
+                                                },
+                                                timeout: 30 * 60 * 1000
+                                            }).fail(function (xhr, status) {
+                                                if (status === "timeout") {
+                                                    console.log('Tiempo de respuesta agotado');
+                                                }
+                                                if (status === "error") {
+                                                    console.log('La cantidad de datos excede el limite por conexión');
                                                 }
                                             });
+                                        },
+                                        Cancel: function () {
+                                            //refreshEvents();
                                         }
-                                    },
-                                    timeout: 30 * 60 * 1000
-                                }).fail(function (xhr, status) {
-                                    if (status === "timeout") {
-                                        console.log('Tiempo de respuesta agotado');
-                                    }
-                                    if (status === "error") {
-                                        console.log('La cantidad de datos excede el limite por conexión');
                                     }
                                 });
-                            },
-                            Cancel: function () {
-                                //refreshEvents();
-                            }
-                        }
-                    });
                             } else {
                                 // Validation failed, show error message
                                 var invalidEventsList = '';
@@ -782,12 +877,12 @@
                                 } else {
                                     invalidEventsList = 'Events are missing required information. Please check all events have Project, and Category assigned.';
                                 }
-                                
+
                                 $.alert({
                                     title: 'Cannot Send for Approval',
                                     content: 'Some events are missing required information (Project or Category).<br><br>' +
-                                            'Please complete the following events before sending for approval:<br><br>' +
-                                            invalidEventsList,
+                                        'Please complete the following events before sending for approval:<br><br>' +
+                                        invalidEventsList,
                                     type: 'red',
                                     theme: 'material',
                                     closeIcon: true,
@@ -802,7 +897,7 @@
                                 });
                             }
                         },
-                        error: function() {
+                        error: function () {
                             alert('Error validating day for approval. Please try again.');
                         }
                     });

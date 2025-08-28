@@ -290,7 +290,18 @@ namespace TimeTracker.Controllers
 
                     foreach (var item in allEvents.Where(x => x.Status == "cancelled"))
                     {
-                        var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
+                        // Busca el registro local correspondiente al evento de Google
+                        var timeHours = db.TimeHours.FirstOrDefault(x => x.GCalendarId == item.Id);
+                        if (timeHours == null)
+                            continue;
+
+                        // 🚫 Regla solicitada: NO eliminar si el día ya fue enviado a aprobación
+                        if (string.Equals(timeHours.DayStatus, "Sent", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        // (Opcional) Si también quieres preservar aprobados, descomenta:
+                        // if (string.Equals(timeHours.DayStatus, "Approved", StringComparison.OrdinalIgnoreCase))
+                        //     continue;
 
                         db.TimeHours.Remove(timeHours);
                         db.SaveChanges();
@@ -489,14 +500,21 @@ namespace TimeTracker.Controllers
 
                         foreach (var item in allEvents.Where(x => x.Status == "cancelled"))
                         {
-                            var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-                            if (timeHours != null)
-                            {
-                                db.TimeHours.Remove(timeHours);
-                                db.SaveChanges();
-                            }
+                            // Busca el registro local correspondiente al evento de Google
+                            var timeHours = db.TimeHours.FirstOrDefault(x => x.GCalendarId == item.Id);
+                            if (timeHours == null)
+                                continue;
 
+                            // 🚫 Regla solicitada: NO eliminar si el día ya fue enviado a aprobación
+                            if (string.Equals(timeHours.DayStatus, "Sent", StringComparison.OrdinalIgnoreCase))
+                                continue;
 
+                            // (Opcional) Si también quieres preservar aprobados, descomenta:
+                            // if (string.Equals(timeHours.DayStatus, "Approved", StringComparison.OrdinalIgnoreCase))
+                            //     continue;
+
+                            db.TimeHours.Remove(timeHours);
+                            db.SaveChanges();
                         }
 
                         foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
@@ -718,14 +736,21 @@ namespace TimeTracker.Controllers
 
                         foreach (var item in allEvents.Where(x => x.Status == "cancelled"))
                         {
-                            var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-                            if (timeHours != null)
-                            {
-                                db.TimeHours.Remove(timeHours);
-                                db.SaveChanges();
-                            }
+                            // Busca el registro local correspondiente al evento de Google
+                            var timeHours = db.TimeHours.FirstOrDefault(x => x.GCalendarId == item.Id);
+                            if (timeHours == null)
+                                continue;
 
+                            // 🚫 Regla solicitada: NO eliminar si el día ya fue enviado a aprobación
+                            if (string.Equals(timeHours.DayStatus, "Sent", StringComparison.OrdinalIgnoreCase))
+                                continue;
 
+                            // (Opcional) Si también quieres preservar aprobados, descomenta:
+                            // if (string.Equals(timeHours.DayStatus, "Approved", StringComparison.OrdinalIgnoreCase))
+                            //     continue;
+
+                            db.TimeHours.Remove(timeHours);
+                            db.SaveChanges();
                         }
 
                         foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
@@ -915,8 +940,26 @@ namespace TimeTracker.Controllers
 
                 request.AddQueryParameter("singleEvents", "true");
                 request.AddQueryParameter("orderBy", "startTime");
-                request.AddQueryParameter("timeMin", today.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                request.AddQueryParameter("timeMax", tomorrow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+                // ⬇️ obtener zona horaria del usuario y convertir el rango a UTC
+                var user = db.Users.FirstOrDefault(x => x.UserId == idUsuario);
+                var userTz = user?.TimeZone ?? "America/Costa_Rica";
+
+                var zone = NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull(userTz)
+                           ?? NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull("America/Costa_Rica");
+
+                var todayLocal = new NodaTime.LocalDate(today.Year, today.Month, today.Day);
+                var tomorrowLocal = new NodaTime.LocalDate(tomorrow.Year, tomorrow.Month, tomorrow.Day);
+
+                var utcStart = todayLocal.At(new NodaTime.LocalTime(0, 0)).InZoneLeniently(zone).ToDateTimeUtc();
+                var utcEnd = tomorrowLocal.At(new NodaTime.LocalTime(0, 0)).InZoneLeniently(zone).ToDateTimeUtc();
+
+                request.AddQueryParameter("timeMin", utcStart.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", utcEnd.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+                // ⬇️ incluir eventos cancelados (borrados) en la respuesta
+                request.AddQueryParameter("showDeleted", "true");
+
                 request.AddQueryParameter("maxResults", "2500");
 
                 request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
@@ -961,9 +1004,29 @@ namespace TimeTracker.Controllers
 
                 request.AddQueryParameter("singleEvents", "true");
                 request.AddQueryParameter("orderBy", "startTime");
-                request.AddQueryParameter("timeMin", startOfWeek.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                request.AddQueryParameter("timeMax", endOfWeek.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+                // ⬇️ obtener zona horaria del usuario y convertir el rango a UTC
+                var user = db.Users.FirstOrDefault(x => x.UserId == idUsuario);
+                var userTz = user?.TimeZone ?? "America/Costa_Rica";
+
+                var zone = NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull(userTz)
+                           ?? NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull("America/Costa_Rica");
+
+                // startOfWeek / endOfWeek ya están como DateTime locales del servidor; normaliza como LocalDate del usuario
+                var sowLocal = new NodaTime.LocalDate(startOfWeek.Year, startOfWeek.Month, startOfWeek.Day);
+                var eowLocal = new NodaTime.LocalDate(endOfWeek.Year, endOfWeek.Month, endOfWeek.Day);
+
+                var utcStart = sowLocal.At(new NodaTime.LocalTime(0, 0)).InZoneLeniently(zone).ToDateTimeUtc();
+                var utcEnd = eowLocal.At(new NodaTime.LocalTime(0, 0)).InZoneLeniently(zone).ToDateTimeUtc();
+
+                request.AddQueryParameter("timeMin", utcStart.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                request.AddQueryParameter("timeMax", utcEnd.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+                // ⬇️ incluir eventos cancelados (borrados) en la respuesta
+                request.AddQueryParameter("showDeleted", "true");
+
                 request.AddQueryParameter("maxResults", "2500");
+
 
                 request.AddHeader("Authorization", "Bearer " + DBtoken.access_token);
                 request.AddHeader("Accept", "application/json");
@@ -989,7 +1052,6 @@ namespace TimeTracker.Controllers
         {
             try
             {
-                
                 RestResponse restResponse;
                 do
                 {
@@ -1001,148 +1063,151 @@ namespace TimeTracker.Controllers
                         var allEvents = calendarEvents["items"].ToObject<IEnumerable<Event>>();
 
                         // Get User info including timezone
-                        Users users = db.Users.Where(x => x.UserId == idUsuario).FirstOrDefault();
-
-                        // Validate that user exists
+                        Users users = db.Users.FirstOrDefault(x => x.UserId == idUsuario);
                         if (users == null)
-                        {
                             throw new Exception($"User with ID {idUsuario} not found in database.");
-                        }
 
-                        string userTimeZone = users.TimeZone ?? "America/Costa_Rica"; // Fallback to Costa Rica timezone
+                        string userTimeZone = users.TimeZone ?? "America/Costa_Rica";
+
+                        // === Cargar fechas SENT del usuario para filtrar rápido ===
+                        var sentDates = new HashSet<DateTime>(
+                            db.DaysUser
+                              .Where(d => d.UserId == idUsuario && d.DayStatus == "Sent")
+                              .Select(d => d.DayDate)
+                              .ToList()
+                        );
 
                         List<TimeHours> newevents = new List<TimeHours>();
 
-                        // Handle cancelled events
+                        // ----------------------------------------------------------------
+                        // 1) CANCELLED: NO eliminar si el registro o su fecha están en SENT
+                        // ----------------------------------------------------------------
                         foreach (var item in allEvents.Where(x => x.Status == "cancelled"))
                         {
-                            var timeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-                            if (timeHours != null)
-                            {
-                                db.TimeHours.Remove(timeHours);
-                                db.SaveChanges();
-                            }
+                            var timeHours = db.TimeHours.FirstOrDefault(x => x.GCalendarId == item.Id);
+                            if (timeHours == null)
+                                continue;
+
+                            // Si el propio registro está marcado como Sent → no borrar
+                            if (string.Equals(timeHours.DayStatus, "Sent", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            // Si la fecha del registro está en un día Sent → no borrar
+                            var evDate = timeHours.THDate.Date;
+                            if (sentDates.Contains(evDate))
+                                continue;
+
+                            db.TimeHours.Remove(timeHours);
+                            db.SaveChanges();
                         }
 
-                        // Create a list to track deleted Google Calendar events to avoid recreating them
-                        var deletedGCalendarIds = new List<string>();
-
+                        // 2) NO-CANCELLED: crear/actualizar salvo que la fecha esté en SENT
                         foreach (var item in allEvents.Where(x => x.Status != "cancelled" && x.Start != null))
                         {
                             DateTime startTime, endTime;
                             string timeFrom, timeTo;
                             decimal hours = 0;
 
-                            // Handle all-day events and preserve original times (no timezone conversion)
+                            // All-day
                             if (!string.IsNullOrEmpty(item.Start.Date))
                             {
-                                // All-day event - check if it's exactly 12:00 AM to 11:59 PM
                                 startTime = DateTime.Parse(item.Start.Date);
                                 endTime = DateTime.Parse(item.End.Date).AddDays(-1);
                                 timeFrom = "00:00";
                                 timeTo = "23:59";
                                 hours = 8.0m;
-                                
-                                // Skip events that are exactly 12:00 AM to 11:59 PM (00:00 to 23:59)
+
+                                // Ignorar 00:00→23:59
                                 if (timeFrom == "00:00" && timeTo == "23:59")
-                                {
                                     continue;
-                                }
                             }
+                            // Timed
                             else if (!string.IsNullOrEmpty(item.Start.DateTimeRaw) && !string.IsNullOrEmpty(item.End.DateTimeRaw))
                             {
-                                // Timed event - convert to user's local timezone
                                 var startDto = DateTimeOffset.Parse(item.Start.DateTimeRaw);
                                 var endDto = DateTimeOffset.Parse(item.End.DateTimeRaw);
 
-                                // 2) Normalizar a UTC
                                 var startUtc = startDto.UtcDateTime;
                                 var endUtc = endDto.UtcDateTime;
 
-                                // 3) Convertir a la zona del usuario (tu función asume UTC)
                                 startTime = ConvertToTimeZone(startUtc, userTimeZone);
                                 endTime = ConvertToTimeZone(endUtc, userTimeZone);
 
                                 timeFrom = startTime.ToString("HH:mm");
                                 timeTo = endTime.ToString("HH:mm");
-                                TimeSpan duration = endTime - startTime;
-                                // Calculate hours with high precision to avoid rounding errors
-                            decimal totalMinutes = (decimal)duration.TotalMinutes;
-                            hours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
+                                var duration = endTime - startTime;
+                                decimal totalMinutes = (decimal)duration.TotalMinutes;
+                                hours = Math.Round(totalMinutes / 60m, 4);
                             }
                             else
                             {
                                 continue;
                             }
 
-                            // Skip events that are exactly 12:00 AM (00:00) to 11:59 PM (23:59)
+                            // Ignorar 00:00→23:59
                             if (timeFrom == "00:00" && timeTo == "23:59")
-                            {
                                 continue;
-                            }
 
-                            var existingTimeHours = db.TimeHours.Where(x => x.GCalendarId == item.Id).FirstOrDefault();
-                            
-                            // If event was manually deleted but still exists in Google Calendar, 
-                            // re-enable it since user is syncing (wants current Google Calendar state)
-                            bool wasManuallyDeleted = existingTimeHours != null && 
-                                                    existingTimeHours.InternalNote != null && 
-                                                    existingTimeHours.InternalNote.StartsWith("MANUALLY_DELETED_");
-                            
+                            // 🚫 Nuevo: si el día está SENT, no crear ni actualizar nada
+                            var evDate = startTime.Date;
+                            if (sentDates.Contains(evDate))
+                                continue;
+
+                            var existingTimeHours = db.TimeHours.FirstOrDefault(x => x.GCalendarId == item.Id);
+
                             if (existingTimeHours != null)
                             {
-                                // Update existing event (including re-enabling manually deleted ones)
+                                // Doble protección: si ese registro quedó con DayStatus=Sent, no tocarlo
+                                if (string.Equals(existingTimeHours.DayStatus, "Sent", StringComparison.OrdinalIgnoreCase))
+                                    continue;
+
                                 existingTimeHours.THDate = startTime.Date;
                                 existingTimeHours.THFrom = timeFrom;
                                 existingTimeHours.THTo = timeTo;
                                 existingTimeHours.THours = hours;
                                 existingTimeHours.ActDescription = item.Summary ?? "";
                                 existingTimeHours.Billable = false;
-                                existingTimeHours.Visible = true; // Re-enable if it was hidden
+                                existingTimeHours.Visible = true;
                                 existingTimeHours.InternalNote = "";
-                                
+
                                 db.Entry(existingTimeHours).State = System.Data.Entity.EntityState.Modified;
                             }
                             else
                             {
-                                // Create new event
-                                TimeHours timeHours = new TimeHours();
-                                timeHours.THDate = startTime.Date;
-                                timeHours.THFrom = timeFrom;
-                                timeHours.THTo = timeTo;
-                                timeHours.THours = hours;
-                                timeHours.Billable = false;
-                                timeHours.ActDescription = item.Summary ?? "";
-                                timeHours.UserId = idUsuario;
-                                timeHours.InternalNote = "";
-                                timeHours.Visible = true;
-                                timeHours.GCalendarId = item.Id;
-                                // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
-                                timeHours.ActivityId = null;
-                                timeHours.CategoryId = null;
-                                timeHours.CustomerId = null;
-                                timeHours.ProjectId = null;
-
+                                var timeHours = new TimeHours
+                                {
+                                    THDate = startTime.Date,
+                                    THFrom = timeFrom,
+                                    THTo = timeTo,
+                                    THours = hours,
+                                    Billable = false,
+                                    ActDescription = item.Summary ?? "",
+                                    UserId = idUsuario,
+                                    InternalNote = "",
+                                    Visible = true,
+                                    GCalendarId = item.Id,
+                                    ActivityId = null,
+                                    CategoryId = null,
+                                    CustomerId = null,
+                                    ProjectId = null
+                                };
                                 newevents.Add(timeHours);
                             }
                         }
 
-                        // Actually add new events to the database
                         if (newevents.Any())
-                        {
                             db.TimeHours.AddRange(newevents);
-                        }
+
                         db.SaveChanges();
 
-                        // Handle pagination
+                        // Paginación
                         var nextPageToken = calendarEvents["nextPageToken"]?.ToString();
                         if (!string.IsNullOrEmpty(nextPageToken))
                         {
                             var existingPageToken = restRequest.Parameters.FirstOrDefault(p => p.Name == "pageToken");
                             if (existingPageToken != null)
-                            {
                                 restRequest.Parameters.RemoveParameter(existingPageToken);
-                            }
+
                             restRequest.AddQueryParameter("pageToken", nextPageToken);
                         }
                         else
@@ -1152,12 +1217,10 @@ namespace TimeTracker.Controllers
                     }
                     else
                     {
-                        // Log error details for debugging
                         string errorMessage = $"Google Calendar API error: {restResponse.StatusCode} - {restResponse.Content}";
                         if (restResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                        {
                             throw new UnauthorizedAccessException("Google Calendar token expired or invalid");
-                        }
+
                         throw new Exception(errorMessage);
                     }
                 } while (true);
@@ -1166,9 +1229,10 @@ namespace TimeTracker.Controllers
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
+
 
         public ActionResult IsConnected()
         {
