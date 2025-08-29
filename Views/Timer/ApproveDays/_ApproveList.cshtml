@@ -27,6 +27,8 @@
        settings.SettingsEditing.BatchEditSettings.StartEditAction = GridViewBatchStartEditAction.FocusedCellClick;
        settings.SettingsEditing.BatchEditSettings.HighlightDeletedRows = true;
        settings.SettingsEditing.BatchEditSettings.KeepChangesOnCallbacks =  DefaultBoolean.True;
+       // VISIBLECLIENT FIX: Prevent automatic callbacks on cell value changes
+       settings.SettingsEditing.BatchEditSettings.AllowValidationOnEndEdit = false;
        settings.Settings.VerticalScrollableHeight = 594;
        settings.SettingsPager.PageSizeItemSettings.Visible = true;
        settings.CommandColumn.Visible = true;
@@ -34,6 +36,10 @@
        settings.CommandColumn.ShowDeleteButton = false;
        settings.CommandColumn.ShowNewButtonInHeader = false;
        settings.CommandColumn.Width = Unit.Pixel(100);
+
+       // VISIBLECLIENT FIX: Disable automatic callbacks that could cause record filtering
+       settings.SettingsBehavior.AllowFocusedRow = true;
+       settings.SettingsBehavior.ProcessFocusedRowChangedOnServer = false;
 
        settings.Columns.Add(c =>
        {
@@ -189,7 +195,7 @@
 
        settings.Columns.Add(c =>
        {
-           c.FieldName = "Visible";
+           c.FieldName = "VisibleClient";
            c.Caption = "Visible Client";
            c.ColumnType = MVCxGridViewColumnType.CheckBox;
            c.Visible = true;

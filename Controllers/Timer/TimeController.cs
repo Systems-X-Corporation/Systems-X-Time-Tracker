@@ -67,7 +67,15 @@ namespace TimeTracker.Controllers.Timer
                     timeHours.THFrom = start;
                     timeHours.THTo = end;
                     timeHours.Billable = billable;
-                    timeHours.ActDescription = description;
+                    if (billable)
+                    {
+                        timeHours.VisibleClient = true;
+                    }
+                    else
+                    {
+                         timeHours.VisibleClient = false;
+                    }
+                        timeHours.ActDescription = description;
                     timeHours.Users = db.Users.Where(x => x.UserId == userId).FirstOrDefault();
                     timeHours.UserId = userId;
                     
@@ -110,6 +118,14 @@ namespace TimeTracker.Controllers.Timer
                     timeHours.THFrom = start;
                     timeHours.THTo = end;
                     timeHours.Billable = billable;
+                    if (billable)
+                    {
+                        timeHours.VisibleClient = true;
+                    }
+                    else
+                    {
+                        timeHours.VisibleClient = false;
+                    }
                     timeHours.ActDescription = description;
                     timeHours.Users = db.Users.Where(x => x.UserId == userId).FirstOrDefault();
                     timeHours.UserId = userId;
