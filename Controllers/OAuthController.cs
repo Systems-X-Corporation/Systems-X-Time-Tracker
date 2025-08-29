@@ -81,17 +81,20 @@ namespace TimeTracker.Controllers
             var state = System.Guid.NewGuid().ToString();
             Session["oauth_state"] = state;
 
-            var redirectUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
-                         "scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/calendar.events&" +
-                         "access_type=offline&" +
-                         "include_granted_scopes=true&" +
-                         "response_type=code&" +
-                         "prompt=consent&" +
-                         "state=" + state + "&" +
-                         "redirect_uri=" + Uri.EscapeDataString(_redirect_uri) + "&" +
-                         "client_id=" + _client_id;
+            int idUser = Convert.ToInt32(GetUser());
+            bool hasRefresh = db.GCToken.Any(x => x.idUsuario == idUser && x.refresh_token != null && x.refresh_token != "");
 
-            return Redirect(redirectUrl);
+            var baseUrl = "https://accounts.google.com/o/oauth2/v2/auth?";
+            var qs = "scope=https://www.googleapis.com/auth/calendar+https://www.googleapis.com/auth/calendar.events&" +
+                     "access_type=offline&" +
+                     "include_granted_scopes=true&" +
+                     "response_type=code&" +
+                     (hasRefresh ? "" : "prompt=consent&") +   // ← solo en primera vez
+                     "state=" + state + "&" +
+                     "redirect_uri=" + Uri.EscapeDataString(_redirect_uri) + "&" +
+                     "client_id=" + _client_id;
+
+            return Redirect(baseUrl + qs);
         }
 
         public ActionResult Callback(string code, string error, string state)
@@ -149,34 +152,69 @@ namespace TimeTracker.Controllers
             {
                 int idUser = Convert.ToInt32(GetUser());
                 JObject resp = JObject.Parse(response.Content);
-                var model = db.GCToken;
-                var tok = db.GCToken.Where(x => x.idUsuario == idUser).ToList();
-                model.RemoveRange(tok);
-                db.SaveChanges();
+                //var model = db.GCToken;
+                //var tok = db.GCToken.Where(x => x.idUsuario == idUser).ToList();
+                //model.RemoveRange(tok);
+                //db.SaveChanges();
+                //GCToken gCToken = new GCToken();
+                //gCToken.idUsuario = idUser;
+                //gCToken.access_token = resp["access_token"].ToString();
+                //if (!string.IsNullOrEmpty((string)resp["refresh_token"]))
+                //{
+                //    gCToken.refresh_token = resp["refresh_token"].ToString();
+                //}
+                //else
+                //{
+                //    gCToken.refresh_token = "";
+                //}
+
+                //gCToken.expires_in = resp["expires_in"].ToString();
+                //gCToken.scope = resp["scope"].ToString();
+                //gCToken.token_type = resp["token_type"].ToString();
+                //// Store creation timestamp in texto field (JSON format for extensibility)
+                //var tokenInfo = new {
+                //    created_at = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                //    expires_at = DateTime.UtcNow.AddSeconds(double.Parse(resp["expires_in"].ToString())).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                //    raw_response = response.Content.ToString()
+                //};
+                //gCToken.texto = Newtonsoft.Json.JsonConvert.SerializeObject(tokenInfo);
+
+                //model.Add(gCToken);
+                //db.SaveChanges();
                 GCToken gCToken = new GCToken();
-                gCToken.idUsuario = idUser;
-                gCToken.access_token = resp["access_token"].ToString();
-                if (!string.IsNullOrEmpty((string)resp["refresh_token"]))
+                var tokenRow = db.GCToken.FirstOrDefault(x => x.idUsuario == idUser);
+                if (tokenRow == null)
                 {
-                    gCToken.refresh_token = resp["refresh_token"].ToString();
-                }
-                else
-                {
-                    gCToken.refresh_token = "";
+                    tokenRow = new GCToken { idUsuario = idUser };
+                    db.GCToken.Add(tokenRow);
                 }
 
-                gCToken.expires_in = resp["expires_in"].ToString();
-                gCToken.scope = resp["scope"].ToString();
-                gCToken.token_type = resp["token_type"].ToString();
-                // Store creation timestamp in texto field (JSON format for extensibility)
-                var tokenInfo = new {
-                    created_at = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                    expires_at = DateTime.UtcNow.AddSeconds(double.Parse(resp["expires_in"].ToString())).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                    raw_response = response.Content.ToString()
+                // siempre actualiza el access_token
+                tokenRow.access_token = (string)resp["access_token"];
+
+                // SOLO pisa refresh_token si Google lo envía; si no, conserva el que ya tienes
+                var respRefresh = (string)resp["refresh_token"];
+                if (!string.IsNullOrEmpty(respRefresh))
+                {
+                    tokenRow.refresh_token = respRefresh;
+                }
+
+                // metadatos
+                tokenRow.expires_in = (string)resp["expires_in"];
+                tokenRow.scope = (string)resp["scope"];
+                tokenRow.token_type = (string)resp["token_type"];
+
+                // Guarda timestamps en texto (JSON)
+                var createdAt = DateTime.UtcNow;
+                var expiresAt = createdAt.AddSeconds(double.Parse((string)resp["expires_in"]));
+                var tokenInfo = new
+                {
+                    created_at = createdAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    expires_at = expiresAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    raw_response = response.Content
                 };
-                gCToken.texto = Newtonsoft.Json.JsonConvert.SerializeObject(tokenInfo);
+                tokenRow.texto = Newtonsoft.Json.JsonConvert.SerializeObject(tokenInfo);
 
-                model.Add(gCToken);
                 db.SaveChanges();
 
                 // Get and save user's timezone automatically
@@ -429,6 +467,30 @@ namespace TimeTracker.Controllers
         }
 
 
+        private bool EnsureValidAccessToken(int idUser, int safetySeconds = 60)
+        {
+            var t = db.GCToken.FirstOrDefault(x => x.idUsuario == idUser);
+            if (t == null || string.IsNullOrEmpty(t.access_token)) return false;
+
+            // intenta leer expires_at desde texto
+            try
+            {
+                var meta = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(t.texto ?? "{}");
+                DateTime expiresAt = DateTime.Parse((string)meta?.expires_at);
+                if (DateTime.UtcNow >= expiresAt.AddSeconds(-safetySeconds))
+                {
+                    // cerca de expirar → refresca
+                    RefreshToken(idUser);
+                }
+                return true;
+            }
+            catch
+            {
+                // si no hay metadata, confía en expires_in y created_at aprox (o refresca por las dudas)
+                RefreshToken(idUser);
+                return true;
+            }
+        }
 
 
         public ActionResult RefreshToken(int idUser)
@@ -457,12 +519,32 @@ namespace TimeTracker.Controllers
 
                 if (respose.StatusCode == System.Net.HttpStatusCode.OK)
                 {
+                    //JObject newToken = JObject.Parse(respose.Content);
+                    //DBtoken.access_token = newToken["access_token"].ToString();
+                    //DBtoken.expires_in = newToken["expires_in"].ToString();
+                    //DBtoken.scope = newToken["scope"].ToString();
+                    //DBtoken.token_type = newToken["token_type"].ToString();
+                    //db.Entry(DBtoken).State = System.Data.Entity.EntityState.Modified;
+                    //db.SaveChanges();
+
                     JObject newToken = JObject.Parse(respose.Content);
-                    DBtoken.access_token = newToken["access_token"].ToString();
-                    DBtoken.expires_in = newToken["expires_in"].ToString();
-                    DBtoken.scope = newToken["scope"].ToString();
-                    DBtoken.token_type = newToken["token_type"].ToString();
-                    db.Entry(DBtoken).State = System.Data.Entity.EntityState.Modified;
+                    DBtoken.access_token = (string)newToken["access_token"];
+                    DBtoken.expires_in = (string)newToken["expires_in"];
+                    DBtoken.scope = (string)newToken["scope"];
+                    DBtoken.token_type = (string)newToken["token_type"];
+
+                    // ⬇️ actualiza timestamps
+                    var createdAt = DateTime.UtcNow;
+                    var expiresAt = createdAt.AddSeconds(double.Parse((string)newToken["expires_in"]));
+                    var tokenInfo = new
+                    {
+                        created_at = createdAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        expires_at = expiresAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        raw_response = respose.Content
+                    };
+                    DBtoken.texto = Newtonsoft.Json.JsonConvert.SerializeObject(tokenInfo);
+
+                    db.Entry(DBtoken).State = EntityState.Modified;
                     db.SaveChanges();
                 }
                 return RedirectToAction("/Home");
@@ -646,6 +728,7 @@ namespace TimeTracker.Controllers
             try
             {
                 var idUsuario = Convert.ToInt32(GetUser());
+                EnsureValidAccessToken(idUsuario);
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
                 if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
@@ -693,6 +776,7 @@ namespace TimeTracker.Controllers
             try
             {
                 var idUsuario = Convert.ToInt32(GetUser());
+                EnsureValidAccessToken(idUsuario);
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
                 if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
@@ -924,6 +1008,7 @@ namespace TimeTracker.Controllers
             try
             {
                 var idUsuario = Convert.ToInt32(GetUser());
+                EnsureValidAccessToken(idUsuario);
                 var DBtoken = db.GCToken.Where(x => x.idUsuario == idUsuario).FirstOrDefault();
 
                 if (DBtoken == null || string.IsNullOrEmpty(DBtoken.access_token))
