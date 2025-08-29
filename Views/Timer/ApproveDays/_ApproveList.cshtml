@@ -18,8 +18,8 @@
        settings.Name = "gvApproveList";
        settings.KeyFieldName = "TimeHoursId";
        settings.Width = Unit.Percentage(100);
-       settings.CallbackRouteValues = new { Controller = "ApproveDays", Action = "DaysList",customer = ViewBag.customer, project = ViewBag.project, user = ViewBag.user, from = ViewBag.from, to = ViewBag.to, records = ViewBag.records };
-       settings.SettingsEditing.BatchUpdateRouteValues = new { Controller = "ApproveDays", Action = "BatchEditingUpdateModel", customer = ViewBag.customer, project = ViewBag.project, user = ViewBag.user, from = ViewBag.from, to = ViewBag.to, records = ViewBag.records };
+       settings.CallbackRouteValues = new { Controller = "ApproveDays", Action = "DaysList",customer = ViewBag.customer, project = ViewBag.project, user = ViewBag.user, from = ViewBag.from, to = ViewBag.to, records = ViewBag.records, filterType = ViewBag.filterType };
+       settings.SettingsEditing.BatchUpdateRouteValues = new { Controller = "ApproveDays", Action = "BatchEditingUpdateModel", customer = ViewBag.customer, project = ViewBag.project, user = ViewBag.user, from = ViewBag.from, to = ViewBag.to, records = ViewBag.records, filterType = ViewBag.filterType };
        //settings.SettingsEditing.AddNewRowRouteValues = new { Controller = "ApproveDays", Action = "AddNewRow", project = ViewBag.project, user = ViewBag.user, from = ViewBag.from, to = ViewBag.to, records = ViewBag.records };
        settings.SettingsEditing.Mode = GridViewEditingMode.Batch;
        settings.SettingsPager.Mode = GridViewPagerMode.ShowPager;

@@ -41,6 +41,8 @@ $(document).ready(function () {
                 showTodaysPending();
             } else if (filterType === "week") {
                 showThisWeeksPending();
+            } else if (filterType === "lastweek") {
+                showLastWeeksPending();
             }
         }
     });
@@ -108,6 +110,9 @@ $(document).ready(function () {
     // Auto-update when date inputs change
     $('#from, #to').on('change', function () {
         if ($('#cboQuickFilter').val() === 'custom') {
+            var fromVal = $('#from').val();
+            var toVal = $('#to').val();
+            console.log('Date filter changed - From:', fromVal, 'To:', toVal, 'FilterType: custom');
             buscar();
         }
     });
@@ -127,15 +132,20 @@ $(document).ready(function () {
         var fromVal = $('#from').val();
         var toVal = $('#to').val();
         
-        // Debug: Log the user value being sent
+        // Debug: Log all values being sent to controller
+        console.log('=== BUSCAR DEBUG ===');
         console.log('User filter value:', userVal);
+        console.log('Date values - From:', fromVal, 'To:', toVal);
         console.log('All filter values:', {
             customer: customerVal,
             project: projectVal,
             user: userVal,
             records: recordsVal,
-            filterType: filterType
+            filterType: filterType,
+            from: fromVal,
+            to: toVal
         });
+        console.log('==================');
         
         // Show loading indicator
         $("#ApproveList").html('<div class="text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading...</div>');
@@ -266,6 +276,47 @@ $(document).ready(function () {
         });
     }
 
+    function showLastWeeksPending() {
+        // Calculate last week's start date (7 days before this week)
+        var today = new Date();
+        var thisWeekStart = new Date(today);
+        thisWeekStart.setDate(today.getDate() - today.getDay()); // This week's Sunday
+        var lastWeekStart = new Date(thisWeekStart);
+        lastWeekStart.setDate(thisWeekStart.getDate() - 7); // Last week's Sunday
+        
+        $.ajax({
+            type: 'GET',
+            url: '../../ApproveDays/GetWeeksPendingApprovals',
+            dataType: 'json',
+            data: {
+                "startDate": lastWeekStart.toISOString()
+            },
+            success: function (data) {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                var summaryHtml = '<strong>Last Week\'s Pending Approvals (' + data.WeekStart + ' to ' + data.WeekEnd + ')</strong><br>' +
+                                'Total Records: <span class="badge badge-warning">' + data.Count + '</span><br>' +
+                                'Daily Breakdown: ';
+                
+                data.DailySummary.forEach(function(day) {
+                    summaryHtml += '<span class="badge badge-info mr-1">' + day.Date + ': ' + day.Count + '</span>';
+                });
+                
+                $("#summaryContent").html(summaryHtml);
+                $("#summarySection").show();
+                
+                // Load the actual data
+                loadDataWithFilter('lastweek', data.WeekStart);
+            },
+            error: function () {
+                alert('Error loading last week\'s pending approvals');
+            }
+        });
+    }
+
     function generatePendingApprovalsReport() {
         $.ajax({
             type: 'GET',
@@ -325,10 +376,10 @@ $(document).ready(function () {
             data: {
                 "customer": 0,
                 "project": 0,
-                "user": 0,
+                "user": "",
                 "from": dateValue,
                 "to": '',
-                "records": '',
+                "records": "",
                 "filterType": filterType
             },
             success: function (response) {

@@ -136,6 +136,17 @@ namespace TimeTracker.Controllers.Timer
         {
             try
             {
+                // Debug logging
+                System.Diagnostics.Debug.WriteLine($"=== DAYSLIST DEBUG ===");
+                System.Diagnostics.Debug.WriteLine($"customer: {customer}");
+                System.Diagnostics.Debug.WriteLine($"project: {project}");
+                System.Diagnostics.Debug.WriteLine($"user: '{user}'");
+                System.Diagnostics.Debug.WriteLine($"from: '{from}'");
+                System.Diagnostics.Debug.WriteLine($"to: '{to}'");
+                System.Diagnostics.Debug.WriteLine($"records: '{records}'");
+                System.Diagnostics.Debug.WriteLine($"filterType: '{filterType}'");
+                System.Diagnostics.Debug.WriteLine($"===================");
+
                 var hours = db.TimeHours.ToList();
 
                 // Always show records that need approval by default if no specific filter is applied
@@ -158,10 +169,10 @@ namespace TimeTracker.Controllers.Timer
                 {
                     hours = hours.Where(x => x.Project.ProjectId == project).ToList();
                 }
-                if (!string.IsNullOrEmpty(user))
+                if (!string.IsNullOrEmpty(user) && user != "0")
                 {
                     // Handle multiple users or single user
-                    var userIds = user.Split(',').Where(u => !string.IsNullOrEmpty(u)).Select(u => int.Parse(u.Trim())).ToList();
+                    var userIds = user.Split(',').Where(u => !string.IsNullOrEmpty(u) && u != "0").Select(u => int.Parse(u.Trim())).ToList();
                     if (userIds.Any())
                     {
                         hours = hours.Where(x => userIds.Contains(x.Users.UserId)).ToList();
@@ -187,6 +198,30 @@ namespace TimeTracker.Controllers.Timer
                             var weekEnd = weekStart.AddDays(6);
                             hours = hours.Where(x => x.THDate >= weekStart && x.THDate <= weekEnd).ToList();
                             break;
+                        case "lastweek":
+                            var thisWeekStart = referenceDate.AddDays(-(int)referenceDate.DayOfWeek);
+                            var lastWeekStart = thisWeekStart.AddDays(-7);
+                            var lastWeekEnd = lastWeekStart.AddDays(6);
+                            hours = hours.Where(x => x.THDate >= lastWeekStart && x.THDate <= lastWeekEnd).ToList();
+                            break;
+                        case "custom":
+                            if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+                            {
+                                DateTime _from = Convert.ToDateTime(from); 
+                                DateTime _to = Convert.ToDateTime(to);
+                                hours = hours.Where(x => x.THDate >= _from && x.THDate <= _to).ToList();
+                            }
+                            else if (!string.IsNullOrEmpty(from))
+                            {
+                                DateTime _from = Convert.ToDateTime(from);
+                                hours = hours.Where(x => x.THDate >= _from).ToList();
+                            }
+                            else if (!string.IsNullOrEmpty(to))
+                            {
+                                DateTime _to = Convert.ToDateTime(to);
+                                hours = hours.Where(x => x.THDate <= _to).ToList();
+                            }
+                            break;
                     }
                 }
                 else if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
@@ -197,7 +232,7 @@ namespace TimeTracker.Controllers.Timer
 
                 ViewBag.customer = customer;
                 ViewBag.project = project;
-                ViewBag.user = user;
+                ViewBag.user = user == "0" ? "" : user;
                 ViewBag.from = from;
                 ViewBag.to = to;
                 ViewBag.records = records;
@@ -211,7 +246,7 @@ namespace TimeTracker.Controllers.Timer
             }
         }
 
-        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<TimeHours, int> updateValues,int customer =0, int project = 0, string user = "", string from = "", string to = "", string records = "")
+        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<TimeHours, int> updateValues,int customer =0, int project = 0, string user = "", string from = "", string to = "", string records = "", string filterType = "")
         {
             try
             {
@@ -306,20 +341,83 @@ namespace TimeTracker.Controllers.Timer
                 }
 
 
-                var hours = db.TimeHours.Where(x => x.Project.ProjectId == project).ToList();
-                if (!string.IsNullOrEmpty(records) && records != "All")
+                var hours = db.TimeHours.ToList();
+
+                // Always show records that need approval by default if no specific filter is applied
+                if (string.IsNullOrEmpty(records) || records == "All")
+                {
+                    // Show all pending approval records (Sent, Under Review)
+                    hours = hours.Where(x => x.DayStatus == "Sent" || x.DayStatus == "Under Review" || x.DayStatus == "Approved").ToList();
+                }
+                else if (records != "All")
                 {
                     hours = hours.Where(x => x.DayStatus == records).ToList();
                 }
-                if (!string.IsNullOrEmpty(user))
+
+                // Apply optional filters
+                if (customer != 0)
                 {
-                    var userIds = user.Split(',').Where(u => !string.IsNullOrEmpty(u)).Select(u => int.Parse(u.Trim())).ToList();
+                    hours = hours.Where(x => x.CustomerId == customer).ToList();
+                }
+                if (project != 0)
+                {
+                    hours = hours.Where(x => x.Project.ProjectId == project).ToList();
+                }
+                if (!string.IsNullOrEmpty(user) && user != "0")
+                {
+                    var userIds = user.Split(',').Where(u => !string.IsNullOrEmpty(u) && u != "0").Select(u => int.Parse(u.Trim())).ToList();
                     if (userIds.Any())
                     {
                         hours = hours.Where(x => userIds.Contains(x.Users.UserId)).ToList();
                     }
                 }
-                if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+
+                // Date filtering with special handling for day and week filters
+                if (!string.IsNullOrEmpty(filterType))
+                {
+                    DateTime referenceDate = DateTime.Today;
+                    if (!string.IsNullOrEmpty(from))
+                    {
+                        referenceDate = Convert.ToDateTime(from);
+                    }
+
+                    switch (filterType.ToLower())
+                    {
+                        case "day":
+                            hours = hours.Where(x => x.THDate.Date == referenceDate.Date).ToList();
+                            break;
+                        case "week":
+                            var weekStart = referenceDate.AddDays(-(int)referenceDate.DayOfWeek);
+                            var weekEnd = weekStart.AddDays(6);
+                            hours = hours.Where(x => x.THDate >= weekStart && x.THDate <= weekEnd).ToList();
+                            break;
+                        case "lastweek":
+                            var thisWeekStart = referenceDate.AddDays(-(int)referenceDate.DayOfWeek);
+                            var lastWeekStart = thisWeekStart.AddDays(-7);
+                            var lastWeekEnd = lastWeekStart.AddDays(6);
+                            hours = hours.Where(x => x.THDate >= lastWeekStart && x.THDate <= lastWeekEnd).ToList();
+                            break;
+                        case "custom":
+                            if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+                            {
+                                DateTime _from = Convert.ToDateTime(from); 
+                                DateTime _to = Convert.ToDateTime(to);
+                                hours = hours.Where(x => x.THDate >= _from && x.THDate <= _to).ToList();
+                            }
+                            else if (!string.IsNullOrEmpty(from))
+                            {
+                                DateTime _from = Convert.ToDateTime(from);
+                                hours = hours.Where(x => x.THDate >= _from).ToList();
+                            }
+                            else if (!string.IsNullOrEmpty(to))
+                            {
+                                DateTime _to = Convert.ToDateTime(to);
+                                hours = hours.Where(x => x.THDate <= _to).ToList();
+                            }
+                            break;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
                 {
                     DateTime _from = Convert.ToDateTime(from); DateTime _to = Convert.ToDateTime(to);
                     hours = hours.Where(x => x.THDate >= _from && x.THDate <= _to).ToList();
@@ -328,10 +426,11 @@ namespace TimeTracker.Controllers.Timer
                 ViewBag.customer = customer;
 
                 ViewBag.project = project;
-                ViewBag.user = user;
+                ViewBag.user = user == "0" ? "" : user;
                 ViewBag.from = from;
                 ViewBag.to = to;
                 ViewBag.records = records;
+                ViewBag.filterType = filterType;
 
                 return PartialView("~/Views/Timer/ApproveDays/_ApproveList.cshtml", hours);
 
@@ -388,7 +487,7 @@ namespace TimeTracker.Controllers.Timer
         {
             try
             {
-                var pendingRecords = db.TimeHours.Where(x => x.DayStatus == "Sent" || x.DayStatus == "Under Review").ToList();
+                var pendingRecords = db.TimeHours.Where(x => (x.DayStatus == "Sent" || x.DayStatus == "Under Review") && x.Visible == true).ToList();
                 
                 var oldestRecord = pendingRecords.OrderBy(x => x.THDate).FirstOrDefault();
                 
@@ -427,7 +526,7 @@ namespace TimeTracker.Controllers.Timer
             try
             {
                 // Get all records that need approval without any filters
-                var hours = db.TimeHours.Where(x => x.DayStatus == "Sent" || x.DayStatus == "Under Review").ToList();
+                var hours = db.TimeHours.Where(x => (x.DayStatus == "Sent" || x.DayStatus == "Under Review") &&  x.Visible == true).ToList();
 
                 ViewBag.customer = 0;
                 ViewBag.project = 0;
@@ -451,7 +550,7 @@ namespace TimeTracker.Controllers.Timer
             {
                 var today = DateTime.Today;
                 var todaysPending = db.TimeHours.Where(x => x.THDate == today && 
-                                                          (x.DayStatus == "Sent" || x.DayStatus == "Under Review")).ToList();
+                                                          (x.DayStatus == "Sent" || x.DayStatus == "Under Review") && x.Visible == true).ToList();
 
                 var summary = new
                 {
@@ -485,7 +584,7 @@ namespace TimeTracker.Controllers.Timer
                 var weekEnd = weekStart.AddDays(6);
 
                 var weeksPending = db.TimeHours.Where(x => x.THDate >= weekStart && x.THDate <= weekEnd && 
-                                                         (x.DayStatus == "Sent" || x.DayStatus == "Under Review")).ToList();
+                                                         (x.DayStatus == "Sent" || x.DayStatus == "Under Review") && x.Visible == true).ToList();
 
                 var summary = new
                 {
