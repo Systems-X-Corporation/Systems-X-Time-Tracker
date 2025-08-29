@@ -309,6 +309,7 @@ warning 6002: The table/view 'timetrackerDB2.dbo.temppagetype' does not have a p
           <Property Name="ApprovalNote" Type="varchar(max)" />
           <Property Name="THours" Type="numeric" Precision="18" Scale="2" />
           <Property Name="GCalendarId" Type="varchar(max)" />
+          <Property Name="VisibleClient" Type="bit" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -1416,6 +1417,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           <NavigationProperty Name="Customer" Relationship="timetrackerDBModel.FK_TimerCustomer" FromRole="TimeHours" ToRole="Customer" />
           <NavigationProperty Name="Project" Relationship="timetrackerDBModel.FK_TimerProject" FromRole="TimeHours" ToRole="Project" />
           <NavigationProperty Name="Users" Relationship="timetrackerDBModel.FK_TimerUsers" FromRole="TimeHours" ToRole="Users" />
+          <Property Name="VisibleClient" Type="Boolean" />
         </EntityType>
         <EntityType Name="UsersProject">
           <Key>
@@ -2144,6 +2146,7 @@ warning 6002: The table/view 'timetrackerDB2.sys.database_firewall_rules' does n
           <EntitySetMapping Name="TimeHours">
             <EntityTypeMapping TypeName="timetrackerDBModel.TimeHours">
               <MappingFragment StoreEntitySet="TimeHours">
+                <ScalarProperty Name="VisibleClient" ColumnName="VisibleClient" />
                 <ScalarProperty Name="GCalendarId" ColumnName="GCalendarId" />
                 <ScalarProperty Name="THours" ColumnName="THours" />
                 <ScalarProperty Name="ApprovalNote" ColumnName="ApprovalNote" />

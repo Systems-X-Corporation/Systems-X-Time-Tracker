@@ -36,6 +36,7 @@ namespace TimeTracker.Models
         public string ApprovalNote { get; set; }
         public Nullable<decimal> THours { get; set; }
         public string GCalendarId { get; set; }
+        public Nullable<bool> VisibleClient { get; set; }
     
         public virtual Category Category { get; set; }
         public virtual Customer Customer { get; set; }
