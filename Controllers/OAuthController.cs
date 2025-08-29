@@ -413,7 +413,8 @@ namespace TimeTracker.Controllers
                                 timeHours.ActDescription = item.Summary ?? "";
                                 timeHours.Billable = true;
                                 timeHours.InternalNote = "";
-                                
+                                timeHours.VisibleClient = true;
+
                                 db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
                             }
                         }
@@ -429,6 +430,7 @@ namespace TimeTracker.Controllers
                             timeHours.UserId = idUsuario;
                             timeHours.InternalNote = "";
                             timeHours.Visible = true;
+                            timeHours.VisibleClient = false;
                             timeHours.GCalendarId = item.Id;
                             timeHours.ActivityId = activity.ActivityId;
                             timeHours.CategoryId = category.CategoryId;
@@ -676,6 +678,7 @@ namespace TimeTracker.Controllers
                                     timeHours.THours = Math.Round(totalMinutes / 60m, 4); // 4 decimal places for precision
                                     timeHours.InternalNote = "";
                                     timeHours.Visible = true;
+                                    timeHours.VisibleClient = false;
                                     timeHours.GCalendarId = item.Id;
 
                                     // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
@@ -908,8 +911,9 @@ namespace TimeTracker.Controllers
                                 existingTimeHours.THours = hours;
                                 existingTimeHours.ActDescription = item.Summary ?? "";
                                 existingTimeHours.Billable = false;
-                                existingTimeHours.Visible = true; // Re-enable if it was hidden
-                                
+                                existingTimeHours.Visible = true;
+                                existingTimeHours.VisibleClient = false;// Re-enable if it was hidden
+
                                 // Clear manual deletion marker since event exists in Google Calendar
                                 if (wasManuallyDeleted)
                                 {
@@ -936,6 +940,7 @@ namespace TimeTracker.Controllers
                                 timeHours.UserId = idUsuario;
                                 timeHours.InternalNote = "";
                                 timeHours.Visible = true;
+                                timeHours.VisibleClient = false;
                                 timeHours.GCalendarId = item.Id;
                                 // Leave CustomerId, ProjectId, ActivityId, and CategoryId as null for manual assignment
                                 timeHours.ActivityId = null;
@@ -1253,6 +1258,7 @@ namespace TimeTracker.Controllers
                                 existingTimeHours.ActDescription = item.Summary ?? "";
                                 existingTimeHours.Billable = false;
                                 existingTimeHours.Visible = true;
+                                existingTimeHours.VisibleClient = false;
                                 existingTimeHours.InternalNote = "";
 
                                 db.Entry(existingTimeHours).State = System.Data.Entity.EntityState.Modified;
@@ -1270,6 +1276,7 @@ namespace TimeTracker.Controllers
                                     UserId = idUsuario,
                                     InternalNote = "",
                                     Visible = true,
+                                    VisibleClient = false,
                                     GCalendarId = item.Id,
                                     ActivityId = null,
                                     CategoryId = null,

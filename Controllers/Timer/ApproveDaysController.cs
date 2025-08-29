@@ -147,7 +147,8 @@ namespace TimeTracker.Controllers.Timer
                 System.Diagnostics.Debug.WriteLine($"filterType: '{filterType}'");
                 System.Diagnostics.Debug.WriteLine($"===================");
 
-                var hours = db.TimeHours.ToList();
+                // CRITICAL FIX: Filter by Visible = true like other methods do
+                var hours = db.TimeHours.Where(x => x.Visible == true).ToList();
 
                 // Always show records that need approval by default if no specific filter is applied
                 if (string.IsNullOrEmpty(records) || records == "All")
@@ -276,7 +277,9 @@ namespace TimeTracker.Controllers.Timer
                     timeHours.DayStatus = item.DayStatus;
                     timeHours.InternalNote = item.InternalNote;
                     timeHours.TaskAllocation = item.TaskAllocation;
-                    timeHours.Visible = item.Visible;
+                    // VISIBLE FIX: Ensure new records default to Visible = true if not specified
+                    timeHours.Visible = item.Visible ?? true;
+                    timeHours.VisibleClient = item.VisibleClient;
                     timeHours.ApprovalNote = item.ApprovalNote;
                     timeHours.THours = item.THours;
                     model.Add(timeHours);
@@ -285,6 +288,14 @@ namespace TimeTracker.Controllers.Timer
                 foreach (var item in updateValues.Update)
                 {
                     TimeHours timeHours = db.TimeHours.Where(x=> x.TimeHoursId == item.TimeHoursId).FirstOrDefault();
+                    
+                    // VISIBLE DEBUG: Log what's happening with Visible field
+                    System.Diagnostics.Debug.WriteLine($"=== BATCH UPDATE DEBUG ===");
+                    System.Diagnostics.Debug.WriteLine($"TimeHoursId: {item.TimeHoursId}");
+                    System.Diagnostics.Debug.WriteLine($"Original Visible: {timeHours.Visible}");
+                    System.Diagnostics.Debug.WriteLine($"Incoming Visible: {item.Visible}");
+                    System.Diagnostics.Debug.WriteLine($"Incoming VisibleClient: {item.VisibleClient}");
+                    System.Diagnostics.Debug.WriteLine($"========================");
 
                     timeHours.ActDescription = item.ActDescription;
                     timeHours.Billable = item.Billable;
@@ -332,16 +343,33 @@ namespace TimeTracker.Controllers.Timer
 
                     timeHours.InternalNote = item.InternalNote;
                     timeHours.TaskAllocation = item.TaskAllocation;
-                    timeHours.Visible = item.Visible;
+                    // VISIBLE FIX: Only update Visible if it's not null (preserve original value when column not in grid)
+                    // Since Visible column was removed from the view, item.Visible will be null
+                    // We should preserve the original database value
+                    if (item.Visible != null)
+                    {
+                        timeHours.Visible = item.Visible;
+                    }
+                    // If item.Visible is null, we don't update it - keep the original value
+                    // VisibleClient can always be updated as it's just an informational field
+                    timeHours.VisibleClient = item.VisibleClient;
                     timeHours.ApprovalNote = item.ApprovalNote;
                     timeHours.THours = item.THours;
+                    
+                    // VISIBLE DEBUG: Log final values before save
+                    System.Diagnostics.Debug.WriteLine($"=== BEFORE SAVE ===");
+                    System.Diagnostics.Debug.WriteLine($"Final Visible: {timeHours.Visible}");
+                    System.Diagnostics.Debug.WriteLine($"Final VisibleClient: {timeHours.VisibleClient}");
+                    System.Diagnostics.Debug.WriteLine($"==================");
+                    
                     db.Entry(timeHours).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
 
                 }
 
 
-                var hours = db.TimeHours.ToList();
+                // CRITICAL FIX: Filter by Visible = true like other methods do
+                var hours = db.TimeHours.Where(x => x.Visible == true).ToList();
 
                 // Always show records that need approval by default if no specific filter is applied
                 if (string.IsNullOrEmpty(records) || records == "All")
